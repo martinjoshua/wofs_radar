@@ -4,89 +4,76 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import time
 import os
 import sys
-import datetime
+import datetime as DT
+import logging
 
-_MRMS_feed       = "/work/anthony.reinhart/radar_files/realtime/multi"
-_MRMS_feed       = "/work/LDM/MRMS"
-_MRMS_obs_seq    = "/work/wicker/REALTIME/REF"
-_NEWSe_grid_info = "/scratch/wof/realtime/radar_files"
-_NEWSe_prep_mrms = "/work/wicker/REALTIME/pyMRMS/prep_mrms.py"
+_wofs_radar_dir    = "/home/louis.wicker/python_software_radar"
+_slurm_mrms_string = "sbatch slurm_mrms.job --start %s"
 
-plot_level = 3
+_TEST = True
+
+if _TEST == True:
+   rtimes = ', '.join(str(t) for t in range(60))    #test the code every minute
+else:
+   rtimes = "5,20,35,50"    # T+5min radar processing start time
+
 
 #-----------------------------------------------------------------------------
-# Utility to round the datetime object to nearest 15 min....
-def quarter_datetime(dt):
-    minute = (dt.minute//15)*15
-    return dt.replace(minute=0, second=0)+datetime.timedelta(minutes=minute)
+# Utility to round a datetime object to nearest 15 min....
 
+def get_time_for_cycle(the_time):
+    minute = (the_time.minute//15)*15
+    return the_time.replace(minute=0, second=0)+DT.timedelta(minutes=minute)
+
+#-----------------------------------------------------------------------------
 # Main program
-# Okay, some fudge here:  need to keep the today as today according to local time..
+# Need to keep two times - the cycle analysis time, and the actual wall time for log
 
 local_today = time.localtime()
 today = "%s%2.2d%2.2d" % (local_today.tm_year, local_today.tm_mon, local_today.tm_mday)
 
 print("\n ==============================================================================")
-print("\n Starting cron_prep_MRMS script at: %s " % time.strftime("%Y-%m-%d %H:%M:%S"))
-print("\n Todays output will be written into the directory: %s " % today)
-print(" ==============================================================================\n")
+print("\n Starting cron_wofs_radar script at: %s " % time.strftime("%Y-%m-%d %H:%M:%S"))
+print("\n ==============================================================================\n")
 
-obs_seq_out_dir = os.path.join(_MRMS_obs_seq, today)
+# Need to start a log file...
 
-# create path for NEWSe radar file
+logging.basicConfig()
 
-radar_csh_file = os.path.join(_NEWSe_grid_info, ("radars.%s.csh" % today))
+# the insubstantiates a scheduler
 
-# Parse center lat and lon out of the c-shell radar file - HARDCODED!
-# If the file does not exist, then we exit out of this run
+wofs_sched = BlockingScheduler()
 
-try:
-    fhandle = open(radar_csh_file)
-except:
-    print("\n ============================================================================")
-    print("\n CANNOT OPEN radar CSH file, exiting MRMS processing:  %s" % radar_csh_file)
-    print("\n ============================================================================")
-    sys.exit(1)
+# Scheduler block of code - this submits the slurm radar processing scripts from
+#   pyOPAWS and pyMRMS directories.  
 
-all_lines  = fhandle.readlines()
-lat = float(all_lines[7].split(" ")[2])
-lon = float(all_lines[8].split(" ")[2])
-fhandle.close()
-
-print("\n ============================================================================")
-print("\n Lat: %f  Lon: %f centers will be used for MRMS sub-domain" % (lat, lon))
-print("\n ============================================================================")
-
-sched = BlockingScheduler()
-
-# schedule the prep_grid3d...
-
-@sched.scheduled_job('cron', minute="5,20,35,50")
+@wofs_sched.scheduled_job('cron', minute=rtimes)
 def scheduled_job():
 
     gmt = time.gmtime()  # for file names, here we need to use GMT time
 
-    dt = quarter_datetime(datetime.datetime(*gmt[:6]))
+    cycle_time = get_time_for_cycle(DT.datetime(*gmt[:6]))
 
-    str_time = dt.strftime("%Y%m%d%H%M")
-
-    MRMS_dir = os.path.join(_MRMS_feed, dt.strftime("%Y/%m/%d"))
+    cycle_time_str = cycle_time.strftime("%Y%m%d%H%M")
     
-    print("\n Reading from operational MRMS directory:  %s\n" % MRMS_dir)
-    
-    print("\n >>>>=======BEGIN===============================================================")
-    cmd = "%s -d %s -w -o %s --realtime %s -p %d --loc %f %f"  %  \
-          (_NEWSe_prep_mrms, MRMS_dir, obs_seq_out_dir, dt.strftime("%Y%m%d%H%M"), plot_level, lat, lon)
+    local_time = time.localtime()  # get this so we know when script was submitted...
+    now = "%s %2.2d %2.2d %2.2d%2.2d" % (local_time.tm_year, \
+                                         local_time.tm_mon,  \
+                                         local_time.tm_mday, \
+                                         local_time.tm_hour, \
+                                         local_time.tm_min)
 
-    print("\n Prep_MRMS called at %s" % (dt.strftime("%Y-%m-%d %H:%M:%S")))
+    print("\n >>>> BEGIN ======================================================================")
+    print("\n Begin processing for cycle time:  %s" % (cycle_time_str))
+    cmd = (_slurm_mrms_string % (cycle_time_str))
     print(" Cmd: %s" % (cmd))
+    
+    if _TEST != True:
+       ret = os.sys(cmd)
 
-    ret = os.system("%s >> log_prep_MRMS" % cmd)
-    if ret != 0:
-        print("\n ============================================================================")
-        print("\n Prep_MRMS cannot find a RF file between [-2,+1] min of %s" % dt_time.strftime("%Y%m%d%H%M"))
-        print("\n ============================================================================")
+    print("\n Slurm_mrms job submited to batch at %s" % (now))
 
-    print("\n <<<<<=======END================================================================")
+    print("\n <<<<< END =======================================================================")
 
-sched.start()
+# Start the ball rolling here....
+wofs_sched.start()

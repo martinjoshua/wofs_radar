@@ -1,0 +1,156 @@
+#!/usr/bin/env python
+
+#SBATCH --ntasks-per-node=4
+#SBATCH --nodes=1
+#SBATCH -J slurm_rt_mrms
+#SBATCH -o test.out
+#SBATCH -e test.error
+#SBATCH -t 00:59:00
+
+### Note that -a <account> and -p <partition> are not in there. This will change when accounting is turned on.
+
+import time
+import logging
+import os, sys
+import datetime as DT
+from optparse import OptionParser
+
+# Where stuff is or is going...
+_MRMS_feed       = "/work/LDM/MRMS"
+_MRMS_obs_seq    = "/home/louis.wicker/python_software/wofs_radar/test"
+_NEWSe_grid_info = "/scratch/wof/realtime/radar_files"
+_prep_mrms       = "/home/louis.wicker/python_software/wofs_radar/pyMRMS/prep_mrms.py"
+_prep_mrms_log   = "/home/louis.wicker/python_software/wofs_radar/test/logs"
+delta_time       = DT.timedelta(minutes=15)
+one_second       = DT.timedelta(seconds=1)
+plot_level       = 3
+
+# Make sure there is a directory to write files into....
+
+if not os.path.exists(_prep_mrms_log):
+    try:
+        os.mkdir(_prep_mrms_log)
+    except:
+        print("\n ============================================================================")
+        print("\nSLURM_MRMS  Cannot create output dir:  %s\n" % _prep_mrms_log)
+        print("\n ============================================================================")
+        sys.exit(1)
+
+if not os.path.exists(_MRMS_obs_seq):
+    try:
+        os.mkdir(_MRMS_obs_seq)
+    except:
+        print("\n ============================================================================")
+        print("\nSLURM_MRMS  Cannot create output dir:  %s\n" % _MRMS_obs_seq)
+        print("\n ============================================================================")
+        sys.exit(1)
+
+# Okay guts of the code
+
+# Function to actually run the prep_mrms.py script
+
+def process_mrms(date_time):
+
+    log_filename = os.path.join(_prep_mrms_log, "prepMRMS_%s.log" % date_time[0:8])
+    log_h        = open(log_filename,"w+")  # handle for the log file (one per day)
+
+    try:
+        mrms_time = DT.datetime.strptime(date_time, "%Y%m%d%H%M")
+        log_h.write("\n ============================================================================")
+        log_h.write(" Processing:  %s for WoFS system" % mrms_time.strftime("%Y%m%d%H%M"))
+        log_h.write(" ============================================================================\n")
+    except:
+        log_h.write("\n ============================================================================")
+        log_h.write(" CANNOT process command line supplied YYYYMMDDHHMM:  %s" % date_time)
+        log_h.write(" No observational file created EXITING.....")
+        log_h.write("\n ============================================================================")
+        sys.exit(1)
+
+    obs_seq_out_dir = os.path.join(_MRMS_obs_seq, mrms_time.strftime("%Y%m%d"))
+
+# create path for NEWSe radar file
+
+    radar_csh_file = os.path.join(_NEWSe_grid_info, ("radars.%s.csh" % mrms_time.strftime("%Y%m%d")))
+
+# Parse center lat and lon out of the c-shell radar file - HARDCODED!
+# If the file does not exist, then we exit out of this run
+
+    try:
+        fhandle = open(radar_csh_file)
+    except:
+        log_h.write("\n ============================================================================")
+        log_h.write("\n CANNOT OPEN radar CSH file, exiting MRMS processing:  %s" % radar_csh_file)
+        log_h.write("\n ============================================================================")
+        sys.exit(1)
+
+    all_lines  = fhandle.readlines()
+    lat = float(all_lines[7].split(" ")[2])
+    lon = float(all_lines[8].split(" ")[2])
+    fhandle.close()
+
+    log_h.write("\n ============================================================================")
+    log_h.write("\n Lat: %f  Lon: %f centers will be used for MRMS sub-domain" % (lat, lon))
+    log_h.write("\n ============================================================================")
+
+    MRMS_dir = os.path.join(_MRMS_feed, mrms_time.strftime("%Y/%m/%d"))
+
+    log_h.write("\n Reading from operational MRMS directory:  %s\n" % MRMS_dir)
+
+    log_h.write("\n >>>>=======BEGIN===============================================================")
+    cmd = "%s -d %s -w -o %s --realtime %s -p %d --loc %f %f"  %  \
+          (_prep_mrms, MRMS_dir, obs_seq_out_dir, mrms_time.strftime("%Y%m%d%H%M"), plot_level, lat, lon)
+
+    log_h.write("\n Prep_MRMS called at %s" % (time.strftime("%Y-%m-%d %H:%M:%S")))
+    log_h.write(" Cmd: %s" % (cmd))
+
+    ret = os.system("%s" % cmd)
+
+    if ret != 0:
+        log_h.write("\n ============================================================================")
+        log_h.write("\n Prep_MRMS cannot find a RF file between [-2,+1] min of %s" % mrms_time.strftime("%Y%m%d%H%M"))
+        log_h.write("\n ============================================================================")
+    log_h.write("\n <<<<<=======END================================================================")
+
+    log_h.close()
+
+
+#-------------------------------------------------------------------------------
+# Main function defined to return correct sys.exit() calls
+
+def main(argv=None):
+
+#
+# Command line interface
+#
+    parser = OptionParser()
+    parser.add_option("-s", "--start", dest="start", default=None,  type="string", help = "YYYYMMDDHHMM to process mrms")
+    parser.add_option("-e", "--end",   dest="end", default=None,  type="string", help = "YYYYMMDDHHMM end time")
+
+    (options, args) = parser.parse_args()
+
+    if options.start == None:   # this is an error, always have to have one time
+         print("\n ============================================================================")
+         print("\n CANNOT process command line, no start time given")
+         print("\n No observational file created EXITING.....")
+         print("\n ============================================================================")
+         sys.exit(1)
+
+    if options.end == None:     # only the start time given, the process a single time
+         process_mrms(options.start)
+
+    else:                       # if both start and end prescribed, assume that user wants to create a series of files
+         start_time = DT.datetime.strptime(options.start, "%Y%m%d%H%M")
+         stop_time  = DT.datetime.strptime(options.end,   "%Y%m%d%H%M") + one_second  # in case start==end
+
+         while start_time < stop_time:
+
+             process_mrms(start_time.strftime("%Y%m%d%H%M"))   # process_mrms() expecting a string..
+
+             start_time = start_time + delta_time              # step to next process time (usually 10-15 min)
+
+#
+#-------------------------------------------------------------------------------
+# Main program for testing...
+#
+if __name__ == "__main__":
+    sys.exit(main())
