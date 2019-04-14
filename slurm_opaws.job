@@ -1,0 +1,229 @@
+#!/usr/bin/env python
+
+#SBATCH --ntasks-per-node=20
+#SBATCH --nodes=1
+#SBATCH -J slurm_rt_opaws
+#SBATCH -o opaws.out
+#SBATCH -e opaws.error
+#SBATCH -t 00:59:00
+
+### Note that -a <account> and -p <partition> are not in there. This will change when accounting is turned on.
+
+import time
+import logging
+import os, sys
+import datetime as DT
+import calendar
+from optparse import OptionParser
+from multiprocessing import Pool
+
+_WSR88D_feed     = "/work/LDM/NEXRAD2"
+_VR_obs_seq      = "/work/wicker/REALTIME/VR"
+_WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
+_opaws2D         = "/work/wicker/REALTIME/wofs_radar/pyOPAWS/opaws2d.py"
+_opaws_log       = "/work/wicker/REALTIME/VR/logs"
+_command_file    = "./commands.txt"
+
+# Cressman parameters
+_dx  = 5000.
+_roi = 1000.
+
+# Plot this level
+_plot_level = 3
+
+# Necessary to add cwd to path when script run
+# by SLURM (since it executes a copy)
+sys.path.append(os.getcwd())
+
+_nthreads = 30
+
+# Make sure there are directories to write files into....
+
+if not os.path.exists(_opaws_log):
+    try:
+        os.mkdirs(_opaws_log)
+    except:
+        print("\n ============================================================================")
+        print("\n SLURM_OPAWS  Cannot create output dir:  %s\n" % _opaws_log)
+        print("\n ============================================================================")
+        sys.exit(1)
+
+if not os.path.exists(_VR_obs_seq):
+    try:
+        os.mkdirs(_VR_obs_seq)
+    except:
+        print("\n ============================================================================")
+        print("\n SLURM_OPAWS  Cannot create output dir:  %s\n" % _VR_obs_seq)
+        print("\n ============================================================================")
+        sys.exit(1)
+
+# Okay guts of the code
+
+#-------------------------------------------------------------------------------
+# This is a handy function to make sure we get the correct day for radar file
+#      I.E., we need to figure out what day it is, even if UTC is after 00Z
+
+def utc_to_local(utc_dt):
+    # get integer timestamp to avoid precision lost
+    timestamp = calendar.timegm(utc_dt.timetuple())
+    local_dt = DT.datetime.fromtimestamp(timestamp)
+    assert utc_dt.resolution >= DT.timedelta(microseconds=1)
+    return local_dt.replace(microsecond=utc_dt.microsecond)
+
+#-------------------------------------------------------------------------------
+# Function to actually run the prep_mrms.py script
+
+def process_opaws(utc_time, radar, command_file):
+
+    # Log files are labeled on the local day, not UTC
+    local_time   = utc_to_local(DT.datetime.strptime(utc_time, "%Y%m%d%H%M"))
+
+    log_filename = os.path.join(_opaws_log, "OPAWS_%s_%s.log" % (radar, local_time.strftime("%Y%m%d")))
+    log_h        = open(log_filename,"a")  # handle for the log file (one per day / per radar)
+
+    try:
+        opaws_time = DT.datetime.strptime(utc_time, "%Y%m%d%H%M")
+        log_h.write("\n ============================================================================")
+        log_h.write("\n Processing:  %s for WoFS system" % opaws_time.strftime("%Y%m%d%H%M"))
+        log_h.write(" ============================================================================\n")
+    except:
+        log_h.write("\n ============================================================================")
+        log_h.write("\n CANNOT process command line supplied YYYYMMDDHHMM:  %s" % date_time)
+        log_h.write("|n No observational file created EXITING.....")
+        log_h.write("\n ============================================================================")
+        sys.exit(1)
+
+    # we put obs into local day directories, so use the local time
+    obs_seq_out_dir = os.path.join(_VR_obs_seq, local_time.strftime("%Y%m%d"))
+
+    log_h.write("\n ============================================================================")
+    log_h.write("\n Radar: %s  is being processed " % (radar))
+    log_h.write("\n ============================================================================")
+
+# Main catchup loop
+
+    WSR88D_dir = os.path.join(_WSR88D_feed, radar)
+
+    log_h.write("\n Reading from operational WSR88D directory:  %s\n" % WSR88D_dir)
+
+# Do one radar for a test
+# opaws2d.py -p 1 -o $outdir -d $indir -w --window 2018,05,02,23,45 --onlyVR --dx 5000. --roi 5000.
+    
+    log_h.write("\n >>>>=======BEGIN===============================================================")
+    cmd = "%s -d %s -o %s -w --window %s -p %d --onlyVR --dx %f  --roi %f"  %  \
+          (_opaws2D, WSR88D_dir, obs_seq_out_dir, opaws_time.strftime("%Y,%m,%d,%H,%M"), _plot_level, _dx, _roi)
+
+    log_h.write("\n opaws2D called at %s" % (opaws_time.strftime("%Y-%m-%d %H:%M:%S")))
+
+    log_h.write(" \n Cmd: %s \n" % (cmd))
+
+    if command_file == None:    
+        log_h.close()
+        ret   = os.system("%s >> %s\n" % (cmd, log_filename))
+        log_h = open(log_filename,"a")  # reopen file to continue writing
+    else:
+        ret = command_file.write("%s\n" % cmd)
+
+    if ret != 0:
+        log_h.write("\n ============================================================================")
+        log_h.write("\n opaws2D cannot find a RF file between [-2,+1] min of %s" % opaws_time.strftime("%Y%m%d%H%M"))
+        log_h.write("\n ============================================================================")
+    
+    log_h.write("\n <<<<<=======END================================================================")
+
+    log_h.close()
+
+#-------------------------------------------------------------------------------
+# Main function defined to return correct sys.exit() calls
+
+def main(argv=None):
+
+    tim0 = time.time()
+#
+# Command line interface
+#
+    parser = OptionParser()
+    parser.add_option("-s", "--start", dest="start", default=None,  type="string", help = "YYYYMMDDHHMM to process mrms")
+    parser.add_option("-e", "--end",   dest="end",   default=None,  type="string", help = "YYYYMMDDHHMM end time")
+    parser.add_option("-c", "--commands",   dest="cmdfile", default=False,  help = "Boolean to write opaws commands \
+                                                                                to an ascii file", action="store_true")
+
+    (options, args) = parser.parse_args()
+
+    if options.start == None:   # this is an error, always have to have one time
+        print("\n ============================================================================")
+        print("\n SLURM_OPAWS:  CANNOT process command line, no start time given")
+        print("\n SLURM_OPAWS:  No observational file created EXITING.....")
+        print("\n ============================================================================")
+        sys.exit(1)
+    else:           
+
+        # Quick check on supplied DT.
+        if len(options.start) != 12:
+            print("\n ============================================================================")
+            print("\n SLURM_OPAWS: start is NOT correct, need 12 characters YYYYMMDDHHMM: %s" % options.start)
+            print("\n SLURM_OPAWS: Exiting!")
+            print("\n ============================================================================")
+            sys.exit(1)
+
+        # create path to WOFS radar file
+        # This method assumes that radar data will only be parsed up to 11:59 PM local time - 
+        #      so we convert the input UTC time to local time...
+
+        start_time = DT.datetime.strptime(options.start, "%Y%m%d%H%M")
+        local_time = utc_to_local(DT.datetime.strptime(options.start, "%Y%m%d%H%M"))
+        radar_file_csh = os.path.join(_WOFS_grid_info, ("radars.%s.csh" % local_time.strftime("%Y%m%d")))
+        
+        # Parse the radars out of the WOFS radar file!
+        # If the file does not exist, then we exit out of this run
+        try:
+            fhandle = open(radar_file_csh)
+        except:
+            print("\n ============================================================================")
+            print("\n SLURM_OPAWS CANNOT OPEN radar CSH file, exiting WSR88D processing:  %s" % radar_csh_file)
+            print("\n ============================================================================")
+            sys.exit(1)
+
+        # Read radars out of radars.YYYYMMDD file and parse into a list....
+        fhandle    = open(radar_file_csh)
+        all_lines  = fhandle.readlines()
+        radar_list = all_lines[6].split("(")[1].split(")")[0].split()
+        fhandle.close()
+
+    if options.cmdfile:
+        commands_h = open(_command_file,"w")  # handle for the log file (one per day)
+    else:  
+        commands_h = None
+    
+    if options.end == None:     # only the start time given, the process a single time
+ 
+        if len(radar_list) > 1:   # run in parallel
+            pool = Pool(processes=_nthreads)
+            for radar in radar_list:
+                ret = pool.apply_async(process_opaws, (options.start, radar, commands_h))
+            pool.close()
+            pool.join()        
+        
+        else:
+            for radar in radar_list:
+                process_opaws(options.start, radar, commands_h)
+
+    else:                       # if both start and end prescribed, assume that user wants to create a series of files
+        start_time = DT.datetime.strptime(options.start, "%Y%m%d%H%M")
+        stop_time  = DT.datetime.strptime(options.end,   "%Y%m%d%H%M") + one_second  # in case start==end
+
+        while start_time < stop_time:
+            for radar in radar_list:
+                process_opaws(start_time.strftime("%Y%m%d%H%M"), radar)  # process_opaws() expecting a string for DT
+
+            start_time = start_time + delta_time              # step to next process time (usually 10-15 min)
+
+    if options.cmdfile:
+        commands_h.close()
+
+    print "\n Time for slurm_opaws: {} seconds".format(time.time() - tim0)
+#-------------------------------------------------------------------------------
+# Main program for testing...
+#
+if __name__ == "__main__":
+    sys.exit(main())

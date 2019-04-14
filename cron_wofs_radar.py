@@ -7,10 +7,11 @@ import sys
 import datetime as DT
 import logging
 
-_wofs_radar_dir    = "/home/louis.wicker/python_software_radar"
-_slurm_mrms_string = "sbatch slurm_mrms.job --start %s"
+_wofs_radar_dir     = "/work/wicker/REALTIME/wofs_radar"
+_slurm_mrms_string  = "/work/wicker/REALTIME/wofs_radar/slurm_mrms.job --start %s"
+_slurm_opaws_string = "/work/wicker/REALTIME/wofs_radar/slurm_opaws.job --start %s"
 
-_TEST = True
+_TEST = False
 
 if _TEST == True:
    rtimes = ', '.join(str(t) for t in range(60))    #test the code every minute
@@ -65,13 +66,28 @@ def scheduled_job():
 
     print("\n >>>> BEGIN ======================================================================")
     print("\n Begin processing for cycle time:  %s" % (cycle_time_str))
+
+    # MRMS processing
     cmd = (_slurm_mrms_string % (cycle_time_str))
-    print(" Cmd: %s" % (cmd))
+    print("\n Cmd: %s \n" % (cmd))
     
     if _TEST != True:
-       ret = os.sys(cmd)
+        try:
+            ret = os.system(cmd)
+            print("\n Slurm_mrms job running at %s" % (now))
+        except:
+            print("\n Slurm_mrms job failed: %s" % (ret))
 
-    print("\n Slurm_mrms job submited to batch at %s" % (now))
+    # OPAWS processing
+    cmd = (_slurm_opaws_string % (cycle_time_str))
+    print("\n Cmd: %s \n" % (cmd))
+    
+    if _TEST != True:
+        try:
+            ret = os.system(cmd)
+            print("\n Slurm_opaws job running at %s" % (now))
+        except:
+            print("\n Slurm_opaws job failed: %s" % (ret))
 
     print("\n <<<<< END =======================================================================")
 

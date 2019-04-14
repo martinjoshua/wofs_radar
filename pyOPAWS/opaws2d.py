@@ -739,6 +739,7 @@ if __name__ == "__main__":
 
    print ' ================================================================================'
    print ''
+   print ''
    print '                   BEGIN PROGRAM opaws2D                     '
    print ''
 
@@ -905,11 +906,9 @@ if __name__ == "__main__":
                pass
 
            file_time = DT.datetime.strptime("%s" % parsed_file_DT[0:13], "%Y%m%d_%H%M")
-           print file_time
            if file_time < start_time or file_time >= stop_time:
                continue
            else:
-               print n
                print("\n FILE TIME WITHIN WINDOW:   %s" % file_time.strftime("%Y,%m,%d,%H,%M") )
                print '\n Reading: {}\n'.format(fname)
                print '\n Writing: {}\n'.format(out_filenames[n])
@@ -1028,11 +1027,15 @@ if __name__ == "__main__":
        
        print '\n ================================================================================'
 
+       tim0 = timeit.time()
        if plot_grid:
            fplotname = os.path.basename(out_filenames[n])
            plottime = plot_gridded(ref, vel, sweep_num, fsuffix=fplotname, dir=options.out_dir, \
                       shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
 
+       print "\n Time for plotting fields: {} seconds".format(timeit.time()-tim0)
+
+       tim0 = timeit.time()
        if options.write == True:      
            ret = write_DART_ascii(vel, filename=out_filenames[n]+"_VR", grid_dict=_grid_dict, \
                                   obs_error=[_obs_errors['velocity']] )
@@ -1043,6 +1046,8 @@ if __name__ == "__main__":
            
            ret = write_radar_file(ref, vel, filename=out_filenames[n])
   
+       print "\n Time for writting fields: {} seconds".format(timeit.time()-tim0)
+
    opaws2D_cpu_time = timeit.time() - t0
 
    print "\n Time for opaws2D operations: {} seconds".format(opaws2D_cpu_time)

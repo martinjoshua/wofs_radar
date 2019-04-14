@@ -3,8 +3,8 @@
 #SBATCH --ntasks-per-node=4
 #SBATCH --nodes=1
 #SBATCH -J slurm_rt_mrms
-#SBATCH -o test.out
-#SBATCH -e test.error
+#SBATCH -o rt_mrms.out
+#SBATCH -e rt_mrms.error
 #SBATCH -t 00:59:00
 
 ### Note that -a <account> and -p <partition> are not in there. This will change when accounting is turned on.
@@ -13,32 +13,33 @@ import time
 import logging
 import os, sys
 import datetime as DT
+import calendar
 from optparse import OptionParser
 
 # Where stuff is or is going...
 _MRMS_feed       = "/work/LDM/MRMS"
-_MRMS_obs_seq    = "/home/louis.wicker/python_software/wofs_radar/test"
-_NEWSe_grid_info = "/scratch/wof/realtime/radar_files"
-_prep_mrms       = "/home/louis.wicker/python_software/wofs_radar/pyMRMS/prep_mrms.py"
-_prep_mrms_log   = "/home/louis.wicker/python_software/wofs_radar/test/logs"
+_MRMS_obs_seq    = "/work/wicker/REALTIME/REF"
+_MRMS_log        = "/work/wicker/REALTIME/REF/logs"
+_WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
+_prep_mrms       = "/work/wicker/REALTIME/wofs_radar/pyMRMS/prep_mrms.py"
 delta_time       = DT.timedelta(minutes=15)
 one_second       = DT.timedelta(seconds=1)
 plot_level       = 3
 
 # Make sure there is a directory to write files into....
 
-if not os.path.exists(_prep_mrms_log):
+if not os.path.exists(_MRMS_log):
     try:
-        os.mkdir(_prep_mrms_log)
+        os.mkdirs(_MRMS_log)
     except:
         print("\n ============================================================================")
-        print("\nSLURM_MRMS  Cannot create output dir:  %s\n" % _prep_mrms_log)
+        print("\nSLURM_MRMS  Cannot create output dir:  %s\n" % _MRMS_log)
         print("\n ============================================================================")
         sys.exit(1)
 
 if not os.path.exists(_MRMS_obs_seq):
     try:
-        os.mkdir(_MRMS_obs_seq)
+        os.mkdirs(_MRMS_obs_seq)
     except:
         print("\n ============================================================================")
         print("\nSLURM_MRMS  Cannot create output dir:  %s\n" % _MRMS_obs_seq)
@@ -46,31 +47,47 @@ if not os.path.exists(_MRMS_obs_seq):
         sys.exit(1)
 
 # Okay guts of the code
+#-------------------------------------------------------------------------------
+# This is a handy function to make sure we get the correct day for radar file
+#      I.E., we need to figure out what day it is, even if UTC is after 00Z
 
+def utc_to_local(utc_dt):
+    # get integer timestamp to avoid precision lost
+    timestamp = calendar.timegm(utc_dt.timetuple())
+    local_dt = DT.datetime.fromtimestamp(timestamp)
+    assert utc_dt.resolution >= DT.timedelta(microseconds=1)
+    return local_dt.replace(microsecond=utc_dt.microsecond)
+
+#-------------------------------------------------------------------------------
 # Function to actually run the prep_mrms.py script
 
-def process_mrms(date_time):
+def process_mrms(utc_time):
 
-    log_filename = os.path.join(_prep_mrms_log, "prepMRMS_%s.log" % date_time[0:8])
-    log_h        = open(log_filename,"w+")  # handle for the log file (one per day)
+    # Log files are labeled on the local day, not UTC
+    local_time   = utc_to_local(DT.datetime.strptime(utc_time, "%Y%m%d%H%M"))
+
+    log_filename = os.path.join(_MRMS_log, "prepMRMS_%s.log" % local_time.strftime("%Y%m%d"))
+    log_h        = open(log_filename,"a")  # handle for the log file (one per day)
 
     try:
-        mrms_time = DT.datetime.strptime(date_time, "%Y%m%d%H%M")
+        mrms_time = DT.datetime.strptime(utc_time, "%Y%m%d%H%M")
         log_h.write("\n ============================================================================")
-        log_h.write(" Processing:  %s for WoFS system" % mrms_time.strftime("%Y%m%d%H%M"))
-        log_h.write(" ============================================================================\n")
+        log_h.write("\n Processing:  %s for WoFS system" % mrms_time.strftime("%Y%m%d%H%M"))
+        log_h.write("\n ============================================================================\n")
     except:
         log_h.write("\n ============================================================================")
-        log_h.write(" CANNOT process command line supplied YYYYMMDDHHMM:  %s" % date_time)
-        log_h.write(" No observational file created EXITING.....")
+        log_h.write("\n CANNOT process command line supplied YYYYMMDDHHMM:  %s" % date_time)
+        log_h.write("\n No observational file created EXITING.....")
         log_h.write("\n ============================================================================")
         sys.exit(1)
 
-    obs_seq_out_dir = os.path.join(_MRMS_obs_seq, mrms_time.strftime("%Y%m%d"))
+    # create path to WOFS radar file
+    # This method assumes that radar data will only be parsed up to 11:59 PM local time -
+    #      so we convert the input UTC time to local time...
+    radar_csh_file = os.path.join(_WOFS_grid_info, ("radars.%s.csh" % local_time.strftime("%Y%m%d")))
 
-# create path for NEWSe radar file
-
-    radar_csh_file = os.path.join(_NEWSe_grid_info, ("radars.%s.csh" % mrms_time.strftime("%Y%m%d")))
+    # we put obs into local day directories, so use the local time
+    obs_seq_out_dir = os.path.join(_MRMS_obs_seq, local_time.strftime("%Y%m%d"))
 
 # Parse center lat and lon out of the c-shell radar file - HARDCODED!
 # If the file does not exist, then we exit out of this run
