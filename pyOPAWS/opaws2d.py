@@ -798,7 +798,9 @@ if __name__ == "__main__":
 # Create directory for output files
   
    if not os.path.exists(options.out_dir):
-       os.mkdir(options.out_dir)
+       try:
+           os.mkdirs(options.out_dir)
+       except:
 
    out_filenames = []
    in_filenames  = []

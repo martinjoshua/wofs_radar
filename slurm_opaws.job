@@ -21,7 +21,7 @@ _WSR88D_feed     = "/work/LDM/NEXRAD2"
 _VR_obs_seq      = "/work/wicker/REALTIME/VR"
 _WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
 _opaws2D         = "/work/wicker/REALTIME/wofs_radar/pyOPAWS/opaws2d.py"
-_opaws_log       = "/work/wicker/REALTIME/VR/logs"
+_opaws_logs      = "/work/wicker/REALTIME/VR/logs"
 _command_file    = "./commands.txt"
 
 # Cressman parameters
@@ -39,9 +39,9 @@ _nthreads = 30
 
 # Make sure there are directories to write files into....
 
-if not os.path.exists(_opaws_log):
+if not os.path.exists(_opaws_logs):
     try:
-        os.mkdirs(_opaws_log)
+        os.mkdirs(_opaws_logs)
     except:
         print("\n ============================================================================")
         print("\n SLURM_OPAWS  Cannot create output dir:  %s\n" % _opaws_log)
@@ -85,7 +85,7 @@ def process_opaws(utc_time, radar, command_file):
         opaws_time = DT.datetime.strptime(utc_time, "%Y%m%d%H%M")
         log_h.write("\n ============================================================================")
         log_h.write("\n Processing:  %s for WoFS system" % opaws_time.strftime("%Y%m%d%H%M"))
-        log_h.write(" ============================================================================\n")
+        log_h.write("\n ============================================================================\n")
     except:
         log_h.write("\n ============================================================================")
         log_h.write("\n CANNOT process command line supplied YYYYMMDDHHMM:  %s" % date_time)
@@ -98,6 +98,7 @@ def process_opaws(utc_time, radar, command_file):
 
     log_h.write("\n ============================================================================")
     log_h.write("\n Radar: %s  is being processed " % (radar))
+    log_h.write("\n Radar output will be written to directory %s " % (obs_seq_out_dir))
     log_h.write("\n ============================================================================")
 
 # Main catchup loop
@@ -126,7 +127,8 @@ def process_opaws(utc_time, radar, command_file):
 
     if ret != 0:
         log_h.write("\n ============================================================================")
-        log_h.write("\n opaws2D cannot find a RF file between [-2,+1] min of %s" % opaws_time.strftime("%Y%m%d%H%M"))
+        log_h.write("\n opaws2D did not return cleanly for time %s" % opaws_time.strftime("%Y%m%d%H%M"))
+        log_h.write("\n opaws2D ret:  %s" % ret)
         log_h.write("\n ============================================================================")
     
     log_h.write("\n <<<<<=======END================================================================")
@@ -180,7 +182,7 @@ def main(argv=None):
             fhandle = open(radar_file_csh)
         except:
             print("\n ============================================================================")
-            print("\n SLURM_OPAWS CANNOT OPEN radar CSH file, exiting WSR88D processing:  %s" % radar_csh_file)
+            print("\n SLURM_OPAWS CANNOT OPEN radar CSH file, exiting WSR88D processing:  %s" % radar_file_csh)
             print("\n ============================================================================")
             sys.exit(1)
 
