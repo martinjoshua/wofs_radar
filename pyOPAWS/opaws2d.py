@@ -799,8 +799,9 @@ if __name__ == "__main__":
   
    if not os.path.exists(options.out_dir):
        try:
-           os.mkdirs(options.out_dir)
+           os.makedirs(options.out_dir)
        except:
+           pass
 
    out_filenames = []
    in_filenames  = []

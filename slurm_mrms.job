@@ -21,30 +21,10 @@ _MRMS_feed       = "/work/LDM/MRMS"
 _MRMS_obs_seq    = "/work/wicker/REALTIME/REF"
 _MRMS_log        = "/work/wicker/REALTIME/REF/logs"
 _WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
-_prep_mrms       = "/work/wicker/REALTIME/wofs_radar/pyMRMS/prep_mrms.py"
+_prep_mrms       = "/work/wicker/REALTIME/WOFS_radar/pyMRMS/prep_mrms.py"
 delta_time       = DT.timedelta(minutes=15)
 one_second       = DT.timedelta(seconds=1)
 plot_level       = 3
-
-# Make sure there is a directory to write files into....
-
-if not os.path.exists(_MRMS_log):
-    try:
-        os.mkdirs(_MRMS_log)
-    except:
-        print("\n ============================================================================")
-        print("\nSLURM_MRMS  Cannot create output dir:  %s\n" % _MRMS_log)
-        print("\n ============================================================================")
-        sys.exit(1)
-
-if not os.path.exists(_MRMS_obs_seq):
-    try:
-        os.mkdirs(_MRMS_obs_seq)
-    except:
-        print("\n ============================================================================")
-        print("\nSLURM_MRMS  Cannot create output dir:  %s\n" % _MRMS_obs_seq)
-        print("\n ============================================================================")
-        sys.exit(1)
 
 # Okay guts of the code
 #-------------------------------------------------------------------------------
@@ -151,6 +131,26 @@ def main(argv=None):
          print("\n No observational file created EXITING.....")
          print("\n ============================================================================")
          sys.exit(1)
+
+# Make sure there is a directory to write files into....
+
+    if not os.path.exists(_MRMS_log):
+        try:
+            os.makedirs(_MRMS_log)
+        except:
+            print("\n ============================================================================")
+            print("\nSLURM_MRMS  Cannot create output dir:  %s\n" % _MRMS_log)
+            print("\n ============================================================================")
+            sys.exit(1)
+
+    if not os.path.exists(_MRMS_obs_seq):
+        try:
+            os.makedirs(_MRMS_obs_seq)
+        except:
+            print("\n ============================================================================")
+            print("\nSLURM_MRMS  Cannot create output dir:  %s\n" % _MRMS_obs_seq)
+            print("\n ============================================================================")
+            sys.exit(1)
 
     if options.end == None:     # only the start time given, the process a single time
          process_mrms(options.start)

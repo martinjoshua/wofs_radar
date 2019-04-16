@@ -20,7 +20,7 @@ from multiprocessing import Pool
 _WSR88D_feed     = "/work/LDM/NEXRAD2"
 _VR_obs_seq      = "/work/wicker/REALTIME/VR"
 _WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
-_opaws2D         = "/work/wicker/REALTIME/wofs_radar/pyOPAWS/opaws2d.py"
+_opaws2D         = "/work/wicker/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py"
 _opaws_logs      = "/work/wicker/REALTIME/VR/logs"
 _command_file    = "./commands.txt"
 
@@ -35,27 +35,7 @@ _plot_level = 3
 # by SLURM (since it executes a copy)
 sys.path.append(os.getcwd())
 
-_nthreads = 30
-
-# Make sure there are directories to write files into....
-
-if not os.path.exists(_opaws_logs):
-    try:
-        os.mkdirs(_opaws_logs)
-    except:
-        print("\n ============================================================================")
-        print("\n SLURM_OPAWS  Cannot create output dir:  %s\n" % _opaws_log)
-        print("\n ============================================================================")
-        sys.exit(1)
-
-if not os.path.exists(_VR_obs_seq):
-    try:
-        os.mkdirs(_VR_obs_seq)
-    except:
-        print("\n ============================================================================")
-        print("\n SLURM_OPAWS  Cannot create output dir:  %s\n" % _VR_obs_seq)
-        print("\n ============================================================================")
-        sys.exit(1)
+_nthreads = 25
 
 # Okay guts of the code
 
@@ -67,8 +47,7 @@ def utc_to_local(utc_dt):
     # get integer timestamp to avoid precision lost
     timestamp = calendar.timegm(utc_dt.timetuple())
     local_dt = DT.datetime.fromtimestamp(timestamp)
-    assert utc_dt.resolution >= DT.timedelta(microseconds=1)
-    return local_dt.replace(microsecond=utc_dt.microsecond)
+    return local_dt
 
 #-------------------------------------------------------------------------------
 # Function to actually run the prep_mrms.py script
@@ -78,7 +57,7 @@ def process_opaws(utc_time, radar, command_file):
     # Log files are labeled on the local day, not UTC
     local_time   = utc_to_local(DT.datetime.strptime(utc_time, "%Y%m%d%H%M"))
 
-    log_filename = os.path.join(_opaws_log, "OPAWS_%s_%s.log" % (radar, local_time.strftime("%Y%m%d")))
+    log_filename = os.path.join(_opaws_logs, "OPAWS_%s_%s.log" % (radar, local_time.strftime("%Y%m%d")))
     log_h        = open(log_filename,"a")  # handle for the log file (one per day / per radar)
 
     try:
@@ -191,6 +170,30 @@ def main(argv=None):
         all_lines  = fhandle.readlines()
         radar_list = all_lines[6].split("(")[1].split(")")[0].split()
         fhandle.close()
+
+        # Make sure there are directories to write files into....
+
+        if not os.path.exists(_opaws_logs):
+            try:
+                os.makedirs(_opaws_logs)
+            except:
+                print("\n ============================================================================")
+                print("\n SLURM_OPAWS  Cannot create output dir:  %s\n" % _opaws_logs)
+                print("\n ============================================================================")
+                sys.exit(1)
+
+        # we put obs into local day directories, so use the local time
+
+        obs_seq_out_dir = os.path.join(_VR_obs_seq, local_time.strftime("%Y%m%d"))
+
+        if not os.path.exists(obs_seq_out_dir):
+            try:
+                os.makedirs(obs_seq_out_dir)
+            except:
+                print("\n ============================================================================")
+                print("\n SLURM_OPAWS  Cannot create output dir:  %s\n" % obs_seq_out_dir)
+                print("\n ============================================================================")
+                sys.exit(1)
 
     if options.cmdfile:
         commands_h = open(_command_file,"w")  # handle for the log file (one per day)

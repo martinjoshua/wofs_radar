@@ -687,7 +687,7 @@ def main(argv=None):
  
    if not os.path.exists(options.out_dir):
        try:
-           os.mkdir(options.out_dir)
+           os.makedirs(options.out_dir)
        except:
            print("\n**********************   FATAL ERROR!!  ************************************")
            print("\n PREP_GRID3D:  Cannot create output dir:  %s\n" % options.out_dir)
