@@ -7,9 +7,9 @@ import sys
 import datetime as DT
 import logging
 
-_wofs_radar_dir     = "/work/wicker/REALTIME/wofs_radar"
-_slurm_mrms_string  = "/work/wicker/REALTIME/wofs_radar/slurm_mrms.job --start %s"
-_slurm_opaws_string = "/work/wicker/REALTIME/wofs_radar/slurm_opaws.job --start %s"
+_wofs_radar_dir     = "/work/wicker/REALTIME/WOFS_radar"
+_slurm_mrms_string  = "/work/wicker/REALTIME/WOFS_radar/slurm_mrms.job --start %s"
+_slurm_opaws_string = "/work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
 
 _TEST = False
 
@@ -82,12 +82,12 @@ def scheduled_job():
     cmd = (_slurm_opaws_string % (cycle_time_str))
     print("\n Cmd: %s \n" % (cmd))
     
-    if _TEST != True:
-        try:
-            ret = os.system(cmd)
-            print("\n Slurm_opaws job running at %s" % (now))
-        except:
-            print("\n Slurm_opaws job failed: %s" % (ret))
+#   if _TEST != True:
+#       try:
+#           ret = os.system(cmd)
+#           print("\n Slurm_opaws job running at %s" % (now))
+#       except:
+#           print("\n Slurm_opaws job failed: %s" % (ret))
 
     print("\n <<<<< END =======================================================================")
 

@@ -668,7 +668,7 @@ def main(argv=None):
            print("\n Prep_MRMS:  RealTime FLAG is true number of levels found:  %s\n" % (len(in_filenames)))
            print("\n Prep_MRMS:  RealTime FLAG is true processing first file:  %s\n" % (in_filenames[0]))
            print(" Prep_MRMS:  RealTime FLAG is true processing last file:  %s\n" % (in_filenames[-1]))
-           rlt_filename = "%s_%s" % ("obs_seq_RF", a_time.strftime("%Y%m%d%H%M"))
+           rlt_filename = "%s_%s" % ("obs_seq_RF", a_time.strftime("%Y%m%d_%H%M"))
        except:
            print("\n============================================================================")
            print("\n Prep_MRMS cannot find a RF file between [%2.2d,%2.2d] min of %s, exiting" % 
@@ -718,7 +718,7 @@ def main(argv=None):
                               QC_info=_grid_dict['QC_info'], zero_levels=_grid_dict['zero_levels'])
 
    if plot_grid_flag:
-       fsuffix = "OpMRMS_%s" % (ref_obj.time.strftime('%Y%m%d%H%M'))
+       fsuffix = "OpMRMS_%s" % (ref_obj.time.strftime('%Y%m%d_%H%M'))
        plot_filename = os.path.join(options.out_dir, fsuffix)
        plot_grid(ref_obj, sweep_num, plot_filename = plot_filename, debug=_debug)
     
