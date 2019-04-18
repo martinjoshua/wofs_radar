@@ -6,10 +6,13 @@ import os
 import sys
 import datetime as DT
 import logging
+import subprocess
 
+_wofs_VEL_dir       = "/work/wicker/REALTIME/VEL"
 _wofs_radar_dir     = "/work/wicker/REALTIME/WOFS_radar"
 _slurm_mrms_string  = "/work/wicker/REALTIME/WOFS_radar/slurm_mrms.job --start %s"
 _slurm_opaws_string = "/work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
+_slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d %s -f %s"
 
 _TEST = False
 
@@ -55,7 +58,8 @@ def scheduled_job():
 
     cycle_time = get_time_for_cycle(DT.datetime(*gmt[:6]))
 
-    cycle_time_str = cycle_time.strftime("%Y%m%d%H%M")
+    cycle_time_str  = cycle_time.strftime("%Y%m%d%H%M")    
+    cycle_time_str2 = cycle_time.strftime("%Y%m%d_%H%M")
     
     local_time = time.localtime()  # get this so we know when script was submitted...
     now = "%s %2.2d %2.2d %2.2d%2.2d" % (local_time.tm_year, \
@@ -73,22 +77,42 @@ def scheduled_job():
     
     if _TEST != True:
         try:
-            ret = os.system(cmd)
-            print("\n Slurm_mrms job running at %s" % (now))
+#             ret = os.system(cmd)
+            MRMSret = subprocess.Popen([cmd],shell=True)
+            MRMSret.wait()
+            print("\n Slurm_mrms job finished at %s" % (now))
         except:
-            print("\n Slurm_mrms job failed: %s" % (ret))
+            print("\n Slurm_mrms job failed: %s" % (now))
 
     # OPAWS processing
     cmd = (_slurm_opaws_string % (cycle_time_str))
     print("\n Cmd: %s \n" % (cmd))
     
-#   if _TEST != True:
-#       try:
-#           ret = os.system(cmd)
-#           print("\n Slurm_opaws job running at %s" % (now))
-#       except:
-#           print("\n Slurm_opaws job failed: %s" % (ret))
+    if _TEST != True:
+        try:
+#             ret = os.system(cmd)
+            OPAWSret = subprocess.Popen([cmd],shell=True)
+            OPAWSret.wait()
+            print("\n Slurm_opaws job completed at %s" % (now))
+        except:
+            print("\n Slurm_opaws job failed: %s" % (now))
+            
+    # combine all the files...
+    directory = "%s/%s%2.2d%2.2d" % (_wofs_VEL_dir, local_time.tm_year, \
+                                     local_time.tm_mon, local_time.tm_mday)
+    wildcard =  "_VR_{}.nc"
+    cmd = (_slurm_concatenate % (directory, wildcard.format(cycle_time_str2)))
+    print("\n Cmd: %s \n" % (cmd))    
 
+    if _TEST != True:
+        try:
+#             ret = os.system(cmd)
+            ret = subprocess.Popen([cmd],shell=True)
+            ret.wait()
+            print("\n Slurm_concatenate job completed at %s" % (now))
+        except:
+            print("\n Slurm_concatenate job failed: %s" % (now))
+    
     print("\n <<<<< END =======================================================================")
 
 # Start the ball rolling here....

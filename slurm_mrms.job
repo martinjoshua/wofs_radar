@@ -9,6 +9,8 @@
 
 ### Note that -a <account> and -p <partition> are not in there. This will change when accounting is turned on.
 
+import matplotlib
+matplotlib.use('Agg')
 import time
 import logging
 import os, sys
@@ -96,6 +98,8 @@ def process_mrms(utc_time):
     log_h.write("\n >>>>=======BEGIN===============================================================")
     cmd = "%s -d %s -w -o %s --realtime %s -p %d --loc %f %f"  %  \
           (_prep_mrms, MRMS_dir, obs_seq_out_dir, mrms_time.strftime("%Y%m%d%H%M"), plot_level, lat, lon)
+#     cmd = "%s -d %s -w -o %s --realtime %s --loc %f %f"  %  \
+#           (_prep_mrms, MRMS_dir, obs_seq_out_dir, mrms_time.strftime("%Y%m%d%H%M"), lat, lon)
 
     log_h.write("\n Prep_MRMS called at %s" % (time.strftime("%Y-%m-%d %H:%M:%S")))
     log_h.write(" Cmd: %s" % (cmd))

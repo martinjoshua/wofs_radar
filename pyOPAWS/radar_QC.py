@@ -43,6 +43,8 @@ def volume_mapping(radar):
    n = 0
    while n < len(elist)-1:
    
+       print "vol_mapper", n, elist[n]
+   
        if elist[n] == 720 and elist[n+1] == 720:
            radar.sweep_table.append((n, n+1))
            radar.reflectivity.append(n)

@@ -23,6 +23,8 @@
 #        Big modifications by Lou Wicker 2016-2017
 #
 #############################################################
+import matplotlib
+matplotlib.use('Agg')
 import os
 import sys
 import glob
@@ -1072,25 +1074,45 @@ if __name__ == "__main__":
  # the check for file size is to make sure there is data in the LVL2 file
        try:
            if os.path.getsize(fname) < 2048000:
-               print '\n File {} is less than 2 mb, skipping...'.format(fname)
+               print '\n File {} is less than 2 mb, exiting...'.format(fname)
                continue
        except:
+           print '\n File {} cannot be found, exiting...'.format(fname)
            continue
       
        if fname[-3:] == ".nc":
-         if _radar_parameters['field_label_trans'][0] == True:
-             REF_LABEL = _radar_parameters['field_label_trans'][1]
-             data.LABEL = _radar_parameters['field_label_trans'][2]
-             volume = pyart.io.read_cfradial(fname, field_names={REF_LABEL:"reflectivity", data.LABEL:"data.city"})
-         else:
-             volume = pyart.io.read_cfradial(fname)
+           if _radar_parameters['field_label_trans'][0] == True:
+               REF_LABEL = _radar_parameters['field_label_trans'][1]
+               data.LABEL = _radar_parameters['field_label_trans'][2]
+               volume = pyart.io.read_cfradial(fname, field_names={REF_LABEL:"reflectivity", data.LABEL:"data.city"})
+           else:
+               volume = pyart.io.read_cfradial(fname)
        else:
-         try:
+       
+           # simple fix in case file is still being written
+       
+           fsize = os.path.getsize(fname)
+           timeit.sleep(3)
+           for nwait in np.arange(4):
+               if nwait > 2:
+                   print("File: %s has yet to be completely written, nwait: %d, exiting" % (os.path.basename(fname), nwait))
+                   sys.exit(0)
+                   
+               fsize_new = os.path.getsize(fname)
+               if fsize_new > fsize:
+                   print("Waiting on file: %s to be completely written, nwait: %d" % (os.path.basename(fname), nwait))
+                   print("Waiting on file: %s, old size is %d, new size is %d" % (fsize, fsize_new))
+                   fsize = fsize_new
+                   timeit.sleep(20)
+               else:
+                   break
+       
+       try:
            volume = pyart.io.read_nexrad_archive(fname, field_names=None, 
                                                  additional_metadata=None, file_field_names=False, 
                                                  delay_field_loading=False, 
                                                  station=None, scans=None, linear_interp=True)
-         except:
+       except:
            print '\n File {} cannot be read, skipping...\n'.format(fname)
            continue
 
@@ -1188,7 +1210,7 @@ if __name__ == "__main__":
            ret = write_data_xarray(vel, filename=out_filenames[n], obs_error= _obs_errors['velocity'], \
                                    volume_name=os.path.basename(fname))
      
-           ret = write_DART_ascii(vel, filename=out_filenames[n]+"_VR", grid_dict=_grid_dict, \
+           ret = write_DART_ascii(vel, filename=out_filenames[n], grid_dict=_grid_dict, \
                                   obs_error=[_obs_errors['velocity']] )
 
            if options.onlyVR != True:

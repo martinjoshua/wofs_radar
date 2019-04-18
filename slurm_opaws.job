@@ -9,6 +9,8 @@
 
 ### Note that -a <account> and -p <partition> are not in there. This will change when accounting is turned on.
 
+import matplotlib
+matplotlib.use('Agg')
 import time
 import logging
 import os, sys
@@ -18,10 +20,10 @@ from optparse import OptionParser
 from multiprocessing import Pool
 
 _WSR88D_feed     = "/work/LDM/NEXRAD2"
-_VR_obs_seq      = "/work/wicker/REALTIME/VR"
+_VR_obs_seq      = "/work/wicker/REALTIME/VEL"
 _WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
 _opaws2D         = "/work/wicker/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py"
-_opaws_logs      = "/work/wicker/REALTIME/VR/logs"
+_opaws_logs      = "/work/wicker/REALTIME/VEL/logs"
 _command_file    = "./commands.txt"
 
 # Cressman parameters
@@ -35,10 +37,26 @@ _plot_level = 3
 # by SLURM (since it executes a copy)
 sys.path.append(os.getcwd())
 
-_nthreads = 25
+_nthreads = 30
 
 # Okay guts of the code
-
+#-------------------------------------------------------------------------------
+class AsyncFactory:
+    def __init__(self, func, cb_func):
+        self.func = func
+        self.cb_func = cb_func
+        self.pool = Pool()
+ 
+    def call(self, *args, **kwargs):
+        self.pool.apply_async(self.func, args, kwargs, self.cb_func)
+ 
+    def wait(self):
+        self.pool.close()
+        self.pool.join()
+        
+def cb_func():
+    print("\nA radar processed\n")
+        
 #-------------------------------------------------------------------------------
 # This is a handy function to make sure we get the correct day for radar file
 #      I.E., we need to figure out what day it is, even if UTC is after 00Z
@@ -70,7 +88,7 @@ def process_opaws(utc_time, radar, command_file):
         log_h.write("\n CANNOT process command line supplied YYYYMMDDHHMM:  %s" % date_time)
         log_h.write("|n No observational file created EXITING.....")
         log_h.write("\n ============================================================================")
-        sys.exit(1)
+        return False
 
     # we put obs into local day directories, so use the local time
     obs_seq_out_dir = os.path.join(_VR_obs_seq, local_time.strftime("%Y%m%d"))
@@ -90,8 +108,8 @@ def process_opaws(utc_time, radar, command_file):
 # opaws2d.py -p 1 -o $outdir -d $indir -w --window 2018,05,02,23,45 --onlyVR --dx 5000. --roi 5000.
     
     log_h.write("\n >>>>=======BEGIN===============================================================")
-    cmd = "%s -d %s -o %s -w --window %s -p %d --onlyVR --dx %f  --roi %f"  %  \
-          (_opaws2D, WSR88D_dir, obs_seq_out_dir, opaws_time.strftime("%Y,%m,%d,%H,%M"), _plot_level, _dx, _roi)
+    cmd = "%s -d %s -o %s -w --window %s --onlyVR --dx %f  --roi %f"  %  \
+          (_opaws2D, WSR88D_dir, obs_seq_out_dir, opaws_time.strftime("%Y,%m,%d,%H,%M"), _dx, _roi)
 
     log_h.write("\n opaws2D called at %s" % (opaws_time.strftime("%Y-%m-%d %H:%M:%S")))
 
@@ -109,10 +127,13 @@ def process_opaws(utc_time, radar, command_file):
         log_h.write("\n opaws2D did not return cleanly for time %s" % opaws_time.strftime("%Y%m%d%H%M"))
         log_h.write("\n opaws2D ret:  %s" % ret)
         log_h.write("\n ============================================================================")
+        return False
     
     log_h.write("\n <<<<<=======END================================================================")
 
     log_h.close()
+    
+    return True
 
 #-------------------------------------------------------------------------------
 # Main function defined to return correct sys.exit() calls
@@ -154,7 +175,11 @@ def main(argv=None):
         start_time = DT.datetime.strptime(options.start, "%Y%m%d%H%M")
         local_time = utc_to_local(DT.datetime.strptime(options.start, "%Y%m%d%H%M"))
         radar_file_csh = os.path.join(_WOFS_grid_info, ("radars.%s.csh" % local_time.strftime("%Y%m%d")))
-        
+
+        print("\n ============================================================================")
+        print("\n SLURM_OPAWS: Reading radar_file: %s" % radar_file_csh)
+        print("\n ============================================================================")
+
         # Parse the radars out of the WOFS radar file!
         # If the file does not exist, then we exit out of this run
         try:
@@ -204,10 +229,21 @@ def main(argv=None):
  
         if len(radar_list) > 1:   # run in parallel
             pool = Pool(processes=_nthreads)
+            print("\n ============================================================================")
             for radar in radar_list:
+                print("\n SLURM_OPAWS starting job for RADAR:  %s" % radar)
                 ret = pool.apply_async(process_opaws, (options.start, radar, commands_h))
             pool.close()
-            pool.join()        
+            pool.join()   
+            print("\n ============================================================================")
+
+                 
+#         if len(radar_list) > 1:   # run in parallel
+#             asyncP = AsyncFactory(process_opaws, cb_func)
+#             
+#             for radar in radar_list:
+#                 ret = asyncP.call(options.start, radar, commands_h)
+#             asyncP.wait()       
         
         else:
             for radar in radar_list:
