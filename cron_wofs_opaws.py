@@ -10,7 +10,6 @@ import subprocess
 
 _wofs_VEL_dir       = "/work/wicker/REALTIME/VEL"
 _wofs_radar_dir     = "/work/wicker/REALTIME/WOFS_radar"
-_slurm_mrms_string  = "/work/wicker/REALTIME/WOFS_radar/slurm_mrms.job --start %s"
 _slurm_opaws_string = "/work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
 _slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d %s -f %s"
 
@@ -19,7 +18,7 @@ _TEST = False
 if _TEST == True:
    rtimes = ', '.join(str(t) for t in range(60))    #test the code every minute
 else:
-   rtimes = "5,20,35,50"    # T+5min radar processing start time
+   rtimes = "6,21,36,51"    # T+5min radar processing start time
 
 
 #-----------------------------------------------------------------------------
@@ -70,19 +69,6 @@ def scheduled_job():
 
     print("\n >>>> BEGIN ======================================================================")
     print("\n Begin processing for cycle time:  %s" % (cycle_time_str))
-
-    # MRMS processing
-    cmd = (_slurm_mrms_string % (cycle_time_str))
-    print("\n Cmd: %s \n" % (cmd))
-    
-    if _TEST != True:
-        try:
-#             ret = os.system(cmd)
-            MRMSret = subprocess.Popen([cmd],shell=True)
-            MRMSret.wait()
-            print("\n Slurm_mrms job finished at %s" % (now))
-        except:
-            print("\n Slurm_mrms job failed: %s" % (now))
 
     # OPAWS processing
     cmd = (_slurm_opaws_string % (cycle_time_str))

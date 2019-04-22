@@ -90,7 +90,8 @@ def main():
 
    # MRMS processing
    cmd = (_slurm_mrms_string % (cycle_time_str))
-   print("\n Cmd: %s \n" % (cmd))
+   if options.no_mrms == False:
+       print("\n Cmd: %s \n" % (cmd))
    
    if _TEST != True:
        try:
@@ -103,7 +104,8 @@ def main():
 
    # OPAWS processing
    cmd = (_slurm_opaws_string % (cycle_time_str))
-   print("\n Cmd: %s \n" % (cmd))
+   if options.no_opaws == False:
+       print("\n Cmd: %s \n" % (cmd))
    
    if _TEST != True:
        try:
@@ -119,13 +121,15 @@ def main():
                                     local_time.tm_mon, local_time.tm_mday)
    wildcard =  "_VR_{}.nc"
    cmd = (_slurm_concatenate % (directory, wildcard.format(cycle_time_str2)))
-   print("\n Cmd: %s \n" % (cmd))    
+   if options.no_combine == False:
+       print("\n Cmd: %s \n" % (cmd))    
 
    if _TEST != True:
        try:
-           ret = subprocess.Popen([cmd],shell=True)
-           ret.wait()
-           print("\n Slurm_concatenate job completed at %s" % (now))
+           if options.no_combine == False:
+               ret = subprocess.Popen([cmd],shell=True)
+               ret.wait()
+               print("\n Slurm_concatenate job completed at %s" % (now))
        except:
            print("\n Slurm_concatenate job failed: %s" % (now))
    

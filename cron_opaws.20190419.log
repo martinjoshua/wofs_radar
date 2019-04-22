@@ -1,0 +1,1348 @@
+
+ ==============================================================================
+
+ Starting cron_wofs_radar script at: 2019-04-19 14:45:23 
+
+ ==============================================================================
+
+
+ >>>> BEGIN ======================================================================
+
+ Begin processing for cycle time:  201904191945
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start 201904191945 
+
+
+ ============================================================================
+
+ SLURM_OPAWS: Reading radar_file: /scratch/wof/realtime/radar_files/radars.20190419.csh
+
+ ============================================================================
+
+ ============================================================================
+
+ SLURM_OPAWS starting job for RADAR:  KMXX
+
+ SLURM_OPAWS starting job for RADAR:  KILN
+
+ SLURM_OPAWS starting job for RADAR:  KCAE
+
+ SLURM_OPAWS starting job for RADAR:  KAKQ
+
+ SLURM_OPAWS starting job for RADAR:  KLTX
+
+ SLURM_OPAWS starting job for RADAR:  KVAX
+
+ SLURM_OPAWS starting job for RADAR:  KMHX
+
+ SLURM_OPAWS starting job for RADAR:  KJKL
+
+ SLURM_OPAWS starting job for RADAR:  KMRX
+
+ SLURM_OPAWS starting job for RADAR:  KDIX
+
+ SLURM_OPAWS starting job for RADAR:  KEOX
+
+ SLURM_OPAWS starting job for RADAR:  KPBZ
+
+ SLURM_OPAWS starting job for RADAR:  KFCX
+
+ SLURM_OPAWS starting job for RADAR:  KJGX
+
+ SLURM_OPAWS starting job for RADAR:  KLWX
+
+ SLURM_OPAWS starting job for RADAR:  KDOX
+
+ SLURM_OPAWS starting job for RADAR:  KCLX
+
+ SLURM_OPAWS starting job for RADAR:  KRLX
+
+ SLURM_OPAWS starting job for RADAR:  KCLE
+
+ SLURM_OPAWS starting job for RADAR:  KFFC
+
+ SLURM_OPAWS starting job for RADAR:  KCCX
+
+ SLURM_OPAWS starting job for RADAR:  KGSP
+
+ SLURM_OPAWS starting job for RADAR:  KRAX
+
+ ============================================================================
+
+ Time for slurm_opaws: 94.8933858871 seconds
+
+ Slurm_opaws job completed at 2019 04 19 1451
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d /work/wicker/REALTIME/VEL/20190419 -f _VR_20190419_1945.nc 
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq*_VR_20190419_1945.nc
+['/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_1945.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_1945.nc']
+
+ Obs_seq.final files sorted by modification time
+
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_1945.nc - Fri Apr 19 14:51:20 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_1945.nc - Fri Apr 19 14:51:22 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_1945.nc - Fri Apr 19 14:51:22 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_1945.nc - Fri Apr 19 14:51:23 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_1945.nc - Fri Apr 19 14:51:28 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_1945.nc - Fri Apr 19 14:51:31 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_1945.nc - Fri Apr 19 14:51:31 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_1945.nc - Fri Apr 19 14:51:31 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_1945.nc - Fri Apr 19 14:51:37 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_1945.nc - Fri Apr 19 14:51:37 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_1945.nc - Fri Apr 19 14:51:43 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_1945.nc - Fri Apr 19 14:51:45 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_1945.nc - Fri Apr 19 14:51:47 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_1945.nc - Fri Apr 19 14:51:49 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_1945.nc - Fri Apr 19 14:51:52 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_1945.nc - Fri Apr 19 14:52:09 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_1945.nc - Fri Apr 19 14:52:22 2019
+
+ Dart_cc:  Processing 17 files in the directory:  /work/wicker/REALTIME/VEL/20190419
+ Dart_cc:  First file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_1945.nc
+ Dart_cc:  Last  file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_1945.nc
+
+ Dart_cc:  netCDF4 file to be written is /work/wicker/REALTIME/VEL/20190419/obs_seq_VR_20190419_1945.nc
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_1945.nc has 17 observations, total is now 17
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_1945.nc has 663 observations, total is now 680
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_1945.nc has 1519 observations, total is now 2199
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_1945.nc has 165 observations, total is now 2364
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_1945.nc has 1876 observations, total is now 4240
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_1945.nc has 437 observations, total is now 4677
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_1945.nc has 1505 observations, total is now 6182
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_1945.nc has 1054 observations, total is now 7236
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_1945.nc has 3389 observations, total is now 10625
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_1945.nc has 2037 observations, total is now 12662
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_1945.nc has 2862 observations, total is now 15524
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_1945.nc has 5124 observations, total is now 20648
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_1945.nc has 7590 observations, total is now 28238
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_1945.nc has 8937 observations, total is now 37175
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_1945.nc has 1834 observations, total is now 39009
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_1945.nc has 367 observations, total is now 39376
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_1945.nc has 5006 observations, total is now 44382
+
+ Reading took 0.373299121857 seconds since the loop started 
+
+
+ Slurm_concatenate job completed at 2019 04 19 1451
+
+ <<<<< END =======================================================================
+
+ >>>> BEGIN ======================================================================
+
+ Begin processing for cycle time:  201904192000
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start 201904192000 
+
+
+ ============================================================================
+
+ SLURM_OPAWS: Reading radar_file: /scratch/wof/realtime/radar_files/radars.20190419.csh
+
+ ============================================================================
+
+ ============================================================================
+
+ SLURM_OPAWS starting job for RADAR:  KMXX
+
+ SLURM_OPAWS starting job for RADAR:  KILN
+
+ SLURM_OPAWS starting job for RADAR:  KCAE
+
+ SLURM_OPAWS starting job for RADAR:  KAKQ
+
+ SLURM_OPAWS starting job for RADAR:  KLTX
+
+ SLURM_OPAWS starting job for RADAR:  KVAX
+
+ SLURM_OPAWS starting job for RADAR:  KMHX
+
+ SLURM_OPAWS starting job for RADAR:  KJKL
+
+ SLURM_OPAWS starting job for RADAR:  KMRX
+
+ SLURM_OPAWS starting job for RADAR:  KDIX
+
+ SLURM_OPAWS starting job for RADAR:  KEOX
+
+ SLURM_OPAWS starting job for RADAR:  KPBZ
+
+ SLURM_OPAWS starting job for RADAR:  KFCX
+
+ SLURM_OPAWS starting job for RADAR:  KJGX
+
+ SLURM_OPAWS starting job for RADAR:  KLWX
+
+ SLURM_OPAWS starting job for RADAR:  KDOX
+
+ SLURM_OPAWS starting job for RADAR:  KCLX
+
+ SLURM_OPAWS starting job for RADAR:  KRLX
+
+ SLURM_OPAWS starting job for RADAR:  KCLE
+
+ SLURM_OPAWS starting job for RADAR:  KFFC
+
+ SLURM_OPAWS starting job for RADAR:  KCCX
+
+ SLURM_OPAWS starting job for RADAR:  KGSP
+
+ SLURM_OPAWS starting job for RADAR:  KRAX
+
+ ============================================================================
+
+ Time for slurm_opaws: 65.7232689857 seconds
+
+ Slurm_opaws job completed at 2019 04 19 1506
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d /work/wicker/REALTIME/VEL/20190419 -f _VR_20190419_2000.nc 
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq*_VR_20190419_2000.nc
+['/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2000.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2000.nc']
+
+ Obs_seq.final files sorted by modification time
+
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2000.nc - Fri Apr 19 15:06:20 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2000.nc - Fri Apr 19 15:06:20 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2000.nc - Fri Apr 19 15:06:22 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2000.nc - Fri Apr 19 15:06:24 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2000.nc - Fri Apr 19 15:06:26 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2000.nc - Fri Apr 19 15:06:28 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2000.nc - Fri Apr 19 15:06:28 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2000.nc - Fri Apr 19 15:06:31 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2000.nc - Fri Apr 19 15:06:31 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2000.nc - Fri Apr 19 15:06:32 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2000.nc - Fri Apr 19 15:06:41 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2000.nc - Fri Apr 19 15:06:41 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2000.nc - Fri Apr 19 15:06:44 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2000.nc - Fri Apr 19 15:06:46 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2000.nc - Fri Apr 19 15:06:50 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2000.nc - Fri Apr 19 15:06:52 2019
+
+ Dart_cc:  Processing 16 files in the directory:  /work/wicker/REALTIME/VEL/20190419
+ Dart_cc:  First file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2000.nc
+ Dart_cc:  Last  file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2000.nc
+
+ Dart_cc:  netCDF4 file to be written is /work/wicker/REALTIME/VEL/20190419/obs_seq_VR_20190419_2000.nc
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2000.nc has 570 observations, total is now 570
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2000.nc has 1545 observations, total is now 2115
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2000.nc has 43 observations, total is now 2158
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2000.nc has 1454 observations, total is now 3612
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2000.nc has 1680 observations, total is now 5292
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2000.nc has 254 observations, total is now 5546
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2000.nc has 1179 observations, total is now 6725
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2000.nc has 532 observations, total is now 7257
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2000.nc has 488 observations, total is now 7745
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2000.nc has 914 observations, total is now 8659
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2000.nc has 4683 observations, total is now 13342
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2000.nc has 5125 observations, total is now 18467
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2000.nc has 5483 observations, total is now 23950
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2000.nc has 3863 observations, total is now 27813
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2000.nc has 8118 observations, total is now 35931
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2000.nc has 8809 observations, total is now 44740
+
+ Reading took 0.382807016373 seconds since the loop started 
+
+
+ Slurm_concatenate job completed at 2019 04 19 1506
+
+ <<<<< END =======================================================================
+
+ >>>> BEGIN ======================================================================
+
+ Begin processing for cycle time:  201904192015
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start 201904192015 
+
+
+ ============================================================================
+
+ SLURM_OPAWS: Reading radar_file: /scratch/wof/realtime/radar_files/radars.20190419.csh
+
+ ============================================================================
+
+ ============================================================================
+
+ SLURM_OPAWS starting job for RADAR:  KMXX
+
+ SLURM_OPAWS starting job for RADAR:  KILN
+
+ SLURM_OPAWS starting job for RADAR:  KCAE
+
+ SLURM_OPAWS starting job for RADAR:  KAKQ
+
+ SLURM_OPAWS starting job for RADAR:  KLTX
+
+ SLURM_OPAWS starting job for RADAR:  KVAX
+
+ SLURM_OPAWS starting job for RADAR:  KMHX
+
+ SLURM_OPAWS starting job for RADAR:  KJKL
+
+ SLURM_OPAWS starting job for RADAR:  KMRX
+
+ SLURM_OPAWS starting job for RADAR:  KDIX
+
+ SLURM_OPAWS starting job for RADAR:  KEOX
+
+ SLURM_OPAWS starting job for RADAR:  KPBZ
+
+ SLURM_OPAWS starting job for RADAR:  KFCX
+
+ SLURM_OPAWS starting job for RADAR:  KJGX
+
+ SLURM_OPAWS starting job for RADAR:  KLWX
+
+ SLURM_OPAWS starting job for RADAR:  KDOX
+
+ SLURM_OPAWS starting job for RADAR:  KCLX
+
+ SLURM_OPAWS starting job for RADAR:  KRLX
+
+ SLURM_OPAWS starting job for RADAR:  KCLE
+
+ SLURM_OPAWS starting job for RADAR:  KFFC
+
+ SLURM_OPAWS starting job for RADAR:  KCCX
+
+ SLURM_OPAWS starting job for RADAR:  KGSP
+
+ SLURM_OPAWS starting job for RADAR:  KRAX
+
+ ============================================================================
+
+ Time for slurm_opaws: 96.6028439999 seconds
+
+ Slurm_opaws job completed at 2019 04 19 1521
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d /work/wicker/REALTIME/VEL/20190419 -f _VR_20190419_2015.nc 
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq*_VR_20190419_2015.nc
+['/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2015.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2015.nc']
+
+ Obs_seq.final files sorted by modification time
+
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2015.nc - Fri Apr 19 15:21:20 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2015.nc - Fri Apr 19 15:21:21 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2015.nc - Fri Apr 19 15:21:22 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2015.nc - Fri Apr 19 15:21:25 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2015.nc - Fri Apr 19 15:21:25 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2015.nc - Fri Apr 19 15:21:25 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2015.nc - Fri Apr 19 15:21:26 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2015.nc - Fri Apr 19 15:21:28 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2015.nc - Fri Apr 19 15:21:30 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2015.nc - Fri Apr 19 15:21:30 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2015.nc - Fri Apr 19 15:21:30 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2015.nc - Fri Apr 19 15:21:32 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2015.nc - Fri Apr 19 15:21:44 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2015.nc - Fri Apr 19 15:21:46 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2015.nc - Fri Apr 19 15:21:48 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2015.nc - Fri Apr 19 15:21:52 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2015.nc - Fri Apr 19 15:22:24 2019
+
+ Dart_cc:  Processing 17 files in the directory:  /work/wicker/REALTIME/VEL/20190419
+ Dart_cc:  First file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2015.nc
+ Dart_cc:  Last  file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2015.nc
+
+ Dart_cc:  netCDF4 file to be written is /work/wicker/REALTIME/VEL/20190419/obs_seq_VR_20190419_2015.nc
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2015.nc has 52 observations, total is now 52
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2015.nc has 1255 observations, total is now 1307
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2015.nc has 429 observations, total is now 1736
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2015.nc has 349 observations, total is now 2085
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2015.nc has 190 observations, total is now 2275
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2015.nc has 1131 observations, total is now 3406
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2015.nc has 1471 observations, total is now 4877
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2015.nc has 494 observations, total is now 5371
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2015.nc has 673 observations, total is now 6044
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2015.nc has 2994 observations, total is now 9038
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2015.nc has 2229 observations, total is now 11267
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2015.nc has 845 observations, total is now 12112
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2015.nc has 5420 observations, total is now 17532
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2015.nc has 2805 observations, total is now 20337
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2015.nc has 1250 observations, total is now 21587
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2015.nc has 8563 observations, total is now 30150
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2015.nc has 4372 observations, total is now 34522
+
+ Reading took 0.43031001091 seconds since the loop started 
+
+
+ Slurm_concatenate job completed at 2019 04 19 1521
+
+ <<<<< END =======================================================================
+
+ >>>> BEGIN ======================================================================
+
+ Begin processing for cycle time:  201904192030
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start 201904192030 
+
+
+ ============================================================================
+
+ SLURM_OPAWS: Reading radar_file: /scratch/wof/realtime/radar_files/radars.20190419.csh
+
+ ============================================================================
+
+ ============================================================================
+
+ SLURM_OPAWS starting job for RADAR:  KMXX
+
+ SLURM_OPAWS starting job for RADAR:  KILN
+
+ SLURM_OPAWS starting job for RADAR:  KCAE
+
+ SLURM_OPAWS starting job for RADAR:  KAKQ
+
+ SLURM_OPAWS starting job for RADAR:  KLTX
+
+ SLURM_OPAWS starting job for RADAR:  KVAX
+
+ SLURM_OPAWS starting job for RADAR:  KMHX
+
+ SLURM_OPAWS starting job for RADAR:  KJKL
+
+ SLURM_OPAWS starting job for RADAR:  KMRX
+
+ SLURM_OPAWS starting job for RADAR:  KDIX
+
+ SLURM_OPAWS starting job for RADAR:  KEOX
+
+ SLURM_OPAWS starting job for RADAR:  KPBZ
+
+ SLURM_OPAWS starting job for RADAR:  KFCX
+
+ SLURM_OPAWS starting job for RADAR:  KJGX
+
+ SLURM_OPAWS starting job for RADAR:  KLWX
+
+ SLURM_OPAWS starting job for RADAR:  KDOX
+
+ SLURM_OPAWS starting job for RADAR:  KCLX
+
+ SLURM_OPAWS starting job for RADAR:  KRLX
+
+ SLURM_OPAWS starting job for RADAR:  KCLE
+
+ SLURM_OPAWS starting job for RADAR:  KFFC
+
+ SLURM_OPAWS starting job for RADAR:  KCCX
+
+ SLURM_OPAWS starting job for RADAR:  KGSP
+
+ SLURM_OPAWS starting job for RADAR:  KRAX
+
+ ============================================================================
+
+ Time for slurm_opaws: 65.2192611694 seconds
+
+ Slurm_opaws job completed at 2019 04 19 1536
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d /work/wicker/REALTIME/VEL/20190419 -f _VR_20190419_2030.nc 
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq*_VR_20190419_2030.nc
+['/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2030.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2030.nc']
+
+ Obs_seq.final files sorted by modification time
+
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2030.nc - Fri Apr 19 15:36:19 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2030.nc - Fri Apr 19 15:36:19 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2030.nc - Fri Apr 19 15:36:24 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2030.nc - Fri Apr 19 15:36:24 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2030.nc - Fri Apr 19 15:36:26 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2030.nc - Fri Apr 19 15:36:28 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2030.nc - Fri Apr 19 15:36:29 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2030.nc - Fri Apr 19 15:36:32 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2030.nc - Fri Apr 19 15:36:32 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2030.nc - Fri Apr 19 15:36:37 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2030.nc - Fri Apr 19 15:36:38 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2030.nc - Fri Apr 19 15:36:44 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2030.nc - Fri Apr 19 15:36:44 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2030.nc - Fri Apr 19 15:36:47 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2030.nc - Fri Apr 19 15:36:47 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2030.nc - Fri Apr 19 15:36:52 2019
+
+ Dart_cc:  Processing 16 files in the directory:  /work/wicker/REALTIME/VEL/20190419
+ Dart_cc:  First file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2030.nc
+ Dart_cc:  Last  file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2030.nc
+
+ Dart_cc:  netCDF4 file to be written is /work/wicker/REALTIME/VEL/20190419/obs_seq_VR_20190419_2030.nc
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2030.nc has 88 observations, total is now 88
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2030.nc has 348 observations, total is now 436
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2030.nc has 1291 observations, total is now 1727
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2030.nc has 1024 observations, total is now 2751
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2030.nc has 452 observations, total is now 3203
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2030.nc has 2105 observations, total is now 5308
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2030.nc has 652 observations, total is now 5960
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2030.nc has 3574 observations, total is now 9534
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2030.nc has 1183 observations, total is now 10717
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2030.nc has 4368 observations, total is now 15085
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2030.nc has 4150 observations, total is now 19235
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2030.nc has 1870 observations, total is now 21105
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2030.nc has 963 observations, total is now 22068
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2030.nc has 949 observations, total is now 23017
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2030.nc has 363 observations, total is now 23380
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2030.nc has 2899 observations, total is now 26279
+
+ Reading took 0.406576156616 seconds since the loop started 
+
+
+ Slurm_concatenate job completed at 2019 04 19 1536
+
+ <<<<< END =======================================================================
+
+ >>>> BEGIN ======================================================================
+
+ Begin processing for cycle time:  201904192045
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start 201904192045 
+
+
+ ============================================================================
+
+ SLURM_OPAWS: Reading radar_file: /scratch/wof/realtime/radar_files/radars.20190419.csh
+
+ ============================================================================
+
+ ============================================================================
+
+ SLURM_OPAWS starting job for RADAR:  KMXX
+
+ SLURM_OPAWS starting job for RADAR:  KILN
+
+ SLURM_OPAWS starting job for RADAR:  KCAE
+
+ SLURM_OPAWS starting job for RADAR:  KAKQ
+
+ SLURM_OPAWS starting job for RADAR:  KLTX
+
+ SLURM_OPAWS starting job for RADAR:  KVAX
+
+ SLURM_OPAWS starting job for RADAR:  KMHX
+
+ SLURM_OPAWS starting job for RADAR:  KJKL
+
+ SLURM_OPAWS starting job for RADAR:  KMRX
+
+ SLURM_OPAWS starting job for RADAR:  KDIX
+
+ SLURM_OPAWS starting job for RADAR:  KEOX
+
+ SLURM_OPAWS starting job for RADAR:  KPBZ
+
+ SLURM_OPAWS starting job for RADAR:  KFCX
+
+ SLURM_OPAWS starting job for RADAR:  KJGX
+
+ SLURM_OPAWS starting job for RADAR:  KLWX
+
+ SLURM_OPAWS starting job for RADAR:  KDOX
+
+ SLURM_OPAWS starting job for RADAR:  KCLX
+
+ SLURM_OPAWS starting job for RADAR:  KRLX
+
+ SLURM_OPAWS starting job for RADAR:  KCLE
+
+ SLURM_OPAWS starting job for RADAR:  KFFC
+
+ SLURM_OPAWS starting job for RADAR:  KCCX
+
+ SLURM_OPAWS starting job for RADAR:  KGSP
+
+ SLURM_OPAWS starting job for RADAR:  KRAX
+
+ ============================================================================
+
+ Time for slurm_opaws: 65.9248940945 seconds
+
+ Slurm_opaws job completed at 2019 04 19 1551
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d /work/wicker/REALTIME/VEL/20190419 -f _VR_20190419_2045.nc 
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq*_VR_20190419_2045.nc
+['/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2045.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2045.nc']
+
+ Obs_seq.final files sorted by modification time
+
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2045.nc - Fri Apr 19 15:51:17 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2045.nc - Fri Apr 19 15:51:18 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2045.nc - Fri Apr 19 15:51:18 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2045.nc - Fri Apr 19 15:51:20 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2045.nc - Fri Apr 19 15:51:23 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2045.nc - Fri Apr 19 15:51:24 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2045.nc - Fri Apr 19 15:51:24 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2045.nc - Fri Apr 19 15:51:24 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2045.nc - Fri Apr 19 15:51:28 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2045.nc - Fri Apr 19 15:51:31 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2045.nc - Fri Apr 19 15:51:32 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2045.nc - Fri Apr 19 15:51:36 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2045.nc - Fri Apr 19 15:51:38 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2045.nc - Fri Apr 19 15:51:43 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2045.nc - Fri Apr 19 15:51:45 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2045.nc - Fri Apr 19 15:51:51 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2045.nc - Fri Apr 19 15:51:53 2019
+
+ Dart_cc:  Processing 17 files in the directory:  /work/wicker/REALTIME/VEL/20190419
+ Dart_cc:  First file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2045.nc
+ Dart_cc:  Last  file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2045.nc
+
+ Dart_cc:  netCDF4 file to be written is /work/wicker/REALTIME/VEL/20190419/obs_seq_VR_20190419_2045.nc
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2045.nc has 157 observations, total is now 157
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2045.nc has 766 observations, total is now 923
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2045.nc has 850 observations, total is now 1773
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2045.nc has 422 observations, total is now 2195
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2045.nc has 921 observations, total is now 3116
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2045.nc has 404 observations, total is now 3520
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2045.nc has 1075 observations, total is now 4595
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2045.nc has 217 observations, total is now 4812
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2045.nc has 736 observations, total is now 5548
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2045.nc has 1393 observations, total is now 6941
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2045.nc has 1958 observations, total is now 8899
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2045.nc has 3874 observations, total is now 12773
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2045.nc has 3529 observations, total is now 16302
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2045.nc has 1675 observations, total is now 17977
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2045.nc has 8679 observations, total is now 26656
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2045.nc has 2437 observations, total is now 29093
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2045.nc has 8868 observations, total is now 37961
+
+ Reading took 0.350147008896 seconds since the loop started 
+
+
+ Slurm_concatenate job completed at 2019 04 19 1551
+
+ <<<<< END =======================================================================
+
+ >>>> BEGIN ======================================================================
+
+ Begin processing for cycle time:  201904192100
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start 201904192100 
+
+
+ ============================================================================
+
+ SLURM_OPAWS: Reading radar_file: /scratch/wof/realtime/radar_files/radars.20190419.csh
+
+ ============================================================================
+
+ ============================================================================
+
+ SLURM_OPAWS starting job for RADAR:  KMXX
+
+ SLURM_OPAWS starting job for RADAR:  KILN
+
+ SLURM_OPAWS starting job for RADAR:  KCAE
+
+ SLURM_OPAWS starting job for RADAR:  KAKQ
+
+ SLURM_OPAWS starting job for RADAR:  KLTX
+
+ SLURM_OPAWS starting job for RADAR:  KVAX
+
+ SLURM_OPAWS starting job for RADAR:  KMHX
+
+ SLURM_OPAWS starting job for RADAR:  KJKL
+
+ SLURM_OPAWS starting job for RADAR:  KMRX
+
+ SLURM_OPAWS starting job for RADAR:  KDIX
+
+ SLURM_OPAWS starting job for RADAR:  KEOX
+
+ SLURM_OPAWS starting job for RADAR:  KPBZ
+
+ SLURM_OPAWS starting job for RADAR:  KFCX
+
+ SLURM_OPAWS starting job for RADAR:  KJGX
+
+ SLURM_OPAWS starting job for RADAR:  KLWX
+
+ SLURM_OPAWS starting job for RADAR:  KDOX
+
+ SLURM_OPAWS starting job for RADAR:  KCLX
+
+ SLURM_OPAWS starting job for RADAR:  KRLX
+
+ SLURM_OPAWS starting job for RADAR:  KCLE
+
+ SLURM_OPAWS starting job for RADAR:  KFFC
+
+ SLURM_OPAWS starting job for RADAR:  KCCX
+
+ SLURM_OPAWS starting job for RADAR:  KGSP
+
+ SLURM_OPAWS starting job for RADAR:  KRAX
+
+ ============================================================================
+
+ Time for slurm_opaws: 89.3538429737 seconds
+
+ Slurm_opaws job completed at 2019 04 19 1606
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d /work/wicker/REALTIME/VEL/20190419 -f _VR_20190419_2100.nc 
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq*_VR_20190419_2100.nc
+['/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCAE_VR_20190419_2100.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2100.nc']
+
+ Obs_seq.final files sorted by modification time
+
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2100.nc - Fri Apr 19 16:06:18 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2100.nc - Fri Apr 19 16:06:19 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2100.nc - Fri Apr 19 16:06:20 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2100.nc - Fri Apr 19 16:06:20 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2100.nc - Fri Apr 19 16:06:21 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2100.nc - Fri Apr 19 16:06:23 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2100.nc - Fri Apr 19 16:06:25 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2100.nc - Fri Apr 19 16:06:25 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2100.nc - Fri Apr 19 16:06:29 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2100.nc - Fri Apr 19 16:06:30 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2100.nc - Fri Apr 19 16:06:34 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2100.nc - Fri Apr 19 16:06:39 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2100.nc - Fri Apr 19 16:06:40 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2100.nc - Fri Apr 19 16:06:40 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCAE_VR_20190419_2100.nc - Fri Apr 19 16:06:46 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2100.nc - Fri Apr 19 16:06:48 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2100.nc - Fri Apr 19 16:06:49 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2100.nc - Fri Apr 19 16:07:17 2019
+
+ Dart_cc:  Processing 18 files in the directory:  /work/wicker/REALTIME/VEL/20190419
+ Dart_cc:  First file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2100.nc
+ Dart_cc:  Last  file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2100.nc
+
+ Dart_cc:  netCDF4 file to be written is /work/wicker/REALTIME/VEL/20190419/obs_seq_VR_20190419_2100.nc
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2100.nc has 44 observations, total is now 44
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2100.nc has 848 observations, total is now 892
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2100.nc has 153 observations, total is now 1045
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2100.nc has 539 observations, total is now 1584
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2100.nc has 323 observations, total is now 1907
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2100.nc has 349 observations, total is now 2256
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2100.nc has 869 observations, total is now 3125
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2100.nc has 290 observations, total is now 3415
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2100.nc has 3840 observations, total is now 7255
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2100.nc has 956 observations, total is now 8211
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2100.nc has 1798 observations, total is now 10009
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2100.nc has 3212 observations, total is now 13221
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2100.nc has 4119 observations, total is now 17340
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2100.nc has 2096 observations, total is now 19436
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCAE_VR_20190419_2100.nc has 1517 observations, total is now 20953
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2100.nc has 7689 observations, total is now 28642
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2100.nc has 1053 observations, total is now 29695
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2100.nc has 3103 observations, total is now 32798
+
+ Reading took 0.374233007431 seconds since the loop started 
+
+
+ Slurm_concatenate job completed at 2019 04 19 1606
+
+ <<<<< END =======================================================================
+
+ >>>> BEGIN ======================================================================
+
+ Begin processing for cycle time:  201904192115
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start 201904192115 
+
+
+ ============================================================================
+
+ SLURM_OPAWS: Reading radar_file: /scratch/wof/realtime/radar_files/radars.20190419.csh
+
+ ============================================================================
+
+ ============================================================================
+
+ SLURM_OPAWS starting job for RADAR:  KMXX
+
+ SLURM_OPAWS starting job for RADAR:  KILN
+
+ SLURM_OPAWS starting job for RADAR:  KCAE
+
+ SLURM_OPAWS starting job for RADAR:  KAKQ
+
+ SLURM_OPAWS starting job for RADAR:  KLTX
+
+ SLURM_OPAWS starting job for RADAR:  KVAX
+
+ SLURM_OPAWS starting job for RADAR:  KMHX
+
+ SLURM_OPAWS starting job for RADAR:  KJKL
+
+ SLURM_OPAWS starting job for RADAR:  KMRX
+
+ SLURM_OPAWS starting job for RADAR:  KDIX
+
+ SLURM_OPAWS starting job for RADAR:  KEOX
+
+ SLURM_OPAWS starting job for RADAR:  KPBZ
+
+ SLURM_OPAWS starting job for RADAR:  KFCX
+
+ SLURM_OPAWS starting job for RADAR:  KJGX
+
+ SLURM_OPAWS starting job for RADAR:  KLWX
+
+ SLURM_OPAWS starting job for RADAR:  KDOX
+
+ SLURM_OPAWS starting job for RADAR:  KCLX
+
+ SLURM_OPAWS starting job for RADAR:  KRLX
+
+ SLURM_OPAWS starting job for RADAR:  KCLE
+
+ SLURM_OPAWS starting job for RADAR:  KFFC
+
+ SLURM_OPAWS starting job for RADAR:  KCCX
+
+ SLURM_OPAWS starting job for RADAR:  KGSP
+
+ SLURM_OPAWS starting job for RADAR:  KRAX
+
+ ============================================================================
+
+ Time for slurm_opaws: 64.5219678879 seconds
+
+ Slurm_opaws job completed at 2019 04 19 1621
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d /work/wicker/REALTIME/VEL/20190419 -f _VR_20190419_2115.nc 
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq*_VR_20190419_2115.nc
+['/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCAE_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2115.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2115.nc']
+
+ Obs_seq.final files sorted by modification time
+
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2115.nc - Fri Apr 19 16:21:17 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2115.nc - Fri Apr 19 16:21:19 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2115.nc - Fri Apr 19 16:21:20 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2115.nc - Fri Apr 19 16:21:20 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2115.nc - Fri Apr 19 16:21:21 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2115.nc - Fri Apr 19 16:21:25 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2115.nc - Fri Apr 19 16:21:26 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2115.nc - Fri Apr 19 16:21:30 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2115.nc - Fri Apr 19 16:21:33 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2115.nc - Fri Apr 19 16:21:34 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2115.nc - Fri Apr 19 16:21:38 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2115.nc - Fri Apr 19 16:21:40 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2115.nc - Fri Apr 19 16:21:44 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCAE_VR_20190419_2115.nc - Fri Apr 19 16:21:46 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2115.nc - Fri Apr 19 16:21:48 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2115.nc - Fri Apr 19 16:21:48 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2115.nc - Fri Apr 19 16:21:50 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2115.nc - Fri Apr 19 16:21:52 2019
+
+ Dart_cc:  Processing 18 files in the directory:  /work/wicker/REALTIME/VEL/20190419
+ Dart_cc:  First file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2115.nc
+ Dart_cc:  Last  file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2115.nc
+
+ Dart_cc:  netCDF4 file to be written is /work/wicker/REALTIME/VEL/20190419/obs_seq_VR_20190419_2115.nc
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2115.nc has 405 observations, total is now 405
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2115.nc has 654 observations, total is now 1059
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2115.nc has 973 observations, total is now 2032
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2115.nc has 659 observations, total is now 2691
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2115.nc has 2314 observations, total is now 5005
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2115.nc has 129 observations, total is now 5134
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2115.nc has 1163 observations, total is now 6297
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2115.nc has 1154 observations, total is now 7451
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2115.nc has 3092 observations, total is now 10543
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2115.nc has 1934 observations, total is now 12477
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2115.nc has 1765 observations, total is now 14242
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2115.nc has 3708 observations, total is now 17950
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2115.nc has 56 observations, total is now 18006
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCAE_VR_20190419_2115.nc has 1301 observations, total is now 19307
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2115.nc has 6879 observations, total is now 26186
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2115.nc has 2847 observations, total is now 29033
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2115.nc has 8744 observations, total is now 37777
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2115.nc has 615 observations, total is now 38392
+
+ Reading took 0.375738859177 seconds since the loop started 
+
+
+ Slurm_concatenate job completed at 2019 04 19 1621
+
+ <<<<< END =======================================================================
+
+ >>>> BEGIN ======================================================================
+
+ Begin processing for cycle time:  201904192130
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start 201904192130 
+
+
+ ============================================================================
+
+ SLURM_OPAWS: Reading radar_file: /scratch/wof/realtime/radar_files/radars.20190419.csh
+
+ ============================================================================
+
+ ============================================================================
+
+ SLURM_OPAWS starting job for RADAR:  KMXX
+
+ SLURM_OPAWS starting job for RADAR:  KILN
+
+ SLURM_OPAWS starting job for RADAR:  KCAE
+
+ SLURM_OPAWS starting job for RADAR:  KAKQ
+
+ SLURM_OPAWS starting job for RADAR:  KLTX
+
+ SLURM_OPAWS starting job for RADAR:  KVAX
+
+ SLURM_OPAWS starting job for RADAR:  KMHX
+
+ SLURM_OPAWS starting job for RADAR:  KJKL
+
+ SLURM_OPAWS starting job for RADAR:  KMRX
+
+ SLURM_OPAWS starting job for RADAR:  KDIX
+
+ SLURM_OPAWS starting job for RADAR:  KEOX
+
+ SLURM_OPAWS starting job for RADAR:  KPBZ
+
+ SLURM_OPAWS starting job for RADAR:  KFCX
+
+ SLURM_OPAWS starting job for RADAR:  KJGX
+
+ SLURM_OPAWS starting job for RADAR:  KLWX
+
+ SLURM_OPAWS starting job for RADAR:  KDOX
+
+ SLURM_OPAWS starting job for RADAR:  KCLX
+
+ SLURM_OPAWS starting job for RADAR:  KRLX
+
+ SLURM_OPAWS starting job for RADAR:  KCLE
+
+ SLURM_OPAWS starting job for RADAR:  KFFC
+
+ SLURM_OPAWS starting job for RADAR:  KCCX
+
+ SLURM_OPAWS starting job for RADAR:  KGSP
+
+ SLURM_OPAWS starting job for RADAR:  KRAX
+
+ ============================================================================
+
+ Time for slurm_opaws: 81.2402482033 seconds
+
+ Slurm_opaws job completed at 2019 04 19 1636
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d /work/wicker/REALTIME/VEL/20190419 -f _VR_20190419_2130.nc 
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq*_VR_20190419_2130.nc
+['/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2130.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2130.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2130.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2130.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2130.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2130.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2130.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2130.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2130.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2130.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2130.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2130.nc']
+
+ Obs_seq.final files sorted by modification time
+
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2130.nc - Fri Apr 19 16:36:17 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2130.nc - Fri Apr 19 16:36:19 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2130.nc - Fri Apr 19 16:36:20 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2130.nc - Fri Apr 19 16:36:21 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2130.nc - Fri Apr 19 16:36:29 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2130.nc - Fri Apr 19 16:36:38 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2130.nc - Fri Apr 19 16:36:40 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2130.nc - Fri Apr 19 16:36:43 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2130.nc - Fri Apr 19 16:36:47 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2130.nc - Fri Apr 19 16:36:47 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2130.nc - Fri Apr 19 16:36:47 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2130.nc - Fri Apr 19 16:37:09 2019
+
+ Dart_cc:  Processing 12 files in the directory:  /work/wicker/REALTIME/VEL/20190419
+ Dart_cc:  First file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2130.nc
+ Dart_cc:  Last  file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2130.nc
+
+ Dart_cc:  netCDF4 file to be written is /work/wicker/REALTIME/VEL/20190419/obs_seq_VR_20190419_2130.nc
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2130.nc has 408 observations, total is now 408
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2130.nc has 725 observations, total is now 1133
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2130.nc has 1953 observations, total is now 3086
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2130.nc has 107 observations, total is now 3193
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2130.nc has 2503 observations, total is now 5696
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2130.nc has 1606 observations, total is now 7302
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2130.nc has 1750 observations, total is now 9052
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2130.nc has 8 observations, total is now 9060
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2130.nc has 819 observations, total is now 9879
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2130.nc has 1441 observations, total is now 11320
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2130.nc has 516 observations, total is now 11836
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2130.nc has 3024 observations, total is now 14860
+
+ Reading took 0.212625026703 seconds since the loop started 
+
+
+ Slurm_concatenate job completed at 2019 04 19 1636
+
+ <<<<< END =======================================================================
+
+ >>>> BEGIN ======================================================================
+
+ Begin processing for cycle time:  201904192145
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start 201904192145 
+
+
+ ============================================================================
+
+ SLURM_OPAWS: Reading radar_file: /scratch/wof/realtime/radar_files/radars.20190419.csh
+
+ ============================================================================
+
+ ============================================================================
+
+ SLURM_OPAWS starting job for RADAR:  KMXX
+
+ SLURM_OPAWS starting job for RADAR:  KILN
+
+ SLURM_OPAWS starting job for RADAR:  KCAE
+
+ SLURM_OPAWS starting job for RADAR:  KAKQ
+
+ SLURM_OPAWS starting job for RADAR:  KLTX
+
+ SLURM_OPAWS starting job for RADAR:  KVAX
+
+ SLURM_OPAWS starting job for RADAR:  KMHX
+
+ SLURM_OPAWS starting job for RADAR:  KJKL
+
+ SLURM_OPAWS starting job for RADAR:  KMRX
+
+ SLURM_OPAWS starting job for RADAR:  KDIX
+
+ SLURM_OPAWS starting job for RADAR:  KEOX
+
+ SLURM_OPAWS starting job for RADAR:  KPBZ
+
+ SLURM_OPAWS starting job for RADAR:  KFCX
+
+ SLURM_OPAWS starting job for RADAR:  KJGX
+
+ SLURM_OPAWS starting job for RADAR:  KLWX
+
+ SLURM_OPAWS starting job for RADAR:  KDOX
+
+ SLURM_OPAWS starting job for RADAR:  KCLX
+
+ SLURM_OPAWS starting job for RADAR:  KRLX
+
+ SLURM_OPAWS starting job for RADAR:  KCLE
+
+ SLURM_OPAWS starting job for RADAR:  KFFC
+
+ SLURM_OPAWS starting job for RADAR:  KCCX
+
+ SLURM_OPAWS starting job for RADAR:  KGSP
+
+ SLURM_OPAWS starting job for RADAR:  KRAX
+
+ ============================================================================
+
+ Time for slurm_opaws: 66.5915219784 seconds
+
+ Slurm_opaws job completed at 2019 04 19 1651
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d /work/wicker/REALTIME/VEL/20190419 -f _VR_20190419_2145.nc 
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq*_VR_20190419_2145.nc
+['/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCAE_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2145.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2145.nc']
+
+ Obs_seq.final files sorted by modification time
+
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2145.nc - Fri Apr 19 16:51:15 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2145.nc - Fri Apr 19 16:51:16 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2145.nc - Fri Apr 19 16:51:17 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2145.nc - Fri Apr 19 16:51:17 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2145.nc - Fri Apr 19 16:51:18 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2145.nc - Fri Apr 19 16:51:19 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2145.nc - Fri Apr 19 16:51:22 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2145.nc - Fri Apr 19 16:51:26 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2145.nc - Fri Apr 19 16:51:27 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2145.nc - Fri Apr 19 16:51:27 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2145.nc - Fri Apr 19 16:51:31 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCAE_VR_20190419_2145.nc - Fri Apr 19 16:51:31 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2145.nc - Fri Apr 19 16:51:32 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2145.nc - Fri Apr 19 16:51:32 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2145.nc - Fri Apr 19 16:51:45 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2145.nc - Fri Apr 19 16:51:45 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2145.nc - Fri Apr 19 16:51:54 2019
+
+ Dart_cc:  Processing 17 files in the directory:  /work/wicker/REALTIME/VEL/20190419
+ Dart_cc:  First file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2145.nc
+ Dart_cc:  Last  file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2145.nc
+
+ Dart_cc:  netCDF4 file to be written is /work/wicker/REALTIME/VEL/20190419/obs_seq_VR_20190419_2145.nc
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2145.nc has 337 observations, total is now 337
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2145.nc has 27 observations, total is now 364
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2145.nc has 606 observations, total is now 970
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2145.nc has 42 observations, total is now 1012
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2145.nc has 788 observations, total is now 1800
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2145.nc has 1699 observations, total is now 3499
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2145.nc has 600 observations, total is now 4099
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2145.nc has 1043 observations, total is now 5142
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2145.nc has 1883 observations, total is now 7025
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2145.nc has 1368 observations, total is now 8393
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2145.nc has 2904 observations, total is now 11297
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCAE_VR_20190419_2145.nc has 1902 observations, total is now 13199
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2145.nc has 1648 observations, total is now 14847
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2145.nc has 1996 observations, total is now 16843
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2145.nc has 4238 observations, total is now 21081
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2145.nc has 1467 observations, total is now 22548
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2145.nc has 5767 observations, total is now 28315
+
+ Reading took 0.384210109711 seconds since the loop started 
+
+
+ Slurm_concatenate job completed at 2019 04 19 1651
+
+ <<<<< END =======================================================================
+
+ >>>> BEGIN ======================================================================
+
+ Begin processing for cycle time:  201904192200
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start 201904192200 
+
+
+ ============================================================================
+
+ SLURM_OPAWS: Reading radar_file: /scratch/wof/realtime/radar_files/radars.20190419.csh
+
+ ============================================================================
+
+ ============================================================================
+
+ SLURM_OPAWS starting job for RADAR:  KMXX
+
+ SLURM_OPAWS starting job for RADAR:  KILN
+
+ SLURM_OPAWS starting job for RADAR:  KCAE
+
+ SLURM_OPAWS starting job for RADAR:  KAKQ
+
+ SLURM_OPAWS starting job for RADAR:  KLTX
+
+ SLURM_OPAWS starting job for RADAR:  KVAX
+
+ SLURM_OPAWS starting job for RADAR:  KMHX
+
+ SLURM_OPAWS starting job for RADAR:  KJKL
+
+ SLURM_OPAWS starting job for RADAR:  KMRX
+
+ SLURM_OPAWS starting job for RADAR:  KDIX
+
+ SLURM_OPAWS starting job for RADAR:  KEOX
+
+ SLURM_OPAWS starting job for RADAR:  KPBZ
+
+ SLURM_OPAWS starting job for RADAR:  KFCX
+
+ SLURM_OPAWS starting job for RADAR:  KJGX
+
+ SLURM_OPAWS starting job for RADAR:  KLWX
+
+ SLURM_OPAWS starting job for RADAR:  KDOX
+
+ SLURM_OPAWS starting job for RADAR:  KCLX
+
+ SLURM_OPAWS starting job for RADAR:  KRLX
+
+ SLURM_OPAWS starting job for RADAR:  KCLE
+
+ SLURM_OPAWS starting job for RADAR:  KFFC
+
+ SLURM_OPAWS starting job for RADAR:  KCCX
+
+ SLURM_OPAWS starting job for RADAR:  KGSP
+
+ SLURM_OPAWS starting job for RADAR:  KRAX
+
+ ============================================================================
+
+ Time for slurm_opaws: 62.2808709145 seconds
+
+ Slurm_opaws job completed at 2019 04 19 1706
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d /work/wicker/REALTIME/VEL/20190419 -f _VR_20190419_2200.nc 
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq*_VR_20190419_2200.nc
+['/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2200.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2200.nc']
+
+ Obs_seq.final files sorted by modification time
+
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2200.nc - Fri Apr 19 17:06:18 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2200.nc - Fri Apr 19 17:06:19 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2200.nc - Fri Apr 19 17:06:19 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2200.nc - Fri Apr 19 17:06:20 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2200.nc - Fri Apr 19 17:06:23 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2200.nc - Fri Apr 19 17:06:24 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2200.nc - Fri Apr 19 17:06:24 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2200.nc - Fri Apr 19 17:06:27 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2200.nc - Fri Apr 19 17:06:32 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2200.nc - Fri Apr 19 17:06:32 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2200.nc - Fri Apr 19 17:06:34 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2200.nc - Fri Apr 19 17:06:34 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2200.nc - Fri Apr 19 17:06:36 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2200.nc - Fri Apr 19 17:06:43 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2200.nc - Fri Apr 19 17:06:47 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2200.nc - Fri Apr 19 17:06:47 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2200.nc - Fri Apr 19 17:06:49 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2200.nc - Fri Apr 19 17:06:50 2019
+
+ Dart_cc:  Processing 18 files in the directory:  /work/wicker/REALTIME/VEL/20190419
+ Dart_cc:  First file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2200.nc
+ Dart_cc:  Last  file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2200.nc
+
+ Dart_cc:  netCDF4 file to be written is /work/wicker/REALTIME/VEL/20190419/obs_seq_VR_20190419_2200.nc
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2200.nc has 544 observations, total is now 544
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2200.nc has 59 observations, total is now 603
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2200.nc has 985 observations, total is now 1588
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2200.nc has 44 observations, total is now 1632
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMXX_VR_20190419_2200.nc has 169 observations, total is now 1801
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2200.nc has 373 observations, total is now 2174
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2200.nc has 2000 observations, total is now 4174
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2200.nc has 1676 observations, total is now 5850
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2200.nc has 1934 observations, total is now 7784
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KAKQ_VR_20190419_2200.nc has 2509 observations, total is now 10293
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2200.nc has 2409 observations, total is now 12702
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLTX_VR_20190419_2200.nc has 2819 observations, total is now 15521
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KGSP_VR_20190419_2200.nc has 1661 observations, total is now 17182
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KLWX_VR_20190419_2200.nc has 4391 observations, total is now 21573
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2200.nc has 330 observations, total is now 21903
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCCX_VR_20190419_2200.nc has 5168 observations, total is now 27071
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2200.nc has 6246 observations, total is now 33317
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2200.nc has 1161 observations, total is now 34478
+
+ Reading took 0.401475191116 seconds since the loop started 
+
+
+ Slurm_concatenate job completed at 2019 04 19 1706
+
+ <<<<< END =======================================================================
+
+ >>>> BEGIN ======================================================================
+
+ Begin processing for cycle time:  201904192215
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start 201904192215 
+
+
+ ============================================================================
+
+ SLURM_OPAWS: Reading radar_file: /scratch/wof/realtime/radar_files/radars.20190419.csh
+
+ ============================================================================
+
+ ============================================================================
+
+ SLURM_OPAWS starting job for RADAR:  KMXX
+
+ SLURM_OPAWS starting job for RADAR:  KILN
+
+ SLURM_OPAWS starting job for RADAR:  KCAE
+
+ SLURM_OPAWS starting job for RADAR:  KAKQ
+
+ SLURM_OPAWS starting job for RADAR:  KLTX
+
+ SLURM_OPAWS starting job for RADAR:  KVAX
+
+ SLURM_OPAWS starting job for RADAR:  KMHX
+
+ SLURM_OPAWS starting job for RADAR:  KJKL
+
+ SLURM_OPAWS starting job for RADAR:  KMRX
+
+ SLURM_OPAWS starting job for RADAR:  KDIX
+
+ SLURM_OPAWS starting job for RADAR:  KEOX
+
+ SLURM_OPAWS starting job for RADAR:  KPBZ
+
+ SLURM_OPAWS starting job for RADAR:  KFCX
+
+ SLURM_OPAWS starting job for RADAR:  KJGX
+
+ SLURM_OPAWS starting job for RADAR:  KLWX
+
+ SLURM_OPAWS starting job for RADAR:  KDOX
+
+ SLURM_OPAWS starting job for RADAR:  KCLX
+
+ SLURM_OPAWS starting job for RADAR:  KRLX
+
+ SLURM_OPAWS starting job for RADAR:  KCLE
+
+ SLURM_OPAWS starting job for RADAR:  KFFC
+
+ SLURM_OPAWS starting job for RADAR:  KCCX
+
+ SLURM_OPAWS starting job for RADAR:  KGSP
+
+ SLURM_OPAWS starting job for RADAR:  KRAX
+
+ ============================================================================
+
+ Time for slurm_opaws: 64.8991019726 seconds
+
+ Slurm_opaws job completed at 2019 04 19 1721
+
+ Cmd: /work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d /work/wicker/REALTIME/VEL/20190419 -f _VR_20190419_2215.nc 
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq*_VR_20190419_2215.nc
+['/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KCAE_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2215.nc', '/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2215.nc']
+
+ Obs_seq.final files sorted by modification time
+
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2215.nc - Fri Apr 19 17:21:17 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2215.nc - Fri Apr 19 17:21:17 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2215.nc - Fri Apr 19 17:21:17 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2215.nc - Fri Apr 19 17:21:20 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2215.nc - Fri Apr 19 17:21:25 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2215.nc - Fri Apr 19 17:21:25 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2215.nc - Fri Apr 19 17:21:26 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2215.nc - Fri Apr 19 17:21:31 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2215.nc - Fri Apr 19 17:21:31 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCAE_VR_20190419_2215.nc - Fri Apr 19 17:21:32 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2215.nc - Fri Apr 19 17:21:33 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2215.nc - Fri Apr 19 17:21:46 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2215.nc - Fri Apr 19 17:21:47 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2215.nc - Fri Apr 19 17:21:49 2019
+ /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2215.nc - Fri Apr 19 17:21:51 2019
+
+ Dart_cc:  Processing 15 files in the directory:  /work/wicker/REALTIME/VEL/20190419
+ Dart_cc:  First file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2215.nc
+ Dart_cc:  Last  file is /work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2215.nc
+
+ Dart_cc:  netCDF4 file to be written is /work/wicker/REALTIME/VEL/20190419/obs_seq_VR_20190419_2215.nc
+
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJGX_VR_20190419_2215.nc has 212 observations, total is now 212
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFFC_VR_20190419_2215.nc has 45 observations, total is now 257
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KJKL_VR_20190419_2215.nc has 347 observations, total is now 604
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KEOX_VR_20190419_2215.nc has 107 observations, total is now 711
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KDOX_VR_20190419_2215.nc has 1265 observations, total is now 1976
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMHX_VR_20190419_2215.nc has 1834 observations, total is now 3810
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KILN_VR_20190419_2215.nc has 1835 observations, total is now 5645
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLE_VR_20190419_2215.nc has 1900 observations, total is now 7545
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KRLX_VR_20190419_2215.nc has 3151 observations, total is now 10696
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCAE_VR_20190419_2215.nc has 1362 observations, total is now 12058
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KPBZ_VR_20190419_2215.nc has 1938 observations, total is now 13996
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KFCX_VR_20190419_2215.nc has 4894 observations, total is now 18890
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KMRX_VR_20190419_2215.nc has 876 observations, total is now 19766
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KVAX_VR_20190419_2215.nc has 198 observations, total is now 19964
+/work/wicker/REALTIME/VEL/20190419/obs_seq_KCLX_VR_20190419_2215.nc has 840 observations, total is now 20804
+
+ Reading took 0.352230072021 seconds since the loop started 
+
+
+ Slurm_concatenate job completed at 2019 04 19 1721
+
+ <<<<< END =======================================================================

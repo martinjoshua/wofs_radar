@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+
+#SBATCH --nodes=1
+#SBATCH -J slurm_rt_opaws
+#SBATCH -o radar.out
+#SBATCH -e radar.error
+#SBATCH -t 00:59:00
+#SBATCH --output=multiprocess_%j.out
+
+### Note that -a <account> and -p <partition> are not in there. This will change when accounting is turned on.
+
+import time
+import logging
+import os, sys
+import datetime as DT
+from optparse import OptionParser
+import multiprocessing 
+
+# Necessary to add cwd to path when script run
+# by SLURM (since it executes a copy)
+sys.path.append(os.getcwd())
+
+def run_job(cmd):
+    os.system("%s" % cmd)
+
+
+ncpus = 5
+
+fhandle    = open("./commands.txt")
+cmds  = fhandle.readlines()
+fhandle.close()
+
+# create pool of ncpus workers
+p = multiprocessing.Pool(ncpus)
+
+# apply work function in parallel
+p.map(run_job, cmds)

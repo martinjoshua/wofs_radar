@@ -62,7 +62,7 @@ import warnings
 #warnings.filterwarnings("ignore")
 
 # re grep pattern to harden file data & time parsing
-parse_radar_name2 = '(?:[A-Z]{4}_)'
+parse_radar_name2 = '(?:[A-Z]{4})'
 parse_radar_name = '(?:[A-Z]{4}_)'
 
 # debug flag
@@ -123,7 +123,7 @@ _obs_errors = {
         
 # List for when window is used to find a file within a specific window - units are minutes
            
-_window_param = [ -5, 2 ]
+_window_param = [ -10, 5 ]
 
 #=========================================================================================
 # Class variable used as container
@@ -770,7 +770,7 @@ def write_radar_file(ref, vel, filename=None):
   return filename 
    
 #####################################################################################################
-def write_data_xarray(field, filename=None, obs_error=9., volume_name=None):
+def write_data_xarray(field, filename=None, obs_error=3., volume_name=None):
     
    _time_units    = 'seconds since 1970-01-01 00:00:00'
    _calendar      = 'standard'
@@ -838,7 +838,7 @@ def write_data_xarray(field, filename=None, obs_error=9., volume_name=None):
                    dir3  = dz / range
 
                    out.value[n]              = fld.data[k,j,i]
-                   out.error_var[n]          = obs_error
+                   out.error_var[n]          = obs_error**2
                    out.lon[n]                = lons[j]
                    out.lat[n]                = lats[i]
                    out.height[n]             = msl_hgt[k,j,i]
@@ -880,6 +880,15 @@ def write_data_xarray(field, filename=None, obs_error=9., volume_name=None):
 
    fnc.sync()  
    fnc.close()
+
+#######################################################################
+def clock_string():
+    local_time = timeit.localtime()  # get this so we know when script was submitted...
+    return "%s%2.2d%2.2d_%2.2d%2.2d" % (local_time.tm_year, \
+                                         local_time.tm_mon,  \
+                                         local_time.tm_mday, \
+                                         local_time.tm_hour, \
+                                         local_time.tm_min)
  
 ########################################################################
 # Main function
@@ -977,9 +986,13 @@ if __name__ == "__main__":
 
        if options.window:
            ttime = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
-           in_filenames = glob.glob("%s/*_%s_*" % (os.path.abspath(options.dname),ttime.strftime("%Y%m%d")))
+           in_filenames = glob.glob("%s/*%s_*" % (os.path.abspath(options.dname),ttime.strftime("%Y%m%d")))
        else:
            in_filenames = glob.glob("%s/*" % os.path.abspath(options.dname))
+           
+       if len(in_filenames) < 1:
+           print("No files found, exiting")
+           sys.exit(0)
  
 # if cfradial files....
        if in_filenames[0][-3:] == ".nc":
@@ -1056,7 +1069,7 @@ if __name__ == "__main__":
 # If window is specified, then find the file that fits in the window
        if options.window:           
            try:
-               parsed_file_DT = "%s" % re.split(parse_radar_name, os.path.basename(fname))[1]
+               parsed_file_DT = "%s" % re.split(parse_radar_name2, os.path.basename(fname))[1]
            except IndexError:
                print os.path.basename(fname)
                pass
@@ -1077,7 +1090,7 @@ if __name__ == "__main__":
                print '\n File {} is less than 2 mb, exiting...'.format(fname)
                continue
        except:
-           print '\n File {} cannot be found, exiting...'.format(fname)
+           print '\n File {} is very small (< 2 MB), exiting...'.format(fname)
            continue
       
        if fname[-3:] == ".nc":
@@ -1089,32 +1102,32 @@ if __name__ == "__main__":
                volume = pyart.io.read_cfradial(fname)
        else:
        
-           # simple fix in case file is still being written
+#            simple fix in case file is still being written
+#        
+#            fsize = os.path.getsize(fname)
+#            timeit.sleep(3)
+#            for nwait in np.arange(4):
+#                if nwait > 2:
+#                    print("File: %s has yet to be completely written, nwait: %d, time:  %s, exiting" % \
+#                                           (os.path.basename(fname), nwait, clock_string()))
+#                    sys.exit(0)
+#                    
+#                fsize_new = os.path.getsize(fname)
+#                if fsize_new > fsize:
+#                    print("Waiting on file: %s to be completely written, nwait: %d, time:  %s" % (os.path.basename(fname), nwait, clock_string()))
+#                    print("Waiting on file: %s, old size is %d, new size is %d" % (os.path.basename(fname), fsize, fsize_new))
+#                    fsize = fsize_new
+#                    timeit.sleep(20)
+#                else:
+#                    break
        
-           fsize = os.path.getsize(fname)
-           timeit.sleep(3)
-           for nwait in np.arange(4):
-               if nwait > 2:
-                   print("File: %s has yet to be completely written, nwait: %d, exiting" % (os.path.basename(fname), nwait))
-                   sys.exit(0)
-                   
-               fsize_new = os.path.getsize(fname)
-               if fsize_new > fsize:
-                   print("Waiting on file: %s to be completely written, nwait: %d" % (os.path.basename(fname), nwait))
-                   print("Waiting on file: %s, old size is %d, new size is %d" % (fsize, fsize_new))
-                   fsize = fsize_new
-                   timeit.sleep(20)
-               else:
-                   break
-       
-       try:
+      #    try:
            volume = pyart.io.read_nexrad_archive(fname, field_names=None, 
                                                  additional_metadata=None, file_field_names=False, 
-                                                 delay_field_loading=False, 
-                                                 station=None, scans=None, linear_interp=True)
-       except:
-           print '\n File {} cannot be read, skipping...\n'.format(fname)
-           continue
+                                                 delay_field_loading=False)
+      #    except:
+      #        print '\n File {} cannot be read, skipping...\n'.format(fname)
+
 
        opaws2D_io_cpu = timeit.time() - tim0
   
