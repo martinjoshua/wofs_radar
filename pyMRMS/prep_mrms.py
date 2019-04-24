@@ -745,7 +745,7 @@ def write_obs_seq_xarray(field, filename=None, obs_error=None,
    fnc.history = "Created " + DT.datetime.today().strftime("%Y%m%d_%H%M")
    fnc.version = "Version 1.0a by Lou Wicker and Thomas Jones (NSSL)"
    if volume_name != None:
-       fnc.version = "Created from the WSR88D radar volume:  %s" % volume_name
+       fnc.version = "Created from the MRMS radar volume:  %s" % volume_name
     
    for key in attributes.keys():
        fnc.variables[key].units = attributes[key][0]
