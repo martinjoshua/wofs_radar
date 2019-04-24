@@ -10,7 +10,7 @@ import subprocess
 from optparse import OptionParser
 
 _wofs_VEL_dir       = "/work/wicker/REALTIME/VEL"
-_wofs_radar_dir     = "/work/wicker/REALTIME/WOFS_radar"
+_wofs_radar_dir     = "/work/LDM/NEXRAD2"
 _slurm_mrms_string  = "/work/wicker/REALTIME/WOFS_radar/slurm_mrms.job --start %s"
 _slurm_opaws_string = "/work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
 _slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d %s -f %s"

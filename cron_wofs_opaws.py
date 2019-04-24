@@ -9,7 +9,7 @@ import logging
 import subprocess
 
 _wofs_VEL_dir       = "/work/wicker/REALTIME/VEL"
-_wofs_radar_dir     = "/work/wicker/REALTIME/WOFS_radar"
+_wofs_radar_dir     = "/work/LDM/NEXRAD2"
 _slurm_opaws_string = "/work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
 _slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d %s -f %s"
 
@@ -18,7 +18,7 @@ _TEST = False
 if _TEST == True:
    rtimes = ', '.join(str(t) for t in range(60))    #test the code every minute
 else:
-   rtimes = "6,21,36,51"    # T+5min radar processing start time
+   rtimes = "5,20,35,50"    # T+5min radar processing start time
 
 
 #-----------------------------------------------------------------------------

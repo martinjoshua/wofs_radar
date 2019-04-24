@@ -42,6 +42,8 @@ from pyart.graph import cm
 import datetime as DT
 from numpy import ma
 from dart_tools import *
+import xarray as xr
+import pandas as pd
 
 # missing value
 _missing = -9999.
@@ -88,6 +90,8 @@ _grid_dict = {
                                    '04.00','05.00','06.00','07.00','08.00','09.00','10.00'],
               'QC_info'         : [[15.,5.],[20.,1.]],
              }
+
+_obs_errors = { 'reflectivity'    : 7.0, '0reflectivity'   : 5.0 } 
 
 #=========================================================================================
 # Class variable used as container
@@ -586,6 +590,169 @@ def plot_grid(ref, sweep, plot_filename=None, shapefiles=None, interactive=False
   plt.savefig(filename)
 
   if interactive:  plt.show()
+  
+#=========================================================================================
+# Defines the data frame for each observation type
+#
+def obs_seq_xarray(len):
+        
+    return (np.recarray(len, 
+                    dtype = [
+                             ('value',               'f8'),
+                             ('lat',                 'f8'),
+                             ('lon',                 'f8'),
+                             ('height',              'f8'),
+                             ('error_var',           'f4'),
+                             ('utime',               'f8'),          
+                             ('date',                'S128'),
+                             ('day',                 'i8'),
+                             ('second',              'i8'),
+                             ('platform_lat',        'f8'),
+                             ('platform_lon',        'f8'),
+                             ('platform_hgt',        'f8'),
+                             ('platform_dir1',       'f8'),
+                             ('platform_dir2',       'f8'),
+                             ('platform_dir3',       'f8'),
+                             ('platform_nyquist',    'f8')
+                            ]), \
+                         {
+                           'lat':   ["degrees", "latitude of observation"],
+                           'lon':   ["degrees", "longitude of observation (deg. west)"],
+                           'height':["meters",  "height above sea level"],
+                           'utime': ["seconds since 1970-01-01 00:00:00", "time of observation"],
+                           'date':  ["", "date and time of obsevation"]
+                          })
+                                 
+#=========================================================================================
+def write_obs_seq_xarray(field, filename=None, obs_error=None, 
+                         zero_dbz_obtype=True,
+                         levels = [], QC_info=[], zero_levels=[], volume_name=None):
+
+    
+   _time_units    = 'seconds since 1970-01-01 00:00:00'
+   _calendar      = 'standard'
+
+   if filename == None:
+       print("\n WRITE_DATA_XARRAY:  No output file name is given, writing to %s" % "obs_seq.nc")
+       filename = "obs_seq.nc"
+   else:
+       dirname = os.path.dirname(filename)
+       basename = "%s_%s.nc" % ("obs_seq", os.path.basename(filename))
+       filename =  os.path.join(dirname, basename)
+             
+   if obs_error == None:
+       obs_errors = { 'reflectivity': 5.0, '0reflectivity': 5.0 } 
+
+   _stringlen     = 8
+   _datelen       = 19
+     
+# Extract data.city data
+  
+   data          = field.data
+   lats          = field.lats
+   lons          = field.lons
+   hgts          = field.zg[:]
+
+   try:
+       nz, ny, nx     = data.shape
+       if len(levels) == 0:
+           nz2        = nz + len(zero_levels)
+       else:
+           nz2        = len(levels) + len(zero_levels)
+           
+       new_data       = np.ma.zeros((nz2, ny, nx), dtype=np.float32)
+       new_hgts       = np.ma.zeros((nz2), dtype=np.float32)
+       
+       for n, k in enumerate(levels):
+           new_data[n,...] = data[n]
+           new_hgts[n]     = hgts[n]
+       
+       for n, lvl in enumerate(zero_levels):
+           new_data[nz+n] = field.zero_dbz.data
+           new_hgts[nz+n] = lvl
+           
+       data = new_data
+       hgts = new_hgts
+       print("\n write_DART_ascii:  0-DBZ separate type added to reflectivity output\n")
+       
+   except AttributeError:
+       print("\n write_DART_ascii:  No 0-DBZ separate type found\n")
+       
+# Use the time of the volume
+
+   secs    = ncdf.date2num(field.time, units = _time_units)   
+   
+# Retain DART time stamps
+
+   days    = ncdf.date2num(field.time, units = "days since 1601-01-01 00:00:00")
+   seconds = np.int(86400.*(days - np.floor(days)))  
+  
+   print("\n -->  Writing %s as the radar file..." % (filename))
+    
+   nobs = np.sum(data.mask[:]==False)
+   print("\n -----> Number of good observations for xarray:  %d" % nobs)
+   
+   # Create numpy rec array that can be converted to a pandas table.
+
+   out, attributes = obs_seq_xarray(nobs)
+
+   nobs = 0
+   nobs_clearair = 0
+   
+   # There is a far better way to do this but this is fast enough for now...
+
+   for k in np.arange(nz2): 
+       for j in np.arange(ny):
+           for i in np.arange(nx):
+         
+               if data.mask[k,j,i] == True:   # bad values
+                    pass     
+               else:          
+                   out.value[nobs]              = data[k,j,i]
+                   
+                   if out.value[nobs] < _grid_dict['min_dbz_zeros']:                   
+                       out.error_var[nobs]      = obs_error[1]**2
+                       nobs_clearair += 1                
+                   else:
+                       out.error_var[nobs]      = obs_error[0]**2
+                       
+                   out.lon[nobs]                = lons[j]
+                   out.lat[nobs]                = lats[i]
+                   out.height[nobs]             = hgts[k]
+                   out.date[nobs]               = field.time
+                   out.utime[nobs]              = secs
+                   out.day[nobs]                = days
+                   out.second[nobs]             = seconds
+         
+                   nobs = nobs + 1
+                   
+                   
+   print("\n -----> Total Obs %d  0DBZ Obs %d" % (nobs, nobs_clearair))           
+      
+   # Create an xarray dataset for file I/O
+   xa = xr.Dataset(pd.DataFrame.from_records(out))
+   
+   # reset index to be a master index across all obs
+   xa.rename({'dim_0': 'index'}, inplace=True)
+   
+   # Write the xarray file out (this is all there is, very nice guys!)
+   xa.to_netcdf(filename, mode='w')
+   xa.close()
+   
+   # Add attributes to the files
+    
+   fnc = ncdf.Dataset(filename, mode = 'a')
+   fnc.history = "Created " + DT.datetime.today().strftime("%Y%m%d_%H%M")
+   fnc.version = "Version 1.0a by Lou Wicker and Thomas Jones (NSSL)"
+   if volume_name != None:
+       fnc.version = "Created from the WSR88D radar volume:  %s" % volume_name
+    
+   for key in attributes.keys():
+       fnc.variables[key].units = attributes[key][0]
+       fnc.variables[key].description = attributes[key][1]
+
+   fnc.sync()  
+   fnc.close()
 #-------------------------------------------------------------------------------
 # Main function defined to return correct sys.exit() calls
 
@@ -702,7 +869,7 @@ def main(argv=None):
    else:
        file = in_filenames[0]
        str_time     = "%s_%s" % (os.path.basename(file)[-27:-17], os.path.basename(file)[-16:-10])
-       prefix       = "obs_seq_RF_%s" % str_time
+       prefix       = "RF_%s" % str_time
        out_filename = os.path.join(options.out_dir, prefix)
        time         = DT.datetime.strptime(file[-18:-3], "%Y%m%d-%H%M%S")
        print(" Out filename:  %s\n" % out_filename)
@@ -712,7 +879,14 @@ def main(argv=None):
 
    ref_obj = dbz_masking(ref_obj, thin_zeros=_grid_dict['thin_zeros'])
 
-   if options.write == True:      
+   if options.write == True:  
+   
+       #ret = write_radar_file(ref, vel filename=out_filenames[n])
+       ret = write_obs_seq_xarray(ref_obj, filename=out_filename, levels=np.arange(len(_grid_dict['levels'])),
+                               obs_error=[_grid_dict['reflectivity'], _grid_dict['0reflectivity']], 
+                               QC_info=_grid_dict['QC_info'], zero_levels=_grid_dict['zero_levels'], 
+                               volume_name=rlt_filename)
+    
        ret = write_DART_ascii(ref_obj, filename=out_filename, levels=np.arange(len(_grid_dict['levels'])),
                               obs_error=[_grid_dict['reflectivity'], _grid_dict['0reflectivity']], 
                               QC_info=_grid_dict['QC_info'], zero_levels=_grid_dict['zero_levels'])

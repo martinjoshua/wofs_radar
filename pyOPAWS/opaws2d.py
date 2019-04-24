@@ -123,7 +123,7 @@ _obs_errors = {
         
 # List for when window is used to find a file within a specific window - units are minutes
            
-_window_param = [ -10, 5 ]
+_window_param = [ -5, 3 ]
 
 #=========================================================================================
 # Class variable used as container
@@ -770,7 +770,7 @@ def write_radar_file(ref, vel, filename=None):
   return filename 
    
 #####################################################################################################
-def write_data_xarray(field, filename=None, obs_error=3., volume_name=None):
+def write_obs_seq_xarray(field, filename=None, obs_error=3., volume_name=None):
     
    _time_units    = 'seconds since 1970-01-01 00:00:00'
    _calendar      = 'standard'
@@ -1069,7 +1069,7 @@ if __name__ == "__main__":
 # If window is specified, then find the file that fits in the window
        if options.window:           
            try:
-               parsed_file_DT = "%s" % re.split(parse_radar_name2, os.path.basename(fname))[1]
+               parsed_file_DT = "%s" % re.split(parse_radar_name, os.path.basename(fname))[1]
            except IndexError:
                print os.path.basename(fname)
                pass
@@ -1081,6 +1081,7 @@ if __name__ == "__main__":
                print("\n FILE TIME WITHIN WINDOW:   %s" % file_time.strftime("%Y,%m,%d,%H,%M") )
                print '\n Reading: {}\n'.format(fname)
                print '\n Writing: {}\n'.format(out_filenames[n])
+               loop_flag = False
    
        tim0 = timeit.time()
 
@@ -1102,31 +1103,14 @@ if __name__ == "__main__":
                volume = pyart.io.read_cfradial(fname)
        else:
        
-#            simple fix in case file is still being written
-#        
-#            fsize = os.path.getsize(fname)
-#            timeit.sleep(3)
-#            for nwait in np.arange(4):
-#                if nwait > 2:
-#                    print("File: %s has yet to be completely written, nwait: %d, time:  %s, exiting" % \
-#                                           (os.path.basename(fname), nwait, clock_string()))
-#                    sys.exit(0)
-#                    
-#                fsize_new = os.path.getsize(fname)
-#                if fsize_new > fsize:
-#                    print("Waiting on file: %s to be completely written, nwait: %d, time:  %s" % (os.path.basename(fname), nwait, clock_string()))
-#                    print("Waiting on file: %s, old size is %d, new size is %d" % (os.path.basename(fname), fsize, fsize_new))
-#                    fsize = fsize_new
-#                    timeit.sleep(20)
-#                else:
-#                    break
        
-      #    try:
-           volume = pyart.io.read_nexrad_archive(fname, field_names=None, 
+           try:
+               volume = pyart.io.read_nexrad_archive(fname, field_names=None, 
                                                  additional_metadata=None, file_field_names=False, 
                                                  delay_field_loading=False)
-      #    except:
-      #        print '\n File {} cannot be read, skipping...\n'.format(fname)
+           except:
+               print '\n File {} cannot be read, skipping...\n'.format(fname)
+               loop_flag = True  # if the read fails, try the next file in the window..
 
 
        opaws2D_io_cpu = timeit.time() - tim0
@@ -1220,8 +1204,8 @@ if __name__ == "__main__":
        if options.write == True: 
        
            #ret = write_radar_file(ref, vel filename=out_filenames[n])
-           ret = write_data_xarray(vel, filename=out_filenames[n], obs_error= _obs_errors['velocity'], \
-                                   volume_name=os.path.basename(fname))
+           ret = write_obs_seq_xarray(vel, filename=out_filenames[n], obs_error= _obs_errors['velocity'], \
+                                      volume_name=os.path.basename(fname))
      
            ret = write_DART_ascii(vel, filename=out_filenames[n], grid_dict=_grid_dict, \
                                   obs_error=[_obs_errors['velocity']] )
@@ -1240,8 +1224,32 @@ if __name__ == "__main__":
 
        print "\n Time for plotting fields: {} seconds".format(timeit.time()-tim0)
 
+       if loop_flag == False:
+           break
+
    opaws2D_cpu_time = timeit.time() - t0
 
    print "\n Time for opaws2D operations: {} seconds".format(opaws2D_cpu_time)
 
    print "\n PROGRAM opaws2D COMPLETED\n"
+
+
+
+#            simple fix in case file is still being written
+#        
+#            fsize = os.path.getsize(fname)
+#            timeit.sleep(3)
+#            for nwait in np.arange(4):
+#                if nwait > 2:
+#                    print("File: %s has yet to be completely written, nwait: %d, time:  %s, exiting" % \
+#                                           (os.path.basename(fname), nwait, clock_string()))
+#                    sys.exit(0)
+#                    
+#                fsize_new = os.path.getsize(fname)
+#                if fsize_new > fsize:
+#                    print("Waiting on file: %s to be completely written, nwait: %d, time:  %s" % (os.path.basename(fname), nwait, clock_string()))
+#                    print("Waiting on file: %s, old size is %d, new size is %d" % (os.path.basename(fname), fsize, fsize_new))
+#                    fsize = fsize_new
+#                    timeit.sleep(20)
+#                else:
+#                    break
