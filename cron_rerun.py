@@ -48,7 +48,7 @@ print("\n ======================================================================
 def main():
 
    parser = OptionParser()
-   parser.add_option("-t", "--time",     dest="time",        default=None,  type="string", help = "format:  YYYMMDDHHMM")
+   parser.add_option("-s", "--start",     dest="time",        default=None,  type="string", help = "format:  YYYMMDDHHMM")
    parser.add_option(      "--no_mrms",  dest="no_mrms",     default=False,  help = "Boolean to not run MRMS processing", \
                                                                                   action="store_true")
    parser.add_option(      "--no_opaws", dest="no_opaws",    default=False,  help = "Boolean to not run OPAWS processing", \
