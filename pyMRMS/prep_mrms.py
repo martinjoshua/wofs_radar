@@ -637,8 +637,8 @@ def write_obs_seq_xarray(field, filename=None, obs_error=None,
        filename = "obs_seq.nc"
    else:
        dirname = os.path.dirname(filename)
-       basename = "%s_%s.nc" % ("obs_seq", os.path.basename(filename))
-       filename =  os.path.join(dirname, basename)
+       basename = "%s.nc" % (filename)
+       filename =  basename
              
    if obs_error == None:
        obs_errors = { 'reflectivity': 5.0, '0reflectivity': 5.0 } 
@@ -690,7 +690,7 @@ def write_obs_seq_xarray(field, filename=None, obs_error=None,
    print("\n -->  Writing %s as the radar file..." % (filename))
     
    nobs = np.sum(data.mask[:]==False)
-   print("\n -----> Number of good observations for xarray:  %d" % nobs)
+   print("\n --> Number of good observations for xarray:  %d" % nobs)
    
    # Create numpy rec array that can be converted to a pandas table.
 
@@ -716,8 +716,8 @@ def write_obs_seq_xarray(field, filename=None, obs_error=None,
                    else:
                        out.error_var[nobs]      = obs_error[0]**2
                        
-                   out.lon[nobs]                = lons[j]
-                   out.lat[nobs]                = lats[i]
+                   out.lon[nobs]                = lons[i]
+                   out.lat[nobs]                = lats[j]
                    out.height[nobs]             = hgts[k]
                    out.date[nobs]               = field.time
                    out.utime[nobs]              = secs
@@ -727,7 +727,7 @@ def write_obs_seq_xarray(field, filename=None, obs_error=None,
                    nobs = nobs + 1
                    
                    
-   print("\n -----> Total Obs %d  0DBZ Obs %d" % (nobs, nobs_clearair))           
+   print("\n -----> Total non-zero Obs: %d  0DBZ Obs: %d" % (nobs-nobs_clearair, nobs_clearair))           
       
    # Create an xarray dataset for file I/O
    xa = xr.Dataset(pd.DataFrame.from_records(out))
@@ -789,6 +789,8 @@ def main(argv=None):
    (options, args) = parser.parse_args()
 
 #-------------------------------------------------------------------------------
+
+   tMAIN = timeit.time()
 
    if options.dir == None:
           
@@ -881,21 +883,28 @@ def main(argv=None):
 
    if options.write == True:  
    
-       #ret = write_radar_file(ref, vel filename=out_filenames[n])
+       tNCDF = timeit.time()
        ret = write_obs_seq_xarray(ref_obj, filename=out_filename, levels=np.arange(len(_grid_dict['levels'])),
                                obs_error=[_grid_dict['reflectivity'], _grid_dict['0reflectivity']], 
                                QC_info=_grid_dict['QC_info'], zero_levels=_grid_dict['zero_levels'], 
                                volume_name=rlt_filename)
-    
+       print "\n --> Time for netCDF write: {} seconds".format(timeit.time() - tNCDF)
+       
+       tDART = timeit.time()
        ret = write_DART_ascii(ref_obj, filename=out_filename, levels=np.arange(len(_grid_dict['levels'])),
                               obs_error=[_grid_dict['reflectivity'], _grid_dict['0reflectivity']], 
                               QC_info=_grid_dict['QC_info'], zero_levels=_grid_dict['zero_levels'])
-
+       print "\n --> Time for DART write: {} seconds".format(timeit.time() - tDART)
+   
    if plot_grid_flag:
+       tPLOT = timeit.time()
        fsuffix = "OpMRMS_%s" % (ref_obj.time.strftime('%Y%m%d_%H%M'))
        plot_filename = os.path.join(options.out_dir, fsuffix)
        plot_grid(ref_obj, sweep_num, plot_filename = plot_filename, debug=_debug)
-    
+       print "\n --> Time to plot image: {} seconds".format(timeit.time() - tPLOT)
+   
+   print "\n ----> Time for MRMS operations: {} seconds".format(timeit.time() - tMAIN)
+   print "\n PROGRAM MRMS COMPLETED\n"    
 #-------------------------------------------------------------------------------
 # Main program for testing...
 #
