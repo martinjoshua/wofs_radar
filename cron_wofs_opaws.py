@@ -76,7 +76,6 @@ def scheduled_job():
     
     if _TEST != True:
         try:
-#             ret = os.system(cmd)
             OPAWSret = subprocess.Popen([cmd],shell=True)
             OPAWSret.wait()
             print("\n Slurm_opaws job completed at %s" % (now))
@@ -92,7 +91,6 @@ def scheduled_job():
 
     if _TEST != True:
         try:
-#             ret = os.system(cmd)
             ret = subprocess.Popen([cmd],shell=True)
             ret.wait()
             print("\n Slurm_concatenate job completed at %s" % (now))
