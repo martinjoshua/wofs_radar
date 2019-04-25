@@ -11,7 +11,7 @@ import subprocess
 _wofs_VEL_dir       = "/work/wicker/REALTIME/VEL"
 _wofs_radar_dir     = "/work/LDM/NEXRAD2"
 _slurm_opaws_string = "/work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
-_slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d %s -f %s"
+_slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d %s -f %s > obs_seq_combine.log"
 
 _TEST = False
 
@@ -91,8 +91,8 @@ def scheduled_job():
 
     if _TEST != True:
         try:
-            ret = subprocess.Popen([cmd],shell=True)
-            ret.wait()
+            COMBINEret = subprocess.Popen([cmd],shell=True)
+            COMBINEret.wait()
             print("\n Slurm_concatenate job completed at %s" % (now))
         except:
             print("\n Slurm_concatenate job failed: %s" % (now))
