@@ -525,11 +525,11 @@ def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, intera
 
   if fsuffix == None:
       print("\n opaws2D.grid_plot:  No output file name is given, writing to %s" % "VR_RF_...png")
-      filename = "%s/VR_RF_%2.2d_plot.pdf" % (dir, sweep)
+      filename = "%s/VR_RF_%2.2d_plot.png" % (dir, sweep)
   else:
-       filename = "%s_%2.2d.pdf" % (os.path.join(dir, fsuffix), sweep)
+       filename = "%s_%2.2d.png" % (os.path.join(dir, fsuffix), sweep)
 
-  fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(25,14))
+  fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(12,7))
   
 # Set up coordinates for the plots
 
