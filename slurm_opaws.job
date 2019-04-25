@@ -39,6 +39,8 @@ sys.path.append(os.getcwd())
 
 _nthreads = 30
 
+_analysis_dt = DT.timedelta(minutes=15)
+
 # Okay guts of the code
 #-------------------------------------------------------------------------------
 class AsyncFactory:
@@ -251,13 +253,14 @@ def main(argv=None):
 
     else:                       # if both start and end prescribed, assume that user wants to create a series of files
         start_time = DT.datetime.strptime(options.start, "%Y%m%d%H%M")
-        stop_time  = DT.datetime.strptime(options.end,   "%Y%m%d%H%M") + one_second  # in case start==end
+        stop_time  = DT.datetime.strptime(options.end,   "%Y%m%d%H%M") + DT.timedelta(seconds=1) # in case start==end
 
         while start_time < stop_time:
             for radar in radar_list:
-                process_opaws(start_time.strftime("%Y%m%d%H%M"), radar)  # process_opaws() expecting a string for DT
+                process_opaws(start_time.strftime("%Y%m%d%H%M"), radar, commands_h)  
+                # process_opaws() expecting a string for DT
 
-            start_time = start_time + delta_time              # step to next process time (usually 10-15 min)
+            start_time = start_time + _analysis_dt              # step to next process time (usually 10-15 min)
 
     if options.cmdfile:
         commands_h.close()
