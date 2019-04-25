@@ -235,7 +235,7 @@ def write_DART_ascii(obs, filename=None, obs_error=None, zero_dbz_obtype=_zero_d
   
    fi = open(filename, "w")
   
-   print("\n Writing %s to file...." % obs.field.upper())
+   print("\n Writing %s to DART file...." % obs.field.upper())
    
    data       = obs.data
    lats       = np.radians(obs.lats)
@@ -417,7 +417,7 @@ def write_DART_ascii(obs, filename=None, obs_error=None, zero_dbz_obtype=_zero_d
 
            fi.write("    %20.14f  \n" % o_error**2 )
 
-           if nobs % 1000 == 0: print(" write_DART_ascii:  Processed observation # %d" % nobs)
+           if nobs % 10000 == 0: print(" write_DART_ascii:  Processed observation # %d" % nobs)
   
        it.iternext()
       
