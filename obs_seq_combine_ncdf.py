@@ -112,12 +112,15 @@ def main(argv=None):
     begin_time = time.time()
         
     for file in files:
-       input = xr.open_dataset(file)
-       nobs_total = nobs_total + len(input.index)
-       print("%s has %d observations, total is now %d" % (file, len(input.index), nobs_total))
-       if len(input.index) > 0:
-           dataset.append(input)
-       del input
+       try:
+          infile = xr.open_dataset(file)
+       except:
+          continue
+       nobs_total = nobs_total + len(infile.index)
+       print("%s has %d observations, total is now %d" % (file, len(infile.index), nobs_total))
+       if len(infile.index) > 0:
+           dataset.append(infile)
+       infile.close()
             
     end_time = time.time()
     
