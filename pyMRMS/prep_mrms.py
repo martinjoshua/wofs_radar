@@ -59,7 +59,7 @@ _plot_format = 'png'
 # Radar information
 
 _dbz_name         = "MergedReflectivityQC_smoothed"
-_temp_netcdf_file = "/work/wicker/REALTIME/pyMRMS/tmp.nc"
+_temp_netcdf_file = "./tmp.nc"
 
 # Grid stuff
 
