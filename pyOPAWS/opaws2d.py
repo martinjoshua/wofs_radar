@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #############################################################
 # opaws2D: A program to process LVL-2 volumes, unfold       #
-#          radial data.cities, and thin the radar data       #
+#          radial velocities, and thin the radar data       #
 #          using a Cressman analysis scheme.                #
 #          Gridded data is then written out to a DART       #
 #          format file for assimilation.                    #
@@ -23,8 +23,6 @@
 #        Big modifications by Lou Wicker 2016-2017
 #
 #############################################################
-import matplotlib
-matplotlib.use('Agg')
 import os
 import sys
 import glob
@@ -39,8 +37,6 @@ from optparse import OptionParser
 from matplotlib.offsetbox import AnchoredText
 import netCDF4 as ncdf
 import datetime as DT
-import xarray as xr
-import pandas as pd
 
 from dart_tools import *
 from radar_QC import *
@@ -62,7 +58,7 @@ import warnings
 #warnings.filterwarnings("ignore")
 
 # re grep pattern to harden file data & time parsing
-parse_radar_name2 = '(?:[A-Z]{4})'
+parse_radar_name2 = '(?:[A-Z]{4}_)'
 parse_radar_name = '(?:[A-Z]{4}_)'
 
 # debug flag
@@ -100,7 +96,7 @@ _grid_dict = {
               'halo_footprint'  : 3,
               'nthreads'        : 1,
               'max_height'      : 10000.,
-              'MRMS_zeros'      : [True,      6000.], # True: creates a single ledata.of zeros where composite DBZ < _dbz_min
+              'MRMS_zeros'      : [True,      6000.], # True: creates a single level of zeros where composite DBZ < _dbz_min
               'model_grid_size' : [750000., 750000.]  # Used to create a common grid for all observations (special option) 
              }
 
@@ -109,11 +105,11 @@ _grid_dict = {
 _radar_parameters = {
                      'min_dbz_analysis': 25.0, 
                      'max_range': 150000.,
-                     'max_Nyquist_factor': 4,                    # dont allow output of data.cities > Nyquist*factor
+                     'max_Nyquist_factor': 4,                    # dont allow output of velocities > Nyquist*factor
                      'field_label_trans': [False, "DBZC", "VR"]  # RaxPol 31 May - must specify for edit sweep files
                     }
 
-# Dict for the standard deviation of obs_error for reflectivity or data.city (these values are squared when written to DART) 
+# Dict for the standard deviation of obs_error for reflectivity or velocity (these values are squared when written to DART) 
            
 _obs_errors = {
                 'reflectivity'  : 5.0,
@@ -123,7 +119,7 @@ _obs_errors = {
         
 # List for when window is used to find a file within a specific window - units are minutes
            
-_window_param = [ -5, 3 ]
+_window_param = [ -7, 5 ]
 
 #=========================================================================================
 # Class variable used as container
@@ -141,45 +137,13 @@ class Gridded_Field(object):
     return self.__dict__
 
 #=========================================================================================
-# Defines the data frame for each observation type
-#
-def obs_seq_xarray(len):
-        
-    return (np.recarray(len, 
-                    dtype = [
-                             ('value',               'f8'),
-                             ('lat',                 'f8'),
-                             ('lon',                 'f8'),
-                             ('height',              'f8'),
-                             ('error_var',           'f4'),
-                             ('utime',               'f8'),          
-                             ('date',                'S128'),
-                             ('day',                 'i8'),
-                             ('second',              'i8'),
-                             ('platform_lat',        'f8'),
-                             ('platform_lon',        'f8'),
-                             ('platform_hgt',        'f8'),
-                             ('platform_dir1',       'f8'),
-                             ('platform_dir2',       'f8'),
-                             ('platform_dir3',       'f8'),
-                             ('platform_nyquist',    'f8')
-                            ]), \
-                         {
-                           'lat':   ["degrees", "latitude of observation"],
-                           'lon':   ["degrees", "longitude of observation (deg. west)"],
-                           'height':["meters",  "height above sea level"],
-                           'utime': ["seconds since 1970-01-01 00:00:00", "time of observation"],
-                           'date':  ["", "date and time of obsevation"]
-                          })
-                                 
-#=========================================================================================
 # DBZ Mask
 
 def dbz_masking(ref, thin_zeros=2):
 
   if _grid_dict['MRMS_zeros'][0] == True:   # create one layer of zeros based on composite ref
   
-      print("\n Creating new 0DBZ ledata. for output\n")
+      print("\n Creating new 0DBZ levels for output\n")
       
       nz, ny, nx = ref.data.shape
       
@@ -237,7 +201,6 @@ def dbz_masking(ref, thin_zeros=2):
       ref.data.mask = np.logical_or(mask1, mask2)
         
   return ref
-
 
 #=========================================================================================
 # VR Masking
@@ -525,11 +488,11 @@ def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, intera
 
   if fsuffix == None:
       print("\n opaws2D.grid_plot:  No output file name is given, writing to %s" % "VR_RF_...png")
-      filename = "%s/VR_RF_%2.2d_plot.png" % (dir, sweep)
+      filename = "%s/VR_RF_%2.2d_plot.pdf" % (dir, sweep)
   else:
-       filename = "%s_%2.2d.png" % (os.path.join(dir, fsuffix), sweep)
+       filename = "%s_%2.2d.pdf" % (os.path.join(dir, fsuffix), sweep)
 
-  fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(12,7))
+  fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(25,14))
   
 # Set up coordinates for the plots
 
@@ -767,136 +730,14 @@ def write_radar_file(ref, vel, filename=None):
   rootgroup.sync()
   rootgroup.close()
   
-  return filename 
-   
-#####################################################################################################
-def write_obs_seq_xarray(field, filename=None, obs_error=3., volume_name=None):
-    
-   _time_units    = 'seconds since 1970-01-01 00:00:00'
-   _calendar      = 'standard'
-
-   if filename == None:
-       print("\n WRITE_DATA_XARRAY:  No output file name is given, writing to %s" % "obs_seq.txt")
-       filename = "obs_seq.nc"
-   else:
-       dirname = os.path.dirname(filename)
-       basename = "%s_%s.nc" % ("obs_seq", os.path.basename(filename))
-       filename =  os.path.join(dirname, basename)
-
-   _stringlen     = 8
-   _datelen       = 19
-     
-# Extract data.city data
+  return filename  
   
-   fld           = field.data
-   lats          = field.lats
-   lons          = field.lons
-   xgrid         = field.xg[:]
-   ygrid         = field.yg[:]
-   zgrid         = field.zg[:,:,:]
-   msl_hgt       = field.zg[:,:,:] + field.radar_hgt
-
-   platform_lat  = field.radar_lat
-   platform_lon  = field.radar_lon
-   platform_hgt  = field.radar_hgt
-
-# Use the volume mean time for the time of the volume
-      
-   utime   = ncdf.num2date(field.time['data'].mean(), field.time['units'])
-   secs    = ncdf.date2num(utime, units = _time_units)   
-# Retain DART time stamps
-   days    = ncdf.date2num(utime, units = "days since 1601-01-01 00:00:00")
-   seconds = np.int(86400.*(days - np.floor(days)))  
-  
-   print "\n -->  Writing %s as the radar file..." % (filename)
-    
-#  mask_check = data.mask && numpy.isnan().any()
-
-   nobs = np.sum(fld.mask[:]==False)
-   print("\n -----> Number of good observations for xarray:  %d" % nobs)
-   
-   # Create numpy rec array that can be converted to a pandas table.
-
-   out, attributes = obs_seq_xarray(nobs)
-
-   n = 0
-   
-   # There is a far better way to do this but this is fast enough for now...
-
-   for k in np.arange(field.data.shape[0]): 
-       for j in np.arange(field.data.shape[1]):
-           for i in np.arange(field.data.shape[2]):
-         
-               if fld.mask[k,j,i] == False:
-     
-                   dx    = xgrid[i]
-                   dy    = ygrid[j]
-                   dz    = zgrid[k,j,i]
-                   range = np.sqrt(dx**2 + dy**2 + dz**2)
-                   dir1  = dx / range
-                   dir2  = dy / range
-                   dir3  = dz / range
-
-                   out.value[n]              = fld.data[k,j,i]
-                   out.error_var[n]          = obs_error**2
-                   out.lon[n]                = lons[j]
-                   out.lat[n]                = lats[i]
-                   out.height[n]             = msl_hgt[k,j,i]
-                   out.date[n]               = utime
-                   out.utime[n]              = secs
-                   out.day[n]                = days
-                   out.second[n]             = seconds
-                   out.platform_lon[n]       = platform_lon
-                   out.platform_lat[n]       = platform_lat
-                   out.platform_hgt[n]       = platform_hgt
-                   out.platform_dir1[n]      = dir1
-                   out.platform_dir2[n]      = dir2
-                   out.platform_dir3[n]      = dir3
-                   out.platform_nyquist[n]   = field.nyquist[k]
-         
-                   n = n + 1
-      
-   # Create an xarray dataset for file I/O
-   xa = xr.Dataset(pd.DataFrame.from_records(out))
-   
-   # reset index to be a master index across all obs
-   xa.rename({'dim_0': 'index'}, inplace=True)
-   
-   # Write the xarray file out (this is all there is, very nice guys!)
-   xa.to_netcdf(filename, mode='w')
-   xa.close()
-   
-   # Add attributes to the files
-    
-   fnc = ncdf.Dataset(filename, mode = 'a')
-   fnc.history = "Created " + DT.datetime.today().strftime("%Y%m%d_%H%M")
-   fnc.version = "Version 1.0a by Lou Wicker and Thomas Jones (NSSL)"
-   if volume_name != None:
-       fnc.version = "Created from the WSR88D radar volume:  %s" % volume_name
-    
-   for key in attributes.keys():
-       fnc.variables[key].units = attributes[key][0]
-       fnc.variables[key].description = attributes[key][1]
-
-   fnc.sync()  
-   fnc.close()
-
-#######################################################################
-def clock_string():
-    local_time = timeit.localtime()  # get this so we know when script was submitted...
-    return "%s%2.2d%2.2d_%2.2d%2.2d" % (local_time.tm_year, \
-                                         local_time.tm_mon,  \
-                                         local_time.tm_mday, \
-                                         local_time.tm_hour, \
-                                         local_time.tm_min)
- 
 ########################################################################
 # Main function
 
 if __name__ == "__main__":
 
    print ' ================================================================================'
-   print ''
    print ''
    print '                   BEGIN PROGRAM opaws2D                     '
    print ''
@@ -910,7 +751,7 @@ if __name__ == "__main__":
            help = "Directory to place output files in")
                      
    parser.add_option("-f", "--file",      dest="fname",     default=None,  type="string", \
-           help = "filename of NEXRAD ledata.II volume or cfradial file to process")
+           help = "filename of NEXRAD level II volume or cfradial file to process")
 
    parser.add_option(      "--window",    dest="window",    type="string", default=None,  \
                                     help = "Time of window location in YYYY,MM,DD,HH,MM")
@@ -928,7 +769,7 @@ if __name__ == "__main__":
            help = "Function to use for the weight process, valid strings are:  Cressman or Barnes")
           
    parser.add_option("-q", "--qc", dest="qc", default="Minimal",  type="string",     \
-           help = "Type of QC corrections on reflectivity or data.city.  Valid:  None, Minimal, MetSignal, A1")  
+           help = "Type of QC corrections on reflectivity or velocity.  Valid:  None, Minimal, MetSignal, A1")  
 
    parser.add_option(     "--dx",     dest="dx",   default=None, type="float", \
            help = "Analysis grid spacing in meters for superob resolution")
@@ -956,10 +797,7 @@ if __name__ == "__main__":
 # Create directory for output files
   
    if not os.path.exists(options.out_dir):
-       try:
-           os.makedirs(options.out_dir)
-       except:
-           pass
+       os.mkdir(options.out_dir)
 
    out_filenames = []
    in_filenames  = []
@@ -967,7 +805,7 @@ if __name__ == "__main__":
    if options.dname == None:
           
        if options.fname == None:
-           print "\n\n ***** USER MUST SPECIFY NEXRAD LEdata.II (MESSAGE 31) FILE! *****"
+           print "\n\n ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE! *****"
            print "\n\n *****                     OR                               *****"
            print "\n\n *****               CFRADIAL FILE!                         *****"
            print "\n                         EXITING!\n\n"
@@ -986,13 +824,9 @@ if __name__ == "__main__":
 
        if options.window:
            ttime = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
-           in_filenames = glob.glob("%s/*%s_*" % (os.path.abspath(options.dname),ttime.strftime("%Y%m%d")))
+           in_filenames = glob.glob("%s/*_%s_*" % (os.path.abspath(options.dname),ttime.strftime("%Y%m%d")))
        else:
            in_filenames = glob.glob("%s/*" % os.path.abspath(options.dname))
-           
-       if len(in_filenames) < 1:
-           print("No files found, exiting")
-           sys.exit(0)
  
 # if cfradial files....
        if in_filenames[0][-3:] == ".nc":
@@ -1004,15 +838,10 @@ if __name__ == "__main__":
 # WSR88D files
        else:
            for item in in_filenames:
-               if options.window:   # for real time processing, we will timestamp the file with the analysis time
-                   strng = "%s_VR_%s" % (os.path.basename(item)[0:4], ttime.strftime("%Y%m%d_%H%M"))
-                   strng = os.path.join(options.out_dir, strng)
-                   out_filenames.append(strng) 
-               else:
-                   strng = os.path.basename(item)[0:18]
-                   strng = os.path.join(options.out_dir, strng)
-                   out_filenames.append(strng) 
-                   
+               strng = os.path.basename(item)[0:18]
+               strng = os.path.join(options.out_dir, strng)
+               out_filenames.append(strng) 
+
    if options.unfold == "phase":
        print "\n opaws2D dealias_unwrap_phase unfolding will be used\n"
        unfold_type = "phase"
@@ -1020,8 +849,8 @@ if __name__ == "__main__":
        print "\n opaws2D dealias_region_based unfolding will be used\n"
        unfold_type = "region"
    else:
-       print "\n ***** INVALID OR NO data.CITY DEALIASING METHOD SPECIFIED *****"
-       print "\n          NO data.CITY UNFOLDING DONE...\n\n"
+       print "\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****"
+       print "\n          NO VELOCITY UNFOLDING DONE...\n\n"
        unfold_type = None
 
    if options.newse:
@@ -1063,61 +892,65 @@ if __name__ == "__main__":
 # Read input file and create radar object
 
    t0 = timeit.time()
+   
+# Preprocessing to find closest file....
+
+   if options.window:
+       try:
+           xfiles    = [os.path.basename(f) for f in in_filenames]
+           xfiles_DT = [DT.datetime.strptime("%s" % f[5:], "%Y%m%d_%H%M%S") for f in xfiles]
+           analysisT = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
+           in_filenames = [in_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
+           print("\n FOUND CLOSEST FILE:   %s" % in_filenames[0] )
+       except:
+           print("\n COULD NOT FILE CLOSEST FILE, exiting: %s ---- %s" % (in_filenames[0], in_filenames[-1]) )
+           sys.exit(0)
 
    for n, fname in enumerate(in_filenames):
-
+   
 # If window is specified, then find the file that fits in the window
-       if options.window:           
-           try:
-               parsed_file_DT = "%s" % re.split(parse_radar_name, os.path.basename(fname))[1]
-           except IndexError:
-               print os.path.basename(fname)
-               pass
-
-           file_time = DT.datetime.strptime("%s" % parsed_file_DT[0:13], "%Y%m%d_%H%M")
+       if options.window:
+           file_time = DT.datetime.strptime("%s" % os.path.basename(fname)[5:], "%Y%m%d_%H%M%S")
            if file_time < start_time or file_time >= stop_time:
                continue
            else:
+               print n
                print("\n FILE TIME WITHIN WINDOW:   %s" % file_time.strftime("%Y,%m,%d,%H,%M") )
                print '\n Reading: {}\n'.format(fname)
                print '\n Writing: {}\n'.format(out_filenames[n])
-               loop_flag = False
    
        tim0 = timeit.time()
 
  # the check for file size is to make sure there is data in the LVL2 file
        try:
            if os.path.getsize(fname) < 2048000:
-               print '\n File {} is less than 2 mb, exiting...'.format(fname)
+               print '\n File {} is less than 2 mb, skipping...'.format(fname)
                continue
        except:
-           print '\n File {} is very small (< 2 MB), exiting...'.format(fname)
            continue
       
        if fname[-3:] == ".nc":
-           if _radar_parameters['field_label_trans'][0] == True:
-               REF_LABEL = _radar_parameters['field_label_trans'][1]
-               data.LABEL = _radar_parameters['field_label_trans'][2]
-               volume = pyart.io.read_cfradial(fname, field_names={REF_LABEL:"reflectivity", data.LABEL:"data.city"})
-           else:
-               volume = pyart.io.read_cfradial(fname)
+         if _radar_parameters['field_label_trans'][0] == True:
+             REF_LABEL = _radar_parameters['field_label_trans'][1]
+             VEL_LABEL = _radar_parameters['field_label_trans'][2]
+             volume = pyart.io.read_cfradial(fname, field_names={REF_LABEL:"reflectivity", VEL_LABEL:"velocity"})
+         else:
+             volume = pyart.io.read_cfradial(fname)
        else:
-       
-       
-           try:
-               volume = pyart.io.read_nexrad_archive(fname, field_names=None, 
+         try:
+           volume = pyart.io.read_nexrad_archive(fname, field_names=None, 
                                                  additional_metadata=None, file_field_names=False, 
-                                                 delay_field_loading=False)
-           except:
-               print '\n File {} cannot be read, skipping...\n'.format(fname)
-               loop_flag = True  # if the read fails, try the next file in the window..
-
+                                                 delay_field_loading=False, 
+                                                 station=None, scans=None, linear_interp=True)
+         except:
+           print '\n File {} cannot be read, skipping...\n'.format(fname)
+           continue
 
        opaws2D_io_cpu = timeit.time() - tim0
   
        print "\n Time for reading in LVL2: {} seconds".format(opaws2D_io_cpu)
 
-# Modern ledata.II files need to be mapped to figure out where the super-res data.city and reflectivity fields are located in file
+# Modern level-II files need to be mapped to figure out where the super-res velocity and reflectivity fields are located in file
  
        ret = volume_mapping(volume)
        
@@ -1199,57 +1032,24 @@ if __name__ == "__main__":
        print "\n Time for gridding fields: {} seconds".format(opaws2D_regrid_cpu)
        
        print '\n ================================================================================'
-       
-       tim0 = timeit.time()
-       if options.write == True: 
-       
-           #ret = write_radar_file(ref, vel filename=out_filenames[n])
-           ret = write_obs_seq_xarray(vel, filename=out_filenames[n], obs_error= _obs_errors['velocity'], \
-                                      volume_name=os.path.basename(fname))
-     
-           ret = write_DART_ascii(vel, filename=out_filenames[n], grid_dict=_grid_dict, \
-                                  obs_error=[_obs_errors['velocity']] )
 
-           if options.onlyVR != True:
-               ret = write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
-                                  obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
-  
-       print "\n Time for writting all files: {} seconds".format(timeit.time()-tim0)
-
-       tim0 = timeit.time()
        if plot_grid:
            fplotname = os.path.basename(out_filenames[n])
            plottime = plot_gridded(ref, vel, sweep_num, fsuffix=fplotname, dir=options.out_dir, \
                       shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
 
-       print "\n Time for plotting fields: {} seconds".format(timeit.time()-tim0)
+       if options.write == True:      
+           ret = write_DART_ascii(vel, filename=out_filenames[n]+"_VR", grid_dict=_grid_dict, \
+                                  obs_error=[_obs_errors['velocity']] )
 
-       if loop_flag == False:
-           break
-
+           if options.onlyVR != True:
+               ret = write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
+                                  obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
+           
+           ret = write_radar_file(ref, vel, filename=out_filenames[n])
+  
    opaws2D_cpu_time = timeit.time() - t0
 
    print "\n Time for opaws2D operations: {} seconds".format(opaws2D_cpu_time)
 
    print "\n PROGRAM opaws2D COMPLETED\n"
-
-
-
-#            simple fix in case file is still being written
-#        
-#            fsize = os.path.getsize(fname)
-#            timeit.sleep(3)
-#            for nwait in np.arange(4):
-#                if nwait > 2:
-#                    print("File: %s has yet to be completely written, nwait: %d, time:  %s, exiting" % \
-#                                           (os.path.basename(fname), nwait, clock_string()))
-#                    sys.exit(0)
-#                    
-#                fsize_new = os.path.getsize(fname)
-#                if fsize_new > fsize:
-#                    print("Waiting on file: %s to be completely written, nwait: %d, time:  %s" % (os.path.basename(fname), nwait, clock_string()))
-#                    print("Waiting on file: %s, old size is %d, new size is %d" % (os.path.basename(fname), fsize, fsize_new))
-#                    fsize = fsize_new
-#                    timeit.sleep(20)
-#                else:
-#                    break
