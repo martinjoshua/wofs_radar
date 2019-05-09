@@ -241,14 +241,6 @@ def main(argv=None):
             pool.join()   
             print("\n ============================================================================")
 
-                 
-#         if len(radar_list) > 1:   # run in parallel
-#             asyncP = AsyncFactory(process_opaws, cb_func)
-#             
-#             for radar in radar_list:
-#                 ret = asyncP.call(options.start, radar, commands_h)
-#             asyncP.wait()       
-        
         else:
             for radar in radar_list:
                 process_opaws(options.start, radar, commands_h)

@@ -922,7 +922,7 @@ if __name__ == "__main__":
            help = "Function to use for the weight process, valid strings are:  Cressman or Barnes")
           
    parser.add_option("-q", "--qc", dest="qc", default="Minimal",  type="string",     \
-           help = "Type of QC corrections on reflectivity or velocity.  Valid:  None, Minimal, MetSignal, A1")  
+           help = "Type of QC corrections on reflectivity or velocity.  Valid:  None, Minimal, MetSignal, A1, default==Minimal")  
 
    parser.add_option(     "--dx",     dest="dx",   default=None, type="float", \
            help = "Analysis grid spacing in meters for superob resolution")
@@ -958,12 +958,12 @@ if __name__ == "__main__":
    if options.dname == None:
           
        if options.fname == None:
-           print "\n\n ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE! *****"
-           print "\n\n *****                     OR                               *****"
-           print "\n\n *****               CFRADIAL FILE!                         *****"
-           print "\n                         EXITING!\n\n"
-           parser.print_help()
+           print "\n   ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE! *****"
+           print "   *****                     OR                               *****"
+           print "   *****               CFRADIAL FILE!                         *****"
+           print "   *****                   EXITING!                           *****"
            print
+           parser.print_help()
            sys.exit(1)
       
        else:
@@ -1004,14 +1004,14 @@ if __name__ == "__main__":
                    out_filenames.append(strng)
 
    if options.unfold == "phase":
-       print "\n opaws2D dealias_unwrap_phase unfolding will be used\n"
+       print("\n opaws2D dealias_unwrap_phase unfolding will be used\n")
        unfold_type = "phase"
    elif options.unfold == "region":
-       print "\n opaws2D dealias_region_based unfolding will be used\n"
+       print("\n opaws2D dealias_region_based unfolding will be used\n")
        unfold_type = "region"
    else:
-       print "\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****"
-       print "\n          NO VELOCITY UNFOLDING DONE...\n\n"
+       print("\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****")
+       print("\n          NO VELOCITY UNFOLDING DONE...\n\n")
        unfold_type = None
 
    if options.newse:
@@ -1039,24 +1039,25 @@ if __name__ == "__main__":
            os.mkdir("images")
 
    if options.window == None:
+
        print("\n NO WINDOW SUPPLIED, PROCESSING WHOLE DIRECTORY.... \n ")
        print("\n opaws2D:  Processing %d files in the directory:  %s\n" % (len(in_filenames), options.dname))
        print("\n opaws2D:  First file is %s" % (in_filenames[0]))
        print("\n opaws2D:  Last  file is %s" % (in_filenames[-1]))
+
    else:
+
+# Preprocessing for windowed runs (used for real time processing)
+#   a) define the window
+#   b) find all the files
+#   c) find the file that is closest to the analysis window time using the "_window_param"
+#   d) determine whether the time on the volume file is within the analysis window prescribed at the top.
+
        print("\n WINDOW IS SUPPLIED, WILL LOOK FOR INDIVIDUAL FILE.... \n ")
        start_time = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[0])
        stop_time  = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[1])
-       print("\n WINDOW_START:  %s" % start_time.strftime("%Y,%m,%d,%H,%M") )
-       print(" WINDOW_END:    %s" % stop_time.strftime("%Y,%m,%d,%H,%M") )
-                     
-# Read input file and create radar object
+       print("\n WINDOW_START:  %s    WINDOW_END:  %s" % (start_time.strftime("%Y,%m,%d,%H,%M"), stop_time.strftime("%Y,%m,%d,%H,%M")))
 
-   t0 = timeit.time()
-   
-# Preprocessing to find closest file....
-
-   if options.window:
        try:
            xfiles        = [os.path.basename(f) for f in in_filenames]
            xfiles_DT     = [DT.datetime.strptime("%s" % f[5:], "%Y%m%d_%H%M%S") for f in xfiles]
@@ -1068,22 +1069,37 @@ if __name__ == "__main__":
            print("\n COULD NOT FILE CLOSEST FILE, exiting: %s ---- %s" % (in_filenames[0], in_filenames[-1]) )
            sys.exit(0)
 
+       file_time = DT.datetime.strptime("%s" % os.path.basename(in_filenames[0])[5:], "%Y%m%d_%H%M%S")
+
+       if file_time < start_time or file_time >= stop_time:
+
+           print("\n CLOSEST FILE IS NOT WITHIN WINDOW, exiting: %s    %s    %s" % ( start_time.strftime("%Y,%m,%d,%H,%M"), \
+                                                                                     file_time.strftime("%Y,%m,%d,%H,%M"),  \
+                                                                                     stop_time.strftime("%Y,%m,%d,%H,%M") ))
+           sys.exit(0)
+
+       else:
+
+           print("\n CLOSEST FILE IS WITHIN WINDOW!!")
+           print("\n FILE TIME WITHIN WINDOW:   %s" % file_time.strftime("%Y,%m,%d,%H,%M"))
+           print('\n Reading: {}\n'.format(in_filenames[0]))
+           print('\n Writing: {}\n'.format(out_filenames[0]))
+                     
+# -------------------------------------------------------------------------------------------------
+# Loop over a series of files or a single window file
+#
+
+   opaws2D_cpu_time = timeit.time()
+
    for n, fname in enumerate(in_filenames):
    
-# If window is specified, then find the file that fits in the window
-       if options.window:
-           file_time = DT.datetime.strptime("%s" % os.path.basename(fname)[5:], "%Y%m%d_%H%M%S")
-           if file_time < start_time or file_time >= stop_time:
-               continue
-           else:
-               print n
-               print("\n FILE TIME WITHIN WINDOW:   %s" % file_time.strftime("%Y,%m,%d,%H,%M") )
-               print '\n Reading: {}\n'.format(fname)
-               print '\n Writing: {}\n'.format(out_filenames[n])
-   
-       tim0 = timeit.time()
+       opaws2D_file_read = timeit.time()
 
- # the check for file size is to make sure there is data in the LVL2 file
+# -------------------------------------------------------------------------------------------------
+# Read radar file....
+#
+# the check for file size is to make sure there is data in the LVL2 file
+
        try:
            if os.path.getsize(fname) < 2048000:
                print '\n File {} is less than 2 mb, skipping...'.format(fname)
@@ -1105,20 +1121,22 @@ if __name__ == "__main__":
                                                  delay_field_loading=False, 
                                                  station=None, scans=None, linear_interp=True)
          except:
-           print '\n File {} cannot be read, skipping...\n'.format(fname)
+           print("\n File {} cannot be read, skipping...\n".format(fname))
            continue
 
-       opaws2D_io_cpu = timeit.time() - tim0
-  
-       print "\n Time for reading in LVL2: {} seconds".format(opaws2D_io_cpu)
+       print("\n Time for reading in radar file: {} seconds".format(timeit.time() - opaws2D_file_read))
+       print '\n ================================================================================'
 
+# -------------------------------------------------------------------------------------------------
 # Modern level-II files need to be mapped to figure out where the super-res velocity and reflectivity fields are located in file
+#
  
        ret = volume_mapping(volume)
 
-# Now we do QC
-
-       tim0 = timeit.time()
+# -------------------------------------------------------------------------------------------------
+# Perform some basic or non-basic QC
+#
+       opaws2D_QC_cpu = timeit.time()
 
        if options.qc == "None":
            print("\n No quality control will be done on data")
@@ -1130,15 +1148,14 @@ if __name__ == "__main__":
                                     max_range = _radar_parameters['max_range'])
 
 
-       opaws2D_QC_cpu = timeit.time() - tim0
-       
-       print "\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu)
+       print "\n Time for quality controling the data: {} seconds".format(timeit.time() - opaws2D_QC_cpu)
        print '\n ================================================================================'
        
-             
-# For some reason, you need to do velocity unfolding first....then QC the rest of the data
+# -------------------------------------------------------------------------------------------------
+# Now do the unfolding
+#
 
-       tim0 = timeit.time()      
+       opaws2D_unfold_cpu = timeit.time()      
 
        print '\n ================================================================================'
 
@@ -1165,35 +1182,15 @@ if __name__ == "__main__":
                    vr_field = "velocity"
                    vr_label = "Radial Velocity"
 
-       opaws2D_unfold_cpu = timeit.time() - tim0
-
-       print "\n Time for unfolding velocity: {} seconds".format(opaws2D_unfold_cpu)
-
-       print '\n ================================================================================'
+       print("\n Time for unfolding velocity: {} seconds".format(timeit.time() - opaws2D_unfold_cpu))
+       print("\n ================================================================================")
   
-# Now we do QC
-
-#        tim0 = timeit.time()
-# 
-#        if options.qc == "None":
-#            print("\n No quality control will be done on data")
-#            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False, \
-#                                     max_range = _radar_parameters['max_range'])
-#        else:
-#            print("\n QC type:  %s " % options.qc)
-#            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref, \
-#                                     max_range = _radar_parameters['max_range'])
-# 
-# 
-#        opaws2D_QC_cpu = timeit.time() - tim0
-#        
-#        print "\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu)
-#        print '\n ================================================================================'
-#        
-
-
-       tim0 = timeit.time()
+# -------------------------------------------------------------------------------------------------
+# Cressman gridding and masking of the data
+#
        
+       opaws2D_regrid_cpu = timeit.time()
+
 # Now grid the reflectivity (embedded call) and then mask it off based on parameters set at top
 
        ref = dbz_masking(grid_data(volume, "reflectivity", LatLon=cLatLon), thin_zeros=_grid_dict['thin_zeros'])
@@ -1211,11 +1208,14 @@ if __name__ == "__main__":
        if _grid_dict['mask_vr_with_dbz']:
            vel = vel_masking(vel, ref, volume)
     
-       opaws2D_regrid_cpu = timeit.time() - tim0
   
-       print "\n Time for gridding fields: {} seconds".format(opaws2D_regrid_cpu)
-       
-       print '\n ================================================================================'
+       print("\n Time for gridding fields: {} seconds".format(timeit.time() - opaws2D_regrid_cpu))
+       print("\n ================================================================================")
+
+# -------------------------------------------------------------------------------------------------
+# Writing out the data
+#
+       opaws2D_io = timeit.time()
 
        if options.write == True:      
            ret = write_obs_seq_xarray(vel, filename=out_filenames[n], obs_error= _obs_errors['velocity'], \
@@ -1228,13 +1228,24 @@ if __name__ == "__main__":
                ret = write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
                                   obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
            
+           print("\n Time for writing out fields: {} seconds".format(timeit.time() - opaws2D_io))
+           print("\n ================================================================================")
+
+# -------------------------------------------------------------------------------------------------
+# Plot ya a slice...
+#
+
+       opaws2D_plot = timeit.time()
+
        if plot_grid:
-           fplotname = os.path.basename(out_filenames[0])
+           fplotname = os.path.basename(out_filenames[n])
            plottime = plot_gridded(ref, vel, sweep_num, fsuffix=fplotname, dir=options.out_dir, \
                       shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
 
-   opaws2D_cpu_time = timeit.time() - t0
+           print("\n Time for plotting: {} seconds".format(timeit.time() - opaws2D_plot))
+           print("\n ================================================================================")
 
-   print "\n Time for opaws2D operations: {} seconds".format(opaws2D_cpu_time)
+# -------------------------------------------------------------------------------------------------
 
+   print "\n Time for opaws2D operations: {} seconds".format(timeit.time() - opaws2D_cpu_time)
    print "\n PROGRAM opaws2D COMPLETED\n"
