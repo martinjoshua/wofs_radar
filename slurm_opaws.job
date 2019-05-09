@@ -155,6 +155,8 @@ def main(argv=None):
     (options, args) = parser.parse_args()
 
     if options.start == None:   # this is an error, always have to have one time
+        parser.print_help()
+        print 
         print("\n ============================================================================")
         print("\n SLURM_OPAWS:  CANNOT process command line, no start time given")
         print("\n SLURM_OPAWS:  No observational file created EXITING.....")
