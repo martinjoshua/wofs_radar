@@ -258,8 +258,16 @@ def main(argv=None):
         stop_time  = DT.datetime.strptime(options.end,   "%Y%m%d%H%M") + DT.timedelta(seconds=1) # in case start==end
 
         while start_time < stop_time:
-            for radar in radar_list:
-                process_opaws(start_time.strftime("%Y%m%d%H%M"), radar, commands_h)  
+            the_time = DT.datetime.strftime(start_time, "%Y%m%d%H%M")
+            if len(radar_list) > 1:   # run in parallel
+                pool = Pool(processes=_nthreads)
+                print("\n ============================================================================")
+                for radar in radar_list:
+                    print("\n SLURM_OPAWS starting job for RADAR:  %s at time %s" % (radar,the_time))
+                    ret = pool.apply_async(process_opaws, (the_time, radar, commands_h))
+                pool.close()
+                pool.join()
+                print("\n ============================================================================")
                 # process_opaws() expecting a string for DT
 
             start_time = start_time + _analysis_dt              # step to next process time (usually 10-15 min)
