@@ -40,6 +40,8 @@ import datetime as DT
 
 from dart_tools import *
 from radar_QC import *
+import xarray as xr
+import pandas as pd
 
 import cressman
 import pyart
@@ -119,7 +121,7 @@ _obs_errors = {
         
 # List for when window is used to find a file within a specific window - units are minutes
            
-_window_param = [ -7, 5 ]
+_window_param = [ -10, 10 ]
 
 #=========================================================================================
 # Class variable used as container
@@ -488,11 +490,11 @@ def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, intera
 
   if fsuffix == None:
       print("\n opaws2D.grid_plot:  No output file name is given, writing to %s" % "VR_RF_...png")
-      filename = "%s/VR_RF_%2.2d_plot.pdf" % (dir, sweep)
+      filename = "%s/VR_RF_%2.2d_plot.png" % (dir, sweep)
   else:
-       filename = "%s_%2.2d.pdf" % (os.path.join(dir, fsuffix), sweep)
+       filename = "%s_%2.2d.png" % (os.path.join(dir, fsuffix), sweep)
 
-  fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(25,14))
+  fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(14,10))
   
 # Set up coordinates for the plots
 
@@ -731,7 +733,158 @@ def write_radar_file(ref, vel, filename=None):
   rootgroup.close()
   
   return filename  
+#=========================================================================================
+# Defines the data frame for each observation type
+#
+def obs_seq_xarray(len):
+
+    return (np.recarray(len,
+                    dtype = [
+                             ('value',               'f8'),
+                             ('lat',                 'f8'),
+                             ('lon',                 'f8'),
+                             ('height',              'f8'),
+                             ('error_var',           'f4'),
+                             ('utime',               'f8'),
+                             ('date',                'S128'),
+                             ('day',                 'i8'),
+                             ('second',              'i8'),
+                             ('platform_lat',        'f8'),
+                             ('platform_lon',        'f8'),
+                             ('platform_hgt',        'f8'),
+                             ('platform_dir1',       'f8'),
+                             ('platform_dir2',       'f8'),
+                             ('platform_dir3',       'f8'),
+                             ('platform_nyquist',    'f8')
+                            ]), \
+                         {
+                           'lat':   ["degrees", "latitude of observation"],
+                           'lon':   ["degrees", "longitude of observation (deg. west)"],
+                           'height':["meters",  "height above sea level"],
+                           'utime': ["seconds since 1970-01-01 00:00:00", "time of observation"],
+                           'date':  ["", "date and time of obsevation"]
+                          })
+
+#####################################################################################################
+def write_obs_seq_xarray(field, filename=None, obs_error=3., volume_name=None):
+
+   _time_units    = 'seconds since 1970-01-01 00:00:00'
+   _calendar      = 'standard'
+
+   if filename == None:
+       print("\n WRITE_DATA_XARRAY:  No output file name is given, writing to %s" % "obs_seq.txt")
+       filename = "obs_seq.nc"
+   else:
+       dirname = os.path.dirname(filename)
+       basename = "%s_%s.nc" % ("obs_seq", os.path.basename(filename))
+       filename =  os.path.join(dirname, basename)
+
+   _stringlen     = 8
+   _datelen       = 19
+
+# Extract data.city data
+
+   fld           = field.data
+   lats          = field.lats
+   lons          = field.lons
+   xgrid         = field.xg[:]
+   ygrid         = field.yg[:]
+   zgrid         = field.zg[:,:,:]
+   msl_hgt       = field.zg[:,:,:] + field.radar_hgt
+
+   platform_lat  = field.radar_lat
+   platform_lon  = field.radar_lon
+   platform_hgt  = field.radar_hgt
+
+# Use the volume mean time for the time of the volume
+
+   utime   = ncdf.num2date(field.time['data'].mean(), field.time['units'])
+   secs    = ncdf.date2num(utime, units = _time_units)
+# Retain DART time stamps
+   days    = ncdf.date2num(utime, units = "days since 1601-01-01 00:00:00")
+   seconds = np.int(86400.*(days - np.floor(days)))
+
+   print "\n -->  Writing %s as the radar file..." % (filename)
+#  mask_check = data.mask && numpy.isnan().any()
+
+   nobs = np.sum(fld.mask[:]==False)
+   print("\n -----> Number of good observations for xarray:  %d" % nobs)
+
+   # Create numpy rec array that can be converted to a pandas table.
+
+   out, attributes = obs_seq_xarray(nobs)
+
+   n = 0
+
+   # There is a far better way to do this but this is fast enough for now...
+
+   for k in np.arange(field.data.shape[0]):
+       for j in np.arange(field.data.shape[1]):
+           for i in np.arange(field.data.shape[2]):
+
+               if fld.mask[k,j,i] == False:
+
+                   dx    = xgrid[i]
+                   dy    = ygrid[j]
+                   dz    = zgrid[k,j,i]
+                   range = np.sqrt(dx**2 + dy**2 + dz**2)
+                   dir1  = dx / range
+                   dir2  = dy / range
+                   dir3  = dz / range
+
+                   out.value[n]              = fld.data[k,j,i]
+                   out.error_var[n]          = obs_error**2
+                   out.lon[n]                = lons[j]
+                   out.lat[n]                = lats[i]
+                   out.height[n]             = msl_hgt[k,j,i]
+                   out.date[n]               = utime
+                   out.utime[n]              = secs
+                   out.day[n]                = days
+                   out.second[n]             = seconds
+                   out.platform_lon[n]       = platform_lon
+                   out.platform_lat[n]       = platform_lat
+                   out.platform_hgt[n]       = platform_hgt
+                   out.platform_dir1[n]      = dir1
+                   out.platform_dir2[n]      = dir2
+                   out.platform_dir3[n]      = dir3
+                   out.platform_nyquist[n]   = field.nyquist[k]
+
+                   n = n + 1
   
+   # Create an xarray dataset for file I/O
+   xa = xr.Dataset(pd.DataFrame.from_records(out))
+
+   # reset index to be a master index across all obs
+   xa.rename({'dim_0': 'index'}, inplace=True)
+
+   # Write the xarray file out (this is all there is, very nice guys!)
+   xa.to_netcdf(filename, mode='w')
+   xa.close()
+
+   # Add attributes to the files
+
+   fnc = ncdf.Dataset(filename, mode = 'a')
+   fnc.history = "Created " + DT.datetime.today().strftime("%Y%m%d_%H%M")
+   fnc.version = "Version 1.0a by Lou Wicker and Thomas Jones (NSSL)"
+   if volume_name != None:
+       fnc.version = "Created from the WSR88D radar volume:  %s" % volume_name
+
+   for key in attributes.keys():
+       fnc.variables[key].units = attributes[key][0]
+       fnc.variables[key].description = attributes[key][1]
+
+   fnc.sync()
+   fnc.close()
+
+#######################################################################
+def clock_string():
+    local_time = timeit.localtime()  # get this so we know when script was submitted...
+    return "%s%2.2d%2.2d_%2.2d%2.2d" % (local_time.tm_year, \
+                                         local_time.tm_mon,  \
+                                         local_time.tm_mday, \
+                                         local_time.tm_hour, \
+                                         local_time.tm_min)
+
 ########################################################################
 # Main function
 
@@ -838,9 +991,14 @@ if __name__ == "__main__":
 # WSR88D files
        else:
            for item in in_filenames:
-               strng = os.path.basename(item)[0:18]
-               strng = os.path.join(options.out_dir, strng)
-               out_filenames.append(strng) 
+               if options.window:   # for real time processing, we will timestamp the file with the analysis time
+                   strng = "%s_VR_%s" % (os.path.basename(item)[0:4], ttime.strftime("%Y%m%d_%H%M"))
+                   strng = os.path.join(options.out_dir, strng)
+                   out_filenames.append(strng)
+               else:
+                   strng = os.path.basename(item)[0:18]
+                   strng = os.path.join(options.out_dir, strng)
+                   out_filenames.append(strng)
 
    if options.unfold == "phase":
        print "\n opaws2D dealias_unwrap_phase unfolding will be used\n"
@@ -897,11 +1055,12 @@ if __name__ == "__main__":
 
    if options.window:
        try:
-           xfiles    = [os.path.basename(f) for f in in_filenames]
-           xfiles_DT = [DT.datetime.strptime("%s" % f[5:], "%Y%m%d_%H%M%S") for f in xfiles]
-           analysisT = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
-           in_filenames = [in_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
+           xfiles        = [os.path.basename(f) for f in in_filenames]
+           xfiles_DT     = [DT.datetime.strptime("%s" % f[5:], "%Y%m%d_%H%M%S") for f in xfiles]
+           analysisT     = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
+           in_filenames  = [in_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
            out_filenames = [out_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
+
            print("\n FOUND CLOSEST FILE:   %s" % in_filenames[0] )
        except:
            print("\n COULD NOT FILE CLOSEST FILE, exiting: %s ---- %s" % (in_filenames[0], in_filenames[-1]) )
@@ -954,42 +1113,7 @@ if __name__ == "__main__":
 # Modern level-II files need to be mapped to figure out where the super-res velocity and reflectivity fields are located in file
  
        ret = volume_mapping(volume)
-       
-# For some reason, you need to do velocity unfolding first....then QC the rest of the data
 
-       tim0 = timeit.time()      
-
-       print '\n ================================================================================'
-
-       if unfold_type == None:
-           vr_field = "velocity"
-           vr_label = "Radial Velocity"
-       else:
-           try:
-               print("\n Trying %s-based unfolding method\n" % unfold_type)
-               ret = velocity_unfold(volume, unfold_type=unfold_type, gatefilter=None) 
-               vr_field = "unfolded velocity"
-               vr_label = "Unfolded Radial Velocity"
-           except:
-               print("\n ----> %s unfolding method has failed!! Trying alternate unfolding method\n" % unfold_type)
-               try:
-                   unfold_type2 = "region"
-                   if unfold_type == "region":    
-                       unfold_type2 = "phase"
-                   ret = velocity_unfold(volume, unfold_type=unfold_type2, gatefilter=None) 
-                   vr_field = "unfolded velocity"
-                   vr_label = "Unfolded Radial Velocity"
-               except:
-                   print("\n ----> Both unfolding methods have failed!! Turning off unfolding\n\n")
-                   vr_field = "velocity"
-                   vr_label = "Radial Velocity"
-
-       opaws2D_unfold_cpu = timeit.time() - tim0
-
-       print "\n Time for unfolding velocity: {} seconds".format(opaws2D_unfold_cpu)
-
-       print '\n ================================================================================'
-  
 # Now we do QC
 
        tim0 = timeit.time()
@@ -1008,6 +1132,63 @@ if __name__ == "__main__":
        
        print "\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu)
        print '\n ================================================================================'
+       
+             
+# For some reason, you need to do velocity unfolding first....then QC the rest of the data
+
+       tim0 = timeit.time()      
+
+       print '\n ================================================================================'
+
+       if unfold_type == None:
+           vr_field = "velocity"
+           vr_label = "Radial Velocity"
+       else:
+           try:
+               print("\n Trying %s-based unfolding method\n" % unfold_type)
+               ret = velocity_unfold(volume, unfold_type=unfold_type, gatefilter=gatefile) 
+               vr_field = "unfolded velocity"
+               vr_label = "Unfolded Radial Velocity"
+           except:
+               print("\n ----> %s unfolding method has failed!! Trying alternate unfolding method\n" % unfold_type)
+               try:
+                   unfold_type2 = "region"
+                   if unfold_type == "region":    
+                       unfold_type2 = "phase"
+                   ret = velocity_unfold(volume, unfold_type=unfold_type2, gatefilter=gatefilter) 
+                   vr_field = "unfolded velocity"
+                   vr_label = "Unfolded Radial Velocity"
+               except:
+                   print("\n ----> Both unfolding methods have failed!! Turning off unfolding\n\n")
+                   vr_field = "velocity"
+                   vr_label = "Radial Velocity"
+
+       opaws2D_unfold_cpu = timeit.time() - tim0
+
+       print "\n Time for unfolding velocity: {} seconds".format(opaws2D_unfold_cpu)
+
+       print '\n ================================================================================'
+  
+# Now we do QC
+
+#        tim0 = timeit.time()
+# 
+#        if options.qc == "None":
+#            print("\n No quality control will be done on data")
+#            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False, \
+#                                     max_range = _radar_parameters['max_range'])
+#        else:
+#            print("\n QC type:  %s " % options.qc)
+#            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref, \
+#                                     max_range = _radar_parameters['max_range'])
+# 
+# 
+#        opaws2D_QC_cpu = timeit.time() - tim0
+#        
+#        print "\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu)
+#        print '\n ================================================================================'
+#        
+
 
        tim0 = timeit.time()
        
@@ -1034,21 +1215,22 @@ if __name__ == "__main__":
        
        print '\n ================================================================================'
 
-       if plot_grid:
-           fplotname = os.path.basename(out_filenames[n])
-           plottime = plot_gridded(ref, vel, sweep_num, fsuffix=fplotname, dir=options.out_dir, \
-                      shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
-
        if options.write == True:      
-           ret = write_DART_ascii(vel, filename=out_filenames[n]+"_VR", grid_dict=_grid_dict, \
+           ret = write_obs_seq_xarray(vel, filename=out_filenames[n], obs_error= _obs_errors['velocity'], \
+                                      volume_name=os.path.basename(fname))
+
+           ret = write_DART_ascii(vel, filename=out_filenames[n], grid_dict=_grid_dict, \
                                   obs_error=[_obs_errors['velocity']] )
 
            if options.onlyVR != True:
                ret = write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
                                   obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
            
-           ret = write_radar_file(ref, vel, filename=out_filenames[n])
-  
+       if plot_grid:
+           fplotname = os.path.basename(out_filenames[0])
+           plottime = plot_gridded(ref, vel, sweep_num, fsuffix=fplotname, dir=options.out_dir, \
+                      shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
+
    opaws2D_cpu_time = timeit.time() - t0
 
    print "\n Time for opaws2D operations: {} seconds".format(opaws2D_cpu_time)

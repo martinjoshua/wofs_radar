@@ -114,10 +114,11 @@ def main(argv=None):
     for file in files:
        try:
           infile = xr.open_dataset(file)
+          nobs_total = nobs_total + len(infile.index)
+          print("%s has %d observations, total is now %d" % (file, len(infile.index), nobs_total))
        except:
           continue
-       nobs_total = nobs_total + len(infile.index)
-       print("%s has %d observations, total is now %d" % (file, len(infile.index), nobs_total))
+
        if len(infile.index) > 0:
            dataset.append(infile)
        infile.close()
