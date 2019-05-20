@@ -63,8 +63,8 @@ _temp_netcdf_file = "./tmp.nc"
 
 # Grid stuff
 
-NX = 200
-NY = 200
+NX = 172  # changed from 200 to leave a 20 km ring inside domain
+NY = 172
 
 # Width in minutes of time to look for radar files every 15 min
 

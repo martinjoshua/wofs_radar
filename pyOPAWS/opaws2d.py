@@ -1058,14 +1058,14 @@ if __name__ == "__main__":
 
    if options.window:
        try:
-           xfiles        = [os.path.basename(f) for f in in_filenames]
-           xfiles_DT     = [DT.datetime.strptime("%s" % f[5:], "%Y%m%d_%H%M%S") for f in xfiles]
            analysisT     = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
+           xfiles        = [os.path.basename(f) for f in in_filenames]
+           xfiles_DT     = [DT.datetime.strptime("%s" % f[5:20], "%Y%m%d_%H%M%S") for f in xfiles]
            in_filenames  = [in_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
            out_filenames = [out_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
            print("\n FOUND CLOSEST FILE:   %s" % in_filenames[0] )
        except:
-           print("\n COULD NOT FILE CLOSEST FILE, exiting: %s ---- %s" % (in_filenames[0], in_filenames[-1]) )
+           print("\n COULD NOT FILE CLOSEST FILE, exiting: %s <----> %s" % (in_filenames[0], in_filenames[-1]) )
            sys.exit(0)
 
    for n, fname in enumerate(in_filenames):
