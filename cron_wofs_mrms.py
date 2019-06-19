@@ -16,7 +16,7 @@ _TEST = False
 if _TEST == True:
    rtimes = ', '.join(str(t) for t in range(60))    #test the code every minute
 else:
-   rtimes = "5,20,35,50"    # T+5min radar processing start time
+   rtimes = "6,21,36,51"    # T+5min radar processing start time
 
 
 #-----------------------------------------------------------------------------
