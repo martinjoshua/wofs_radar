@@ -64,7 +64,7 @@ parse_radar_name2 = '(?:[A-Z]{4}_)'
 parse_radar_name = '(?:[A-Z]{4}_)'
 
 # debug flag
-debug = True
+debug = False
 
 _thres_vr_from_ref     = True
 _default_QC            = "Minimal"
@@ -976,14 +976,34 @@ if __name__ == "__main__":
    else:
 
        if options.window:
-           ttime = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
-           in_filenames = glob.glob("%s/*_%s_*" % (os.path.abspath(options.dname),ttime.strftime("%Y%m%d")))
+           ttime      = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
+           start_time = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[0])
+           stop_time  = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[1])
+           in_filenames = glob.glob("%s/*_%s*" % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"))) \
+                        + glob.glob("%s/*_%s*" % (os.path.abspath(options.dname),stop_time.strftime("%Y%m%d_%H")))
+           if len(in_filenames) == 0:
+               print("\n COULD NOT find any files for radar %s between %s and %s, EXITING" \
+                     % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"),stop_time.strftime("%Y%m%d_%H")))
+               sys.exit(0)
+           else:
+               print("\n WINDOW IS SUPPLIED, WILL LOOK FOR AN INDIVIDUAL FILE.... \n ")
+               print("\n WINDOW_START:  %s" % start_time.strftime("%Y,%m,%d,%H,%M") )
+               print(" WINDOW_END:    %s, will search %d files for closest time " \
+                     % (stop_time.strftime("%Y,%m,%d,%H,%M"), len(in_filenames)) )
        else:
            in_filenames = glob.glob("%s/*" % os.path.abspath(options.dname))
            if len(in_filenames) == 0:
-               print("\n COULD NOT find any files for radar: %s at time %s" % (os.path.abspath(options.dname),ttime.strftime("%Y%m%d")))
+               print("\n COULD NOT find any files for radar: %s, EXITING" % (os.path.abspath(options.dname)))
                sys.exit(0)
+           else:
+               print("\n NO WINDOW SUPPLIED, PROCESSING WHOLE DIRECTORY.... \n ")
+               print("\n opaws2D:  Processing %d files in the directory:  %s\n" % (len(in_filenames), options.dname))
+               print("\n opaws2D:  First file is %s" % (in_filenames[0]))
+               print("\n opaws2D:  Last  file is %s" % (in_filenames[-1]))
  
+       if debug:  
+           print(in_filenames)
+
 # if cfradial files....
        if in_filenames[0][-3:] == ".nc":
            for item in in_filenames:
@@ -1038,18 +1058,6 @@ if __name__ == "__main__":
        if not os.path.exists("images"):
            os.mkdir("images")
 
-   if options.window == None:
-       print("\n NO WINDOW SUPPLIED, PROCESSING WHOLE DIRECTORY.... \n ")
-       print("\n opaws2D:  Processing %d files in the directory:  %s\n" % (len(in_filenames), options.dname))
-       print("\n opaws2D:  First file is %s" % (in_filenames[0]))
-       print("\n opaws2D:  Last  file is %s" % (in_filenames[-1]))
-   else:
-       print("\n WINDOW IS SUPPLIED, WILL LOOK FOR INDIVIDUAL FILE.... \n ")
-       start_time = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[0])
-       stop_time  = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[1])
-       print("\n WINDOW_START:  %s" % start_time.strftime("%Y,%m,%d,%H,%M") )
-       print(" WINDOW_END:    %s" % stop_time.strftime("%Y,%m,%d,%H,%M") )
-                     
 # Read input file and create radar object
 
    t0 = timeit.time()
@@ -1076,7 +1084,6 @@ if __name__ == "__main__":
            if file_time < start_time or file_time >= stop_time:
                continue
            else:
-               print n
                print("\n FILE TIME WITHIN WINDOW:   %s" % file_time.strftime("%Y,%m,%d,%H,%M") )
                print '\n Reading: {}\n'.format(fname)
                print '\n Writing: {}\n'.format(out_filenames[n])
