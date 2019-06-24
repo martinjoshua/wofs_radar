@@ -17,6 +17,8 @@ _slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py 
 
 _TEST = False
 
+_hour_offset = 12
+
 if _TEST == True:
    rtimes = ', '.join(str(t) for t in range(60))    #test the code every minute
 else:
@@ -49,7 +51,7 @@ def main(time=None, no_mrms=False, no_opaws=False, no_combine=False):
    
    cycle_time_str = gmt.strftime("%Y%m%d%H%M")  
    cycle_time_str2 = gmt.strftime("%Y%m%d_%H%M")
-   yyyy_mm_dd_directory = gmt - DT.timedelta(hours=5)
+   yyyy_mm_dd_directory = gmt - DT.timedelta(hours=_hour_offset)
    
    print("\n >>>> BEGIN ======================================================================")
    print("\n Begin processing for cycle time:  %s" % (cycle_time_str))

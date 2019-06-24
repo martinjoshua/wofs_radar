@@ -1,5 +1,21 @@
 #!/usr/bin/env python
 
+#-----------------------------------------------------------------------
+#
+# Documentation
+#
+# This script is processes a special MRMS grid created for WoFs 
+# which has already been superobbed to 5 km.  It then sub-sections
+# that CONUS grid into the grid needed for the smaller WoFs grid,
+# and writes it out to a netCDF that GSI can read.
+#
+#
+# 06/24/2019-LJW:  Fixed code so that the radar file and directory
+#                  are set to the run day by subtracting 12 hours
+#                  from the GMT time supplied.
+#                  This is done using "_hour_offset" variable
+#-----------------------------------------------------------------------
+
 #SBATCH --ntasks-per-node=4
 #SBATCH --nodes=1
 #SBATCH -J slurm_rt_mrms
@@ -28,6 +44,8 @@ delta_time       = DT.timedelta(minutes=15)
 one_second       = DT.timedelta(seconds=1)
 plot_level       = 3
 
+_hour_offset = 12
+
 # Okay guts of the code
 #-------------------------------------------------------------------------------
 # This is a handy function to make sure we get the correct day for radar file
@@ -38,7 +56,8 @@ def utc_to_local(utc_dt):
     timestamp = calendar.timegm(utc_dt.timetuple())
     local_dt = DT.datetime.fromtimestamp(timestamp)
     assert utc_dt.resolution >= DT.timedelta(microseconds=1)
-    return local_dt.replace(microsecond=utc_dt.microsecond)
+#   return local_dt.replace(microsecond=utc_dt.microsecond)
+    return local_dt.replace(microsecond=utc_dt.microsecond) - DT.timedelta(hours=_hour_offset)
 
 #-------------------------------------------------------------------------------
 # Function to actually run the prep_mrms.py script

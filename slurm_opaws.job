@@ -1,5 +1,21 @@
 #!/usr/bin/env python
 
+#-----------------------------------------------------------------------
+#
+# Documentation
+#
+# This script is used to take a list of radars for the WARN on FORECAST
+# domain, and each time it is called, create N (N=no. of radars) netCDF 
+# files of data (superobbed) to cartesian grid.  The program runs
+# a task-parallel set of jobs.  
+#
+#
+# 06/24/2019-LJW:  Fixed code so that the radar file and directory
+#                  are set to the run day by subtracting 12 hours
+#                  from the GMT time supplied.                 
+#                  This is done using "_hour_offset" variable
+#-----------------------------------------------------------------------
+
 #SBATCH --ntasks-per-node=20
 #SBATCH --nodes=1
 #SBATCH -J slurm_rt_opaws
@@ -25,6 +41,9 @@ _WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
 _opaws2D         = "/work/wicker/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py"
 _opaws_logs      = "/work/wicker/REALTIME/VEL/logs"
 _command_file    = "./commands.txt"
+
+# offset to get the correct date for file directories and radar file
+_hour_offset = 12
 
 # Cressman parameters
 _dx  = 5000.
@@ -67,7 +86,7 @@ def utc_to_local(utc_dt):
     # get integer timestamp to avoid precision lost
     timestamp = calendar.timegm(utc_dt.timetuple())
     local_dt = DT.datetime.fromtimestamp(timestamp)
-    return local_dt
+    return local_dt - DT.timedelta(hours=_hour_offset)
 
 #-------------------------------------------------------------------------------
 # Function to actually run the prep_mrms.py script

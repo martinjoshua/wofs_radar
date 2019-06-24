@@ -35,6 +35,8 @@ class myobject(object):
 #=========================================================================================
 # Parse and return a datetime object from obs_seq filename (notice, no seconds in filename)
 #
+# Not used...
+#
 def obs_seq_file_DT(filename):
     try:
         return DT.datetime.strptime(os.path.split(filename)[1][-17:-4], "%Y%m%d_%H%M")
