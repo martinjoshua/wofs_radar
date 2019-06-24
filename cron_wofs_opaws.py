@@ -104,11 +104,11 @@ def scheduled_job():
             print("\n Slurm_opaws job failed: %s" % (now))
             
 # combine all the files...
-   directory = "%s/%s" % (_wofs_VEL_dir,yyyy_mm_dd_directory.strftime("%Y%m%d"))
-   wildcard =  "_VR_{}.nc"
-   cmd = (_slurm_concatenate % (directory, wildcard.format(cycle_time_str2)))
-   if no_combine == False:
-       print("\n Cmd: %s \n" % (cmd))
+    directory = "%s/%s" % (_wofs_VEL_dir,yyyy_mm_dd_directory.strftime("%Y%m%d"))
+    wildcard =  "_VR_{}.nc"
+    cmd = (_slurm_concatenate % (directory, wildcard.format(cycle_time_str2)))
+    if no_combine == False:
+        print("\n Cmd: %s \n" % (cmd))
 
     if _TEST != True:
         try:
