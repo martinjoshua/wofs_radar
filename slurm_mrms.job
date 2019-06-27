@@ -56,8 +56,8 @@ def utc_to_local(utc_dt):
     timestamp = calendar.timegm(utc_dt.timetuple())
     local_dt = DT.datetime.fromtimestamp(timestamp)
     assert utc_dt.resolution >= DT.timedelta(microseconds=1)
-#   return local_dt.replace(microsecond=utc_dt.microsecond)
-    return local_dt.replace(microsecond=utc_dt.microsecond) - DT.timedelta(hours=_hour_offset)
+    return local_dt.replace(microsecond=utc_dt.microsecond)
+#   return local_dt.replace(microsecond=utc_dt.microsecond) - DT.timedelta(hours=_hour_offset)
 
 #-------------------------------------------------------------------------------
 # Function to actually run the prep_mrms.py script

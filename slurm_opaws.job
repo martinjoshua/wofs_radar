@@ -94,7 +94,8 @@ def utc_to_local(utc_dt):
 def process_opaws(utc_time, radar, command_file):
 
     # Log files are labeled on the local day, not UTC
-    local_time   = utc_to_local(DT.datetime.strptime(utc_time, "%Y%m%d%H%M"))
+#   local_time   = utc_to_local(DT.datetime.strptime(utc_time, "%Y%m%d%H%M"))
+    local_time   = DT.datetime.strptime(utc_time, "%Y%m%d%H%M") - DT.timedelta(hours=_hour_offset)
 
     log_filename = os.path.join(_opaws_logs, "OPAWS_%s_%s.log" % (radar, local_time.strftime("%Y%m%d")))
     log_h        = open(log_filename,"a")  # handle for the log file (one per day / per radar)
@@ -192,11 +193,12 @@ def main(argv=None):
             sys.exit(1)
 
         # create path to WOFS radar file
-        # This method assumes that radar data will only be parsed up to 11:59 PM local time - 
-        #      so we convert the input UTC time to local time...
+        # This method assumes that radar data be processed past 12 AM CST.
+        #      We want the data to go into a directory from case day, so subtract off 12 hours
+        #      to get the correct radar_configuration file AND put the data into the correct directory.
 
         start_time = DT.datetime.strptime(options.start, "%Y%m%d%H%M")
-        local_time = utc_to_local(DT.datetime.strptime(options.start, "%Y%m%d%H%M"))
+        local_time = DT.datetime.strptime(options.start, "%Y%m%d%H%M") - DT.timedelta(hours=_hour_offset)
         radar_file_csh = os.path.join(_WOFS_grid_info, ("radars.%s.csh" % local_time.strftime("%Y%m%d")))
 
         print("\n ============================================================================")

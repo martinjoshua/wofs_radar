@@ -61,14 +61,14 @@ def main(time=None, no_mrms=False, no_opaws=False, no_combine=False):
    if no_mrms == False:
        print("\n Cmd: %s \n" % (cmd))
    
-#    if _TEST != True:
-#        try:
-#            if options.no_mrms == False:
-#                MRMSret = subprocess.Popen([cmd],shell=True)
-#                MRMSret.wait()
-#                print("\n Slurm_mrms job finished at %s" % (now))
-#        except:
-#            print("\n Slurm_mrms job failed: %s" % (now))
+   if _TEST != True:
+       try:
+           if options.no_mrms == False:
+               MRMSret = subprocess.Popen([cmd],shell=True)
+               MRMSret.wait()
+               print("\n Slurm_mrms job finished at %s" % (now))
+       except:
+           print("\n Slurm_mrms job failed: %s" % (now))
 
    # OPAWS processing
    cmd = (_slurm_opaws_string % (cycle_time_str))

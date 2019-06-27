@@ -40,6 +40,18 @@ if _TEST == True:
 else:
    rtimes = "6,21,36,51"    # T+5min radar processing start time
 
+#-------------------------------------------------------------------------------
+# This is a handy function to make sure we get the correct day for radar file
+#      I.E., we need to figure out what day it is, even if UTC is after 00Z
+
+def utc_to_local(utc_dt):
+    # get integer timestamp to avoid precision lost
+    timestamp = calendar.timegm(utc_dt.timetuple())
+    local_dt = DT.datetime.fromtimestamp(timestamp)
+    assert utc_dt.resolution >= DT.timedelta(microseconds=1)
+#   return local_dt.replace(microsecond=utc_dt.microsecond)
+    return local_dt.replace(microsecond=utc_dt.microsecond) - DT.timedelta(hours=_hour_offset)
+
 
 #-----------------------------------------------------------------------------
 # Utility to round a datetime object to nearest 15 min....
@@ -79,7 +91,7 @@ def scheduled_job():
 
     cycle_time_str  = cycle_time.strftime("%Y%m%d%H%M")    
     cycle_time_str2 = cycle_time.strftime("%Y%m%d_%H%M")
-    yyyy_mm_dd_directory = gmt - DT.timedelta(hours=_hour_offset)
+    yyyy_mm_dd_directory = cycle_time - DT.timedelta(hours=_hour_offset)
     
     local_time = time.localtime()  # get this so we know when script was submitted...
     now = "%s %2.2d %2.2d %2.2d%2.2d" % (local_time.tm_year, \
@@ -107,8 +119,6 @@ def scheduled_job():
     directory = "%s/%s" % (_wofs_VEL_dir,yyyy_mm_dd_directory.strftime("%Y%m%d"))
     wildcard =  "_VR_{}.nc"
     cmd = (_slurm_concatenate % (directory, wildcard.format(cycle_time_str2)))
-    if no_combine == False:
-        print("\n Cmd: %s \n" % (cmd))
 
     if _TEST != True:
         try:
