@@ -229,10 +229,10 @@ def vel_masking(vel, ref, volume):
         
    if _grid_dict['max_height'] > 0:
       mask1 = (vel.zg - vel.radar_hgt) > _grid_dict['max_height']
-      print(" Size of height mask: %d" % np.sum(mask1 == False))
+#     print(" Size of height mask: %d" % np.sum(mask1 == False))
       mask2 = vel.data.mask
       vel.data.mask = np.logical_or(mask1, mask2)
-      print(" Size of VR mask after height mask: %d" % np.sum(mask2 == False))
+      print(" Size of VR mask after height mask: %d" % np.sum(vel.data.mask == False))
       
    return vel
       
@@ -867,7 +867,7 @@ def write_obs_seq_xarray(field, filename=None, obs_error=3., volume_name=None):
    xa = xr.Dataset(pd.DataFrame.from_records(out))
 
 #  # reset index to be a master index across all obs
-#  xa.rename({'dim_0': 'index'}, inplace=True)
+   xa.rename({'dim_0': 'index'}, inplace=True)
 
    # Write the xarray file out (this is all there is, very nice guys!)
    xa.to_netcdf(filename, mode='w')
