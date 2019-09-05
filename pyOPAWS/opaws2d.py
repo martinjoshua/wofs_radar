@@ -99,7 +99,7 @@ _grid_dict = {
               'nthreads'        : 1,
               'max_height'      : 10000.,
               'MRMS_zeros'      : [True,      6000.], # True: creates a single level of zeros where composite DBZ < _dbz_min
-              'model_grid_size' : [750000., 750000.]  # Used to create a common grid for all observations (special option) 
+              'model_grid_size' : [900000., 900000.]  # Used to create a common grid for all observations (special option) 
              }
 
 # Parameter dict setting radar data parameters
@@ -211,10 +211,12 @@ def vel_masking(vel, ref, volume):
 
 # Mask the radial velocity where dbz is masked
 
-   print(" Size of input VR  mask: %d" % np.sum(vel.data.mask))
-   print(" Size of input dBZ mask: %d" % np.sum(ref.data.mask))
+   print(" Size of VR  from objective analysis  mask: %d" % np.sum(vel.data.mask == False))
+   print(" Size of dBZ from objective analysis  mask: %d" % np.sum(ref.data.mask == False))
 
    vel.data.mask = np.logical_or(vel.data.mask, ref.data.mask)
+
+   print(" Size of VR mask after minimum dBZ mask: %d" % np.sum(vel.data.mask == False))
 
 # Limit max/min values of radial velocity (bad unfolding, too much "truth")
 
@@ -227,11 +229,10 @@ def vel_masking(vel, ref, volume):
         
    if _grid_dict['max_height'] > 0:
       mask1 = (vel.zg - vel.radar_hgt) > _grid_dict['max_height']
-      print(" Size of height mask: %d" % np.sum(mask1))
+      print(" Size of height mask: %d" % np.sum(mask1 == False))
       mask2 = vel.data.mask
-      print(" Size of VR + dBZ mask: %d" % np.sum(mask2))
       vel.data.mask = np.logical_or(mask1, mask2)
-      print(" Size of new mask: %d" % np.sum(vel.data.mask))
+      print(" Size of VR mask after height mask: %d" % np.sum(mask2 == False))
       
    return vel
       
@@ -360,7 +361,8 @@ def grid_data(volume, field, LatLon=None):
 #####################################################################################
 # Create 3D arrays for analysis grid, the vertical dimension is the number of tilts
 
-   new         = np.ma.zeros((len(sweeps), ny, nx))
+   new_grid    = np.zeros((len(sweeps), ny, nx))
+   new_mask    = np.full((len(sweeps), ny, nx), False)
    elevations  = np.zeros((len(sweeps),))
    sweep_time  = np.zeros((len(sweeps),))
    zgrid       = np.zeros((len(sweeps), ny, nx))
@@ -368,6 +370,7 @@ def grid_data(volume, field, LatLon=None):
        
 # Grid only those valid sweeps 
   
+   total = 0
    for n, sweep_level in enumerate(sweeps):
    
        sweep_data = volume.get_field(sweep_level, field_name)
@@ -392,17 +395,18 @@ def grid_data(volume, field, LatLon=None):
        if obs.size > 0:
            tmp = cressman.obs_2_grid2d(obs, xob, yob, xg, yg, ix, iy, anal_method, min_count, min_weight, min_range, \
                                        2.0*grid_spacing_xy, _missing)
-           new_mask = (tmp <= _missing)
-           new[n] = np.ma.array(tmp, mask=new_mask)
+           new_grid[n] = tmp
+           new_mask[n] = (tmp <= _missing)
+           total = total + np.sum(new_mask[n] == False)
        else:
-           new[n] = np.ma.masked_all((grid_pts_xy, grid_pts_xy))
+           new_grid[n] = np.full((ny,nx), _missing)
+           new_mask[n] = np.full((ny,nx), True)
         
-       print(" Sweep: %2.2d Elevation: %5.2f  Number of valid grid points:  %d" % (n, elevations[n],np.sum(new[n].mask==False)))
-
        if field == "reflectivity":
-           new[n].mask = np.logical_or(new[n].mask, new[n] < _radar_parameters['min_dbz_analysis'])
-           print(" Sweep: %2.2d Elevation: %5.2f  Number of valid reflectivity points:  %d" % \
-                        (n, elevations[n],np.sum(new[n].mask==False)))
+           new_mask[n] = np.logical_or(new_mask[n], new_grid[n] < _radar_parameters['min_dbz_analysis'])
+           print(" Sweep: %2.2d Elevation: %5.2f  Number of valid reflectivity points:  %d" % (n, elevations[n],np.sum(new_mask[n]==False)))
+       else:
+           print(" Sweep: %2.2d Elevation: %5.2f  Number of valid grid points:  %d" % (n, elevations[n],np.sum(new_mask[n]==False)))
 
    # Create z-field
 
@@ -419,13 +423,15 @@ def grid_data(volume, field, LatLon=None):
 #                    min_neighbors=min_count, kind='cressman')
 
        tmp = cressman.obs_2_grid2d(zobs, xob, yob, xg, yg, ix, iy, 1, 1, 0.1, min_range, 2.0*grid_spacing_xy, -99999.)
-       new_mask = (tmp == -99999.)
-       zgrid[n] = np.ma.array(tmp, mask=new_mask)
+       zgrid[n] = tmp
     
    print("\n %f secs to run superob analysis for all levels \n" % (timeit.clock()-tt))
 
-   return Gridded_Field("data_grid", field = field, data = new, basemap = map, 
-                        xg = xg, yg = yg, zg = zgrid,                   
+   print('\n Total number of valid obs in volume: %d \n' % total)
+   print('\n Total number of valid obs in volume: %d \n' % np.sum(new_mask == False))
+
+   return Gridded_Field("data_grid", field = field, data = np.ma.array(new_grid, mask=new_mask), basemap = map, 
+                        xg = xg, yg = yg, zg = np.ma.array(zgrid, mask=new_mask),                   
                         lats = lats, lons = lons, elevations=elevations,
                         radar_lat = radar_lat, radar_lon = radar_lon, radar_hgt=volume.altitude['data'][0],
                         time = volume.time, sweep_time = sweep_time, metadata = volume.metadata, nyquist = nyquist  ) 
@@ -578,15 +584,19 @@ def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, intera
     
   bgmap.drawparallels(range(10,80,1),labels=[1,0,0,0], linewidth=0.5, ax=ax2)
   bgmap.drawmeridians(range(-170,-10,1),labels=[0,0,0,1],linewidth=0.5, ax=ax2)
+
+  vr_mask = (vel.data.mask == False)[sweep]
+  vr_data = vel.data[sweep]
+  print(np.sum(vr_data.mask == False))
   
-  im1 = bgmap.pcolormesh(xe, ye, vel.data[sweep], cmap=cmapv, vmin=_vr_scale[0], vmax=_vr_scale[1], ax=ax2)
+  im1 = bgmap.pcolormesh(xe, ye, vr_data, cmap=cmapv, vmin=_vr_scale[0], vmax=_vr_scale[1], ax=ax2)
   cbar = bgmap.colorbar(im1,location='right')
   cbar.set_label('Dealised Radial Velocity (meters_per_second)')
   ax2.set_title('Thresholded, Unfolded Radial Velocity (Gridded)') 
   bgmap.scatter(xoffset,yoffset, c='k', s=50., alpha=0.8, ax=ax2)
 
   at = AnchoredText("Max Vr: %4.1f \nMin Vr: %4.1f " % \
-                 (vel.data[sweep].max(),vel.data[sweep].min()), loc=4, prop=dict(size=12), frameon=True,)
+                 (vr_data.max(), vr_data.min()), loc=4, prop=dict(size=12), frameon=True,)
   at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
   ax2.add_artist(at)  
     
@@ -715,8 +725,9 @@ def write_radar_file(ref, vel, filename=None):
 
   rootgroup.variables['date'][:] = ncdf.stringtoarr(dtime.strftime("%Y-%m-%d_%H:%M:%S"), _datelen)
   
-  rootgroup.variables['REF'][:]  = dbz[:]
-  rootgroup.variables['VEL'][:]  = vr[:]
+  rootgroup.variables['REF'][:,:,:] = dbz[:]
+  rootgroup.variables['VEL'][:,:,:] = vr[:]
+
   rootgroup.variables['XC'][:]   = ref.xg[:]
   rootgroup.variables['YC'][:]   = ref.yg[:]
   rootgroup.variables['EL'][:]   = elevations[:]
@@ -772,19 +783,20 @@ def write_obs_seq_xarray(field, filename=None, obs_error=3., volume_name=None):
    _calendar      = 'standard'
 
    if filename == None:
-       print("\n WRITE_DATA_XARRAY:  No output file name is given, writing to %s" % "obs_seq.txt")
-       filename = "obs_seq.nc"
+      print("\n WRITE_DATA_XARRAY:  No output file name is given, writing to %s" % "obs_seq.txt")
+      filename = "obs_seq.nc"
    else:
-       dirname = os.path.dirname(filename)
-       basename = "%s_%s.nc" % ("obs_seq", os.path.basename(filename))
-       filename =  os.path.join(dirname, basename)
+      dirname = os.path.dirname(filename)
+      basename = "%s_%s.nc" % ("obs_seq", os.path.basename(filename))
+      filename =  os.path.join(dirname, basename)
 
    _stringlen     = 8
    _datelen       = 19
 
 # Extract data.city data
 
-   fld           = field.data
+   fld           = field.data.data[:,:,:]
+   mask          = field.data.mask[:,:,:]
    lats          = field.lats
    lons          = field.lons
    xgrid         = field.xg[:]
@@ -807,55 +819,55 @@ def write_obs_seq_xarray(field, filename=None, obs_error=3., volume_name=None):
    print "\n -->  Writing %s as the radar file..." % (filename)
 #  mask_check = data.mask && numpy.isnan().any()
 
-   nobs = np.sum(fld.mask[:]==False)
+   nobs = np.sum(mask==False)
    print("\n -----> Number of good observations for xarray:  %d" % nobs)
 
    # Create numpy rec array that can be converted to a pandas table.
 
    out, attributes = obs_seq_xarray(nobs)
 
-   n = 0
-
    # There is a far better way to do this but this is fast enough for now...
 
-   for k in np.arange(field.data.shape[0]):
-       for j in np.arange(field.data.shape[1]):
-           for i in np.arange(field.data.shape[2]):
+   n = 0
 
-               if fld.mask[k,j,i] == False:
+   for k in np.arange(fld.shape[0]):
+      for j in np.arange(fld.shape[1]):
+         for i in np.arange(fld.shape[2]):
 
-                   dx    = xgrid[i]
-                   dy    = ygrid[j]
-                   dz    = zgrid[k,j,i]
-                   range = np.sqrt(dx**2 + dy**2 + dz**2)
-                   dir1  = dx / range
-                   dir2  = dy / range
-                   dir3  = dz / range
+            if mask[k,j,i] == False:
 
-                   out.value[n]              = fld.data[k,j,i]
-                   out.error_var[n]          = obs_error**2
-                   out.lon[n]                = lons[j]
-                   out.lat[n]                = lats[i]
-                   out.height[n]             = msl_hgt[k,j,i]
-                   out.date[n]               = utime
-                   out.utime[n]              = secs
-                   out.day[n]                = days
-                   out.second[n]             = seconds
-                   out.platform_lon[n]       = platform_lon
-                   out.platform_lat[n]       = platform_lat
-                   out.platform_hgt[n]       = platform_hgt
-                   out.platform_dir1[n]      = dir1
-                   out.platform_dir2[n]      = dir2
-                   out.platform_dir3[n]      = dir3
-                   out.platform_nyquist[n]   = field.nyquist[k]
+               dx    = xgrid[i]
+               dy    = ygrid[j]
+               dz    = zgrid[k,j,i]
+               range = np.sqrt(dx**2 + dy**2 + dz**2)
+               dir1  = dx / range
+               dir2  = dy / range
+               dir3  = dz / range
 
-                   n = n + 1
+               out.value[n]              = fld[k,j,i]
+               out.error_var[n]          = obs_error**2
+               out.lon[n]                = lons[i]
+               out.lat[n]                = lats[j]
+               out.height[n]             = msl_hgt[k,i,j]
+               out.date[n]               = utime
+               out.utime[n]              = secs
+               out.day[n]                = days
+               out.second[n]             = seconds
+               out.platform_lon[n]       = platform_lon
+               out.platform_lat[n]       = platform_lat
+               out.platform_hgt[n]       = platform_hgt
+               out.platform_dir1[n]      = dir1
+               out.platform_dir2[n]      = dir2
+               out.platform_dir3[n]      = dir3
+               out.platform_nyquist[n]   = field.nyquist[k]
+
+               n = n + 1
   
    # Create an xarray dataset for file I/O
    xa = xr.Dataset(pd.DataFrame.from_records(out))
 
-   # reset index to be a master index across all obs
-   xa.rename({'dim_0': 'index'}, inplace=True)
+#  # reset index to be a master index across all obs
+#  xa.rename({'dim_0': 'index'}, inplace=True)
 
    # Write the xarray file out (this is all there is, very nice guys!)
    xa.to_netcdf(filename, mode='w')
@@ -909,7 +921,7 @@ if __name__ == "__main__":
    parser.add_option(      "--window",    dest="window",    type="string", default=None,  \
                                     help = "Time of window location in YYYY,MM,DD,HH,MM")
 
-   parser.add_option("-u", "--unfold",    dest="unfold",    default="region",  type="string", \
+   parser.add_option("-u", "--unfold",    dest="unfold",    default="phase",  type="string", \
            help = "dealiasing method to use (phase or region, default = phase)")
                      
    parser.add_option("-w", "--write",     dest="write",   default=False, \
@@ -1167,6 +1179,7 @@ if __name__ == "__main__":
                    ret = velocity_unfold(volume, unfold_type=unfold_type2, gatefilter=gatefilter) 
                    vr_field = "unfolded velocity"
                    vr_label = "Unfolded Radial Velocity"
+                   print("\n ----> Alternate [ %s ] unfolding method worked!!\n" % unfold_type2)
                except:
                    print("\n ----> Both unfolding methods have failed!! Turning off unfolding\n\n")
                    vr_field = "velocity"
@@ -1197,7 +1210,6 @@ if __name__ == "__main__":
 #        print "\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu)
 #        print '\n ================================================================================'
 #        
-
 
        tim0 = timeit.time()
        

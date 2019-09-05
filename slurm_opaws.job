@@ -35,11 +35,11 @@ import calendar
 from optparse import OptionParser
 from multiprocessing import Pool
 
-_WSR88D_feed     = "/work/LDM/NEXRAD2"
-_VR_obs_seq      = "/work/wicker/REALTIME/VEL"
+_WSR88D_feed     = "/scratch/LDM/NEXRAD2"
+_VR_obs_seq_dir  = "/scratch/wicker/REALTIME/VEL"
 _WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
 _opaws2D         = "/work/wicker/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py"
-_opaws_logs      = "/work/wicker/REALTIME/VEL/logs"
+_opaws_logs      = "/scratch/wicker/REALTIME/VEL/logs"
 _command_file    = "./commands.txt"
 
 # offset to get the correct date for file directories and radar file
@@ -113,7 +113,7 @@ def process_opaws(utc_time, radar, command_file):
         return False
 
     # we put obs into local day directories, so use the local time
-    obs_seq_out_dir = os.path.join(_VR_obs_seq, local_time.strftime("%Y%m%d"))
+    obs_seq_out_dir = os.path.join(_VR_obs_seq_dir, local_time.strftime("%Y%m%d"))
 
     log_h.write("\n ============================================================================")
     log_h.write("\n Radar: %s  is being processed " % (radar))
@@ -127,11 +127,13 @@ def process_opaws(utc_time, radar, command_file):
     log_h.write("\n Reading from operational WSR88D directory:  %s\n" % WSR88D_dir)
 
 # Do one radar for a test
-# opaws2d.py -p 1 -o $outdir -d $indir -w --window 2018,05,02,23,45 --onlyVR --dx 5000. --roi 5000.
+# opaws2d.py -p 1 -o $outdir -d $indir -w --window 2018,05,02,23,45 --onlyVR --dx 5000. --roi 1000.
     
     log_h.write("\n >>>>=======BEGIN===============================================================")
     cmd = "%s -d %s -o %s -w --window %s --onlyVR -p %d --dx %f  --roi %f"  %  \
           (_opaws2D, WSR88D_dir, obs_seq_out_dir, opaws_time.strftime("%Y,%m,%d,%H,%M"), _plot_level, _dx, _roi)
+
+    print(cmd)
 
     log_h.write("\n opaws2D called at %s" % (opaws_time.strftime("%Y-%m-%d %H:%M:%S")))
 
@@ -234,7 +236,7 @@ def main(argv=None):
 
         # we put obs into local day directories, so use the local time
 
-        obs_seq_out_dir = os.path.join(_VR_obs_seq, local_time.strftime("%Y%m%d"))
+        obs_seq_out_dir = os.path.join(_VR_obs_seq_dir, local_time.strftime("%Y%m%d"))
 
         if not os.path.exists(obs_seq_out_dir):
             try:

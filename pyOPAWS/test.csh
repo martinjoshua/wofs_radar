@@ -1,5 +1,3 @@
-/scratch/software/radx/bin/RadxConvert -native -nexrad -f /work/LDM/NEXRAD2/KGWX/KGWX_20190418_2155 -output ./
+#!/bin/csh
 
-
-
-#/work/wicker/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py -d ./ -o ./ -w --window 2019,04,14,23,45 --onlyVR --dx 5000.000000  --roi 1000.00
+/work/wicker/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py -u phase -d /scratch/LDM/NEXRAD2/KJAX -o /scratch/wicker/REALTIME/VEL/20190904 -w --window 2019,09,04,18,30 --onlyVR -p 3 --dx 5000.000000  --roi 1000.000000

@@ -35,11 +35,12 @@ import calendar
 from optparse import OptionParser
 
 # Where stuff is or is going...
-_MRMS_feed       = "/work/LDM/MRMS"
-_MRMS_obs_seq    = "/work/wicker/REALTIME/REF"
-_MRMS_log        = "/work/wicker/REALTIME/REF/logs"
+_MRMS_feed       = "/scratch/LDM/MRMS"
+_MRMS_obs_seq    = "/scratch/wicker/REALTIME/REF"
+_MRMS_log        = "/scratch/wicker/REALTIME/REF/logs"
 _WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
 _prep_mrms       = "/work/wicker/REALTIME/WOFS_radar/pyMRMS/prep_mrms.py"
+
 delta_time       = DT.timedelta(minutes=15)
 one_second       = DT.timedelta(seconds=1)
 plot_level       = 3
@@ -64,7 +65,8 @@ def utc_to_local(utc_dt):
 def process_mrms(utc_time):
 
     # Log files are labeled on the local day, not UTC
-    local_time   = utc_to_local(DT.datetime.strptime(utc_time, "%Y%m%d%H%M"))
+#   local_time   = utc_to_local(DT.datetime.strptime(utc_time, "%Y%m%d%H%M"))
+    local_time   = DT.datetime.strptime(utc_time, "%Y%m%d%H%M") - DT.timedelta(hours=_hour_offset)
 
     log_filename = os.path.join(_MRMS_log, "prepMRMS_%s.log" % local_time.strftime("%Y%m%d"))
     log_h        = open(log_filename,"a")  # handle for the log file (one per day)

@@ -8,7 +8,7 @@ import datetime as DT
 import logging
 import subprocess
 
-_wofs_radar_dir     = "/work/wicker/REALTIME/WOFS_radar"
+_wofs_radar_dir     = "/scratch/wicker/REALTIME/WOFS_radar"
 _slurm_mrms_string  = "/work/wicker/REALTIME/WOFS_radar/slurm_mrms.job --start %s"
 
 _TEST = False
@@ -73,7 +73,6 @@ def scheduled_job():
     
     if _TEST != True:
         try:
-#             ret = os.system(cmd)
             MRMSret = subprocess.Popen([cmd],shell=True)
             MRMSret.wait()
             print("\n Slurm_mrms job finished at %s" % (now))

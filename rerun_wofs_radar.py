@@ -9,8 +9,7 @@ import logging
 import subprocess
 from optparse import OptionParser
 
-_wofs_VEL_dir       = "/work/wicker/REALTIME/VEL"
-_wofs_radar_dir     = "/work/LDM/NEXRAD2"
+_VR_obs_seq_dir     = "/scratch/wicker/REALTIME/VEL"
 _slurm_mrms_string  = "/work/wicker/REALTIME/WOFS_radar/slurm_mrms.job --start %s"
 _slurm_opaws_string = "/work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
 _slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d %s -f %s"
@@ -86,7 +85,7 @@ def main(time=None, no_mrms=False, no_opaws=False, no_combine=False):
            
    # combine all the files...
    
-   directory = "%s/%s" % (_wofs_VEL_dir,yyyy_mm_dd_directory.strftime("%Y%m%d"))
+   directory = "%s/%s" % (_VR_obs_seq_dir,yyyy_mm_dd_directory.strftime("%Y%m%d"))
    wildcard =  "_VR_{}.nc"
    cmd = (_slurm_concatenate % (directory, wildcard.format(cycle_time_str2)))
    if no_combine == False:
