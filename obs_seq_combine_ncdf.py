@@ -79,7 +79,7 @@ def main(argv=None):
     else:
 
         suffix = options.file
-        wild = os.path.abspath(options.dir)+"/obs_seq*"+suffix
+        wild = os.path.abspath(options.dir)+"/obs_seq_K*"+suffix
         print wild
         rawlist = glob.glob(wild)
         print rawlist

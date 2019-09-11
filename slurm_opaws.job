@@ -36,6 +36,7 @@ from optparse import OptionParser
 from multiprocessing import Pool
 
 _WSR88D_feed     = "/scratch/LDM/NEXRAD2"
+_WSR88D_feed     = "/scratch/tajones/realtime/OBSGEN/NEXRAD"  # TJ directory
 _VR_obs_seq_dir  = "/scratch/wicker/REALTIME/VEL"
 _WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
 _opaws2D         = "/work/wicker/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py"

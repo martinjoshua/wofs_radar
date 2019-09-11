@@ -63,6 +63,12 @@ import warnings
 parse_radar_name2 = '(?:[A-Z]{4}_)'
 parse_radar_name = '(?:[A-Z]{4}_)'
 
+# AWS filename sparse
+_AWS_L2Files = True
+_AWS_L2Name_Style = "%s/*%s*"
+#LDM filename parse
+_LDM_L2Name_Style = "%s/*_%s"
+
 # debug flag
 debug = False
 
@@ -848,7 +854,7 @@ def write_obs_seq_xarray(field, filename=None, obs_error=3., volume_name=None):
                out.error_var[n]          = obs_error**2
                out.lon[n]                = lons[i]
                out.lat[n]                = lats[j]
-               out.height[n]             = msl_hgt[k,i,j]
+               out.height[n]             = msl_hgt[k,j,i]
                out.date[n]               = utime
                out.utime[n]              = secs
                out.day[n]                = days
@@ -991,8 +997,14 @@ if __name__ == "__main__":
            ttime      = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
            start_time = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[0])
            stop_time  = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[1])
-           in_filenames = glob.glob("%s/*_%s*" % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"))) \
-                        + glob.glob("%s/*_%s*" % (os.path.abspath(options.dname),stop_time.strftime("%Y%m%d_%H")))
+
+           if _AWS_L2Files:
+               in_filenames = glob.glob(_AWS_L2Name_Style % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"))) \
+                            + glob.glob(_AWS_L2Name_Style % (os.path.abspath(options.dname),stop_time.strftime("%Y%m%d_%H")))
+           else:
+               in_filenames = glob.glob(_LDM_L2Name_Style % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"))) \
+                            + glob.glob(_LDM_L2Name_Style % (os.path.abspath(options.dname),stop_time.strftime("%Y%m%d_%H")))
+
            if len(in_filenames) == 0:
                print("\n COULD NOT find any files for radar %s between %s and %s, EXITING" \
                      % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"),stop_time.strftime("%Y%m%d_%H")))
@@ -1080,7 +1092,10 @@ if __name__ == "__main__":
        try:
            analysisT     = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
            xfiles        = [os.path.basename(f) for f in in_filenames]
-           xfiles_DT     = [DT.datetime.strptime("%s" % f[5:20], "%Y%m%d_%H%M%S") for f in xfiles]
+           if _AWS_L2Files:
+               xfiles_DT     = [DT.datetime.strptime("%s" % f[4:19], "%Y%m%d_%H%M%S") for f in xfiles]
+           else:
+               xfiles_DT     = [DT.datetime.strptime("%s" % f[5:20], "%Y%m%d_%H%M%S") for f in xfiles]
            in_filenames  = [in_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
            out_filenames = [out_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
            print("\n FOUND CLOSEST FILE:   %s" % in_filenames[0] )
@@ -1090,26 +1105,19 @@ if __name__ == "__main__":
 
    for n, fname in enumerate(in_filenames):
    
-# If window is specified, then find the file that fits in the window
-       if options.window:
-           file_time = DT.datetime.strptime("%s" % os.path.basename(fname)[5:], "%Y%m%d_%H%M%S")
-           if file_time < start_time or file_time >= stop_time:
-               continue
-           else:
-               print("\n FILE TIME WITHIN WINDOW:   %s" % file_time.strftime("%Y,%m,%d,%H,%M") )
-               print '\n Reading: {}\n'.format(fname)
-               print '\n Writing: {}\n'.format(out_filenames[n])
-   
-       tim0 = timeit.time()
-
  # the check for file size is to make sure there is data in the LVL2 file
        try:
            if os.path.getsize(fname) < 2048000:
                print '\n File {} is less than 2 mb, skipping...'.format(fname)
                continue
        except:
+           print("what?")
            continue
-      
+
+       tim0 = timeit.time() 
+
+       print '\n READING: {}\n'.format(fname)
+
        if fname[-3:] == ".nc":
          if _radar_parameters['field_label_trans'][0] == True:
              REF_LABEL = _radar_parameters['field_label_trans'][1]
@@ -1119,6 +1127,7 @@ if __name__ == "__main__":
              volume = pyart.io.read_cfradial(fname)
        else:
          try:
+           print("1")
            volume = pyart.io.read_nexrad_archive(fname, field_names=None, 
                                                  additional_metadata=None, file_field_names=False, 
                                                  delay_field_loading=False, 
@@ -1127,6 +1136,7 @@ if __name__ == "__main__":
            print '\n File {} cannot be read, skipping...\n'.format(fname)
            continue
 
+       print("2")
        opaws2D_io_cpu = timeit.time() - tim0
   
        print "\n Time for reading in LVL2: {} seconds".format(opaws2D_io_cpu)
@@ -1237,13 +1247,16 @@ if __name__ == "__main__":
        print '\n ================================================================================'
 
        if options.write == True:      
+           print '\n WRITING XARRAY: {}\n'.format(out_filenames[n])
            ret = write_obs_seq_xarray(vel, filename=out_filenames[n], obs_error= _obs_errors['velocity'], \
                                       volume_name=os.path.basename(fname))
 
+           print '\n WRITING DART: {}\n'.format(out_filenames[n])
            ret = write_DART_ascii(vel, filename=out_filenames[n], grid_dict=_grid_dict, \
                                   obs_error=[_obs_errors['velocity']] )
 
            if options.onlyVR != True:
+               print '\n WRITING DART ONLY VR: {}\n'.format(out_filenames[n])
                ret = write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
                                   obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
            
