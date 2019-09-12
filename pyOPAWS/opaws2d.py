@@ -47,7 +47,7 @@ import cressman
 import pyart
 
 import warnings
-warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 
 from pyproj import Proj
 import pylab as plt  
@@ -83,7 +83,7 @@ _plot_counties = True
 
 # Colorscale information
 _ref_scale = (0.,74.)
-_vr_scale  = (-40.,40.)
+_vr_scale  = (-50.,50.)
 
 # Need for Lambert conformal (default) coordinate projection
 truelat1, truelat2 = 30.0, 60.0
@@ -1111,7 +1111,6 @@ if __name__ == "__main__":
                print '\n File {} is less than 2 mb, skipping...'.format(fname)
                continue
        except:
-           print("what?")
            continue
 
        tim0 = timeit.time() 
@@ -1127,7 +1126,6 @@ if __name__ == "__main__":
              volume = pyart.io.read_cfradial(fname)
        else:
          try:
-           print("1")
            volume = pyart.io.read_nexrad_archive(fname, field_names=None, 
                                                  additional_metadata=None, file_field_names=False, 
                                                  delay_field_loading=False, 
@@ -1136,7 +1134,6 @@ if __name__ == "__main__":
            print '\n File {} cannot be read, skipping...\n'.format(fname)
            continue
 
-       print("2")
        opaws2D_io_cpu = timeit.time() - tim0
   
        print "\n Time for reading in LVL2: {} seconds".format(opaws2D_io_cpu)
@@ -1148,7 +1145,7 @@ if __name__ == "__main__":
 # Now we do QC
 
        tim0 = timeit.time()
-
+ 
        if options.qc == "None":
            print("\n No quality control will be done on data")
            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False, \
@@ -1157,8 +1154,8 @@ if __name__ == "__main__":
            print("\n QC type:  %s " % options.qc)
            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref, \
                                     max_range = _radar_parameters['max_range'])
-
-
+ 
+ 
        opaws2D_QC_cpu = timeit.time() - tim0
        
        print "\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu)
@@ -1175,30 +1172,11 @@ if __name__ == "__main__":
            vr_field = "velocity"
            vr_label = "Radial Velocity"
        else:
-           try:
-               print("\n Trying %s-based unfolding method\n" % unfold_type)
-               ret = velocity_unfold(volume, unfold_type=unfold_type, gatefilter=gatefile) 
-               vr_field = "unfolded velocity"
-               vr_label = "Unfolded Radial Velocity"
-           except:
-               print("\n ----> %s unfolding method has failed!! Trying alternate unfolding method\n" % unfold_type)
-               try:
-                   unfold_type2 = "region"
-                   if unfold_type == "region":    
-                       unfold_type2 = "phase"
-                   ret = velocity_unfold(volume, unfold_type=unfold_type2, gatefilter=gatefilter) 
-                   vr_field = "unfolded velocity"
-                   vr_label = "Unfolded Radial Velocity"
-                   print("\n ----> Alternate [ %s ] unfolding method worked!!\n" % unfold_type2)
-               except:
-                   print("\n ----> Both unfolding methods have failed!! Turning off unfolding\n\n")
-                   vr_field = "velocity"
-                   vr_label = "Radial Velocity"
+           vr_field, vr_label = velocity_unfold(volume, unfold_type=unfold_type, gatefilter=gatefilter)
 
        opaws2D_unfold_cpu = timeit.time() - tim0
 
        print "\n Time for unfolding velocity: {} seconds".format(opaws2D_unfold_cpu)
-
        print '\n ================================================================================'
   
 # Now we do QC
