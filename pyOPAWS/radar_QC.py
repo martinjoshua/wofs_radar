@@ -62,7 +62,7 @@ def volume_mapping(radar):
 ########################################################################
 # A wrapper for velocity unfolding...
   
-def velocity_unfold(radar, unfold_type="region", gatefilter=None):
+def velocity_unfold(radar, unfold_type="region", gatefilter=None, interval_splits=3):
 
 # In order to use pyART dealiasing, make sure the nyquist velocity on a sweep is constant 
 # Multi-PRF schemes are a problem because the information needed to dealias is NOT stored in the
@@ -77,9 +77,12 @@ def velocity_unfold(radar, unfold_type="region", gatefilter=None):
 
        start = idx[0]
        end   = idx[1] + 1
-       
-       nyq_min = nyq[start:end].min()
-       radar.instrument_parameters['nyquist_velocity']['data'][start:end] = nyq_min
+
+       if _verbose_QC:
+           print("Velocity_Unfold/ Ray:  %d  %d  Nyquist_max:  %f   Nyquist_min:  %f" % 
+                  (start, end, nyq[start:end].max(), nyq[start:end].min()))
+
+#      radar.instrument_parameters['nyquist_velocity']['data'][start:end] = nyq[start:end].min()
 
    del(nyq)
     
@@ -87,7 +90,7 @@ def velocity_unfold(radar, unfold_type="region", gatefilter=None):
 
    if unfold_type == "region":
        try:
-           dealiased_vel = pyart.correct.dealias_region_based(radar, interval_splits=3,
+           dealiased_vel = pyart.correct.dealias_region_based(radar, interval_splits=6,
                                                           interval_limits=None, skip_between_rays=100,
                                                           skip_along_ray=100, centered=True,
                                                           nyquist_vel=None, check_nyquist_uniform=False,
@@ -96,7 +99,7 @@ def velocity_unfold(radar, unfold_type="region", gatefilter=None):
                                                           vel_field='velocity')
                                    
            radar.add_field('unfolded velocity', dealiased_vel)
-           return ["unfolded velocity", "Unfolded Radial Velocity"]
+           return ["unfolded velocity", "Region-Unfold Radial Velocity"]
 
        except:
            print("\n ----> RADAR_QC/volume_unfold:  Region unfolding method has failed! Raw velocities will be used.\n") 
@@ -115,7 +118,7 @@ def velocity_unfold(radar, unfold_type="region", gatefilter=None):
                                                               vel_field='velocity')
 
            radar.add_field('unfolded velocity', dealiased_vel)
-           return ["unfolded velocity", "Unfolded Radial Velocity"]
+           return ["unfolded velocity", "Phase-Unfold Radial Velocity"]
        except:
            print("\n ----> RADAR_QC/volume_unfold:  Phase unfolding method has failed!! Raw velocities will be used.\n")
            return ["velocity", "Radial Velocity"]
