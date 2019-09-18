@@ -29,6 +29,13 @@ import glob
 import re
 import time as timeit
 
+# Need to set the backend BEFORE loading pyplot
+import matplotlib as mpl
+mpl.use('Agg')
+
+import warnings
+warnings.filterwarnings("ignore")
+
 import numpy as np
 import scipy.interpolate
 import scipy.ndimage as ndimage
@@ -42,12 +49,11 @@ from dart_tools import *
 from radar_QC import *
 import xarray as xr
 import pandas as pd
+import metpy.calc as mpcalc
+from metpy.units import units
 
 import cressman
 import pyart
-
-import warnings
-warnings.filterwarnings("ignore")
 
 from pyproj import Proj
 import pylab as plt  
@@ -148,6 +154,30 @@ class Gridded_Field(object):
       
   def keys(self):
     return self.__dict__
+
+#=========================================================================================
+# Read in sounding file
+
+def get_sounding(file=None):
+    
+    if file == None:
+        file = './KGRB_2019072000_raob.txt'
+        df = pd.read_fwf(file, skiprows=1, usecols=[1,6,7],
+        names=['height', 'direction', 'speed'])
+        wind_dir = df['direction'].values * units.degrees
+        wind_spd = df['speed'].values*.514
+        u, v = mpcalc.wind_components(wind_spd, wind_dir)
+
+        for n in np.arange(u.shape[0]):
+            print("%8.1f  %6.3f  %6.3f  %5.2f  %5.2f  %5.2f" % 
+                   (df['height'].values[n], df['direction'].values[n], wind_spd[n], u[n], v[n]))
+
+        return Gridded_Field('sounding', height = df['height'].values,
+                                         u_wind = u,
+                                         v_wind = v)
+    else:
+        print('No sounding found')
+        return None
 
 #=========================================================================================
 # DBZ Mask
@@ -1179,9 +1209,11 @@ if __name__ == "__main__":
            vr_field = "velocity"
            vr_label = "Radial Velocity"
        else:
+           wind_profile = get_sounding()
            vr_field, vr_label = velocity_unfold(volume, unfold_type=unfold_type, 
                                                 gatefilter=gatefilter, 
-                                                interval_splits=_radar_parameters['region_interval_splits'])
+                                                interval_splits=_radar_parameters['region_interval_splits'],
+                                                wind_profile = wind_profile)
 
        opaws2D_unfold_cpu = timeit.time() - tim0
 

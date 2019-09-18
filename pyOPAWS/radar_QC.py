@@ -62,7 +62,7 @@ def volume_mapping(radar):
 ########################################################################
 # A wrapper for velocity unfolding...
   
-def velocity_unfold(radar, unfold_type="region", gatefilter=None, interval_splits=3):
+def velocity_unfold(radar, unfold_type="region", gatefilter=None, interval_splits=3, wind_profile=None):
 
 # In order to use pyART dealiasing, make sure the nyquist velocity on a sweep is constant 
 # Multi-PRF schemes are a problem because the information needed to dealias is NOT stored in the
@@ -89,8 +89,10 @@ def velocity_unfold(radar, unfold_type="region", gatefilter=None, interval_split
 # Dealias the velocity data
 
    if unfold_type == "region":
+       simulated_profile = pyart.util.simulated_vel_from_profile(radar, wind_profile)
        try:
            dealiased_vel = pyart.correct.dealias_region_based(radar, interval_splits=6,
+                                                          ref_vel_field = 'simulated_vel',
                                                           interval_limits=None, skip_between_rays=100,
                                                           skip_along_ray=100, centered=True,
                                                           nyquist_vel=None, check_nyquist_uniform=False,
