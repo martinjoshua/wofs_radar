@@ -1,6 +1,14 @@
+#-----------------------------------------------------------------------
 # This file contains the directories needed by WoFS radar processing.  
 # Change things here to where you want them to come FROM or go TO...
 #  
+#
+# In the rerun, slurm_mrms, or slurm_opaws scripts, these are imported 
+# directly via
+#
+# from wofs_dirs import _MRMS_feed, _WSR88D_feed, ....
+#
+#  etc.
 #-----------------------------------------------------------------------
 # from slurm_mrms.job
 _MRMS_feed       = "/scratch/LDM/MRMS"
