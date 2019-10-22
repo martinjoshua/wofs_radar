@@ -961,8 +961,8 @@ if __name__ == "__main__":
    parser.add_option(      "--window",    dest="window",    type="string", default=None,  \
                                     help = "Time of window location in YYYY,MM,DD,HH,MM")
 
-   parser.add_option("-u", "--unfold",    dest="unfold",    default="phase",  type="string", \
-           help = "dealiasing method to use (phase or region, default = phase)")
+   parser.add_option("-u", "--unfold",    dest="unfold",    default="region",  type="string", \
+           help = "dealiasing method to use (phase or region, default = region)")
                      
    parser.add_option("-w", "--write",     dest="write",   default=False, \
            help = "Boolean flag to write DART ascii file", action="store_true")
@@ -1209,11 +1209,10 @@ if __name__ == "__main__":
            vr_field = "velocity"
            vr_label = "Radial Velocity"
        else:
-           wind_profile = get_sounding()
            vr_field, vr_label = velocity_unfold(volume, unfold_type=unfold_type, 
                                                 gatefilter=gatefilter, 
                                                 interval_splits=_radar_parameters['region_interval_splits'],
-                                                wind_profile = wind_profile)
+                                                wind_profile = None)
 
        opaws2D_unfold_cpu = timeit.time() - tim0
 

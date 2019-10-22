@@ -9,10 +9,13 @@ import logging
 import subprocess
 from optparse import OptionParser
 
-_VR_obs_seq_dir     = "/scratch/wicker/REALTIME/VEL"
-_slurm_mrms_string  = "/work/wicker/REALTIME/WOFS_radar/slurm_mrms.job --start %s"
-_slurm_opaws_string = "/work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
-_slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d %s -f %s"
+# Import wofs_dirs to tell you where things are....
+from wofs_dirs import _VR_obs_seq_dir, _slurm_mrms_string, _slurm_opaws_string, _slurm_concatenate
+
+#_VR_obs_seq_dir     = "/scratch/wicker/REALTIME/VEL"
+#_slurm_mrms_string  = "~/REALTIME/WOFS_radar/slurm_mrms.job --start %s"
+#_slurm_opaws_string = "~/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
+#_slurm_concatenate  = "~/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d %s -f %s"
 
 _TEST = False
 

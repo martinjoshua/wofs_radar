@@ -89,23 +89,41 @@ def velocity_unfold(radar, unfold_type="region", gatefilter=None, interval_split
 # Dealias the velocity data
 
    if unfold_type == "region":
-       simulated_profile = pyart.util.simulated_vel_from_profile(radar, wind_profile)
-       try:
-           dealiased_vel = pyart.correct.dealias_region_based(radar, interval_splits=6,
-                                                          ref_vel_field = 'simulated_vel',
-                                                          interval_limits=None, skip_between_rays=100,
-                                                          skip_along_ray=100, centered=True,
-                                                          nyquist_vel=None, check_nyquist_uniform=False,
-                                                          gatefilter=gatefilter, rays_wrap_around=None,
-                                                          keep_original=True, set_limits=False,
-                                                          vel_field='velocity')
+       if wind_profile != None:
+           simulated_profile = pyart.util.simulated_vel_from_profile(radar, wind_profile)
+           try:
+               dealiased_vel = pyart.correct.dealias_region_based(radar, interval_splits=6,
+                                                              ref_vel_field = 'simulated_vel',
+                                                              interval_limits=None, skip_between_rays=100,
+                                                              skip_along_ray=100, centered=True,
+                                                              nyquist_vel=None, check_nyquist_uniform=False,
+                                                              gatefilter=gatefilter, rays_wrap_around=None,
+                                                              keep_original=True, set_limits=False,
+                                                              vel_field='velocity')
                                    
-           radar.add_field('unfolded velocity', dealiased_vel)
-           return ["unfolded velocity", "Region-Unfold Radial Velocity"]
+               radar.add_field('unfolded velocity', dealiased_vel)
+               return ["unfolded velocity", "Region-Unfold Radial Velocity"]
 
-       except:
-           print("\n ----> RADAR_QC/volume_unfold:  Region unfolding method has failed! Raw velocities will be used.\n") 
-           return ["velocity", "Raw Radial Velocity"]
+           except:
+               print("\n ----> RADAR_QC/volume_unfold:  Region unfolding method has failed! Raw velocities will be used.\n") 
+               return ["velocity", "Raw Radial Velocity"]
+       
+       else:
+           try:
+               dealiased_vel = pyart.correct.dealias_region_based(radar, interval_splits=6,
+                                                              interval_limits=None, skip_between_rays=100,
+                                                              skip_along_ray=100, centered=True,
+                                                              nyquist_vel=None, check_nyquist_uniform=False,
+                                                              gatefilter=gatefilter, rays_wrap_around=None,
+                                                              keep_original=True, set_limits=False,
+                                                              vel_field='velocity')
+                                   
+               radar.add_field('unfolded velocity', dealiased_vel)
+               return ["unfolded velocity", "Region-Unfold Radial Velocity"]
+
+           except:
+               print("\n ----> RADAR_QC/volume_unfold:  Region unfolding method has failed! Raw velocities will be used.\n") 
+               return ["velocity", "Raw Radial Velocity"]
        
    if unfold_type == "phase":
        try:

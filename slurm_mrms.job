@@ -34,12 +34,15 @@ import datetime as DT
 import calendar
 from optparse import OptionParser
 
+# Import wofs_dirs to tell you where things are....
+from wofs_dirs import _MRMS_feed, _MRMS_obs_seq, _MRMS_log, _WOFS_grid_info, _prep_mrms
+
 # Where stuff is or is going...
-_MRMS_feed       = "/scratch/LDM/MRMS"
-_MRMS_obs_seq    = "/scratch/wicker/REALTIME/REF"
-_MRMS_log        = "/scratch/wicker/REALTIME/REF/logs"
-_WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
-_prep_mrms       = "/work/wicker/REALTIME/WOFS_radar/pyMRMS/prep_mrms.py"
+#_MRMS_feed       = "/scratch/LDM/MRMS"
+#_MRMS_obs_seq    = "/scratch/wicker/REALTIME/REF"
+#_MRMS_log        = "/scratch/wicker/REALTIME/REF/logs"
+#_WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
+#_prep_mrms       = "/work/wicker/REALTIME/WOFS_radar/pyMRMS/prep_mrms.py"
 
 delta_time       = DT.timedelta(minutes=15)
 one_second       = DT.timedelta(seconds=1)

@@ -35,12 +35,14 @@ import calendar
 from optparse import OptionParser
 from multiprocessing import Pool
 
-_WSR88D_feed     = "/scratch/LDM/NEXRAD2"
-_WSR88D_feed     = "/scratch/tajones/realtime/OBSGEN/NEXRAD"  # TJ directory
-_VR_obs_seq_dir  = "/scratch/wicker/REALTIME/VEL"
-_WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
-_opaws2D         = "/work/wicker/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py"
-_opaws_logs      = "/scratch/wicker/REALTIME/VEL/logs"
+# Import wofs_dirs to tell you where things are....
+from wofs_dirs import _WSR88D_feed, _VR_obs_seq_dir, _WOFS_grid_info, _opaws2D, _opaws_logs
+
+#_WSR88D_feed     = "/scratch/wicker/realtime/OBSGEN/NEXRAD"
+#_VR_obs_seq_dir  = "/scratch/wicker/REALTIME/VEL"
+#_WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
+#_opaws2D         = "~/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py"
+#_opaws_logs      = "/scratch/wicker/REALTIME/VEL/logs"
 _command_file    = "./commands.txt"
 
 # offset to get the correct date for file directories and radar file
