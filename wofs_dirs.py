@@ -21,21 +21,21 @@ WOFS_DIR = os.getcwd()
 #-----------------------------------------------------------------------
 # WOFS grid info directory
 
-_WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
+_WOFS_grid_info  = "/scratch/wof/realtime/radar_files"  #EDIT HERE
 
 #-----------------------------------------------------------------------
 # MRMS processing
 
-_MRMS_feed       = "/scratch/LDM/MRMS"
-_MRMS_obs_seq    = "/scratch/wicker/REALTIME/REF"
+_MRMS_feed       = "/scratch/LDM/MRMS"                  # EDIT HERE
+_MRMS_obs_seq    = "/scratch/wicker/REALTIME/REF"       # EDIT HERE
 _prep_mrms       = WOFS_DIR+"/pyMRMS/prep_mrms.py"
 _MRMS_log        = _MRMS_obs_seq+"/logs"
 
 #-----------------------------------------------------------------------
 # VR processing
 
-_WSR88D_feed     = "/scratch/wicker/realtime/OBSGEN/NEXRAD"
-_VR_obs_seq_dir  = "/scratch/wicker/REALTIME/VEL"
+_WSR88D_feed     = "/scratch/wicker/realtime/OBSGEN/NEXRAD"  # EDIT HERE
+_VR_obs_seq_dir  = "/scratch/wicker/REALTIME/VEL"            # EDIT HERE
 _opaws2D         = WOFS_DIR+"/pyOPAWS/opaws2d.py"
 _opaws_logs      = _VR_obs_seq_dir+"/logs"
 
