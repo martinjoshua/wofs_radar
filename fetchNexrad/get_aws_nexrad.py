@@ -39,7 +39,7 @@ _window = 10
 
 _wget_string   = "wget -c https://noaa-nexrad-level2.s3.amazonaws.com/"
 
-_get_aws_string= "/work/wicker/REALTIME/WOFS_radar/get_aws_nexrad.py --start %s --window %s -r %s >& %s "
+_get_aws_string= "./get_aws_nexrad.py --start %s --window %s -r %s >& %s "
 
 debug = True
 
@@ -112,6 +112,8 @@ def getS3FileList(radar, datetime, window):
 
     if debug:
         print(" \n getS3FileList string: %s \n" % prefix)
+        print(" \n %s \n" % datetime.strftime("%Y%m%d_%H%M"))
+        print(" \n %s \n" % (datetime+window).strftime("%Y%m%d_%H%M"))
 
     file_list = noaas3.list_objects_v2(Bucket='noaa-nexrad-level2', Delimiter='/', Prefix=prefix)
 
@@ -124,6 +126,25 @@ def getS3FileList(radar, datetime, window):
             print("Found file:  %s for time %s" % (file_time.strftime("%Y%m%d_%H%M"), datetime.strftime("%Y%m%d_%H%M")))
         else:
             continue
+
+    if (datetime.date() < (datetime+window).date()):  # need to get file list from next day....
+
+        prefix = "%s/%s/" % ((datetime+window).strftime("%Y/%m/%d"), radar)
+
+        if debug:
+            print(" \n getS3FileList string for next day: %s \n" % prefix)
+
+        file_list = noaas3.list_objects_v2(Bucket='noaa-nexrad-level2', Delimiter='/', Prefix=prefix)
+
+        for i in file_list['Contents'][:]:
+
+            file_time = DT.datetime.strptime(os.path.basename(i['Key'])[4:17], "%Y%m%d_%H%M")
+
+            if file_time >= datetime and file_time < datetime + window:
+                files.append(i['Key'])
+                print("Found file:  %s for time %s" % (file_time.strftime("%Y%m%d_%H%M"), datetime.strftime("%Y%m%d_%H%M")))
+            else:
+                continue
 
     #here you can then feed the list to boto3.s3.copy_object or use wget proce
 

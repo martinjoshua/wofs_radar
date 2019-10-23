@@ -10,23 +10,41 @@
 #
 #  etc.
 #-----------------------------------------------------------------------
-# from slurm_mrms.job
+#
+
+import os
+
+# Find current working directory
+
+WOFS_DIR = os.getcwd()
+
+#-----------------------------------------------------------------------
+# WOFS grid info directory
+
+_WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
+
+#-----------------------------------------------------------------------
+# MRMS processing
+
 _MRMS_feed       = "/scratch/LDM/MRMS"
 _MRMS_obs_seq    = "/scratch/wicker/REALTIME/REF"
-_MRMS_log        = "/scratch/wicker/REALTIME/REF/logs"
-_WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
-_prep_mrms       = "/work/wicker/REALTIME/WOFS_radar/pyMRMS/prep_mrms.py"
+_prep_mrms       = WOFS_DIR+"/pyMRMS/prep_mrms.py"
+_MRMS_log        = _MRMS_obs_seq+"/logs"
 
 #-----------------------------------------------------------------------
-# from slurm_opaws.job
-_VR_obs_seq_dir  = "/scratch/wicker/REALTIME/VEL"
+# VR processing
+
 _WSR88D_feed     = "/scratch/wicker/realtime/OBSGEN/NEXRAD"
-_WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
-_opaws2D         = "~/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py"
-_opaws_logs      = "/scratch/wicker/REALTIME/VEL/logs"
+_VR_obs_seq_dir  = "/scratch/wicker/REALTIME/VEL"
+_opaws2D         = WOFS_DIR+"/pyOPAWS/opaws2d.py"
+_opaws_logs      = _VR_obs_seq_dir+"/logs"
 
 #-----------------------------------------------------------------------
-# from rerun_wofs
-_slurm_mrms_string  = "~/REALTIME/WOFS_radar/slurm_mrms.job --start %s"
-_slurm_opaws_string = "~/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
-_slurm_concatenate  = "~/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d %s -f %s"
+# Command strings to run within rerun...
+
+_slurm_mrms_string  = WOFS_DIR+"/slurm_mrms.job --start %s" 
+_slurm_opaws_string = WOFS_DIR+"/slurm_opaws.job --start %s"
+_slurm_concatenate  = WOFS_DIR+"/obs_seq_combine_ncdf.py -d %s -f %s"
+
+#
+#-----------------------------------------------------------------------
