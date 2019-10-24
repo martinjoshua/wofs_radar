@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from apscheduler.schedulers.blocking import BlockingScheduler
 import time
 import os
 import sys
