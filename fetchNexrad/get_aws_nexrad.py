@@ -15,9 +15,12 @@
 #
 #############################################################
 
+from __future__ import print_function
 import datetime as DT
 import sys, os
 import boto3
+from botocore import UNSIGNED
+from botocore.client import Config
 from optparse import OptionParser
 import datetime as DT
 from multiprocessing import Pool
@@ -39,7 +42,7 @@ _window = 10
 
 _wget_string   = "wget -c https://noaa-nexrad-level2.s3.amazonaws.com/"
 
-_get_aws_string= "./get_aws_nexrad.py --start %s --window %s -r %s >& %s "
+_get_aws_string= "./get_aws_nexrad.py --start %s --window %s -r %s -d %s > %s 2>&1"
 
 debug = True
 
@@ -82,7 +85,7 @@ def parse_NEWSe_radar_file(radar_file_csh, start, window, outdir):
     for radar in radar_list:
         print(" \n Now processing %s \n " % radar)
         log_file = os.path.join(outdir, "%s.%s.log" % (radar, start.strftime("%Y%m%d")))
-        cmd = _get_aws_string % ( start.strftime("%Y%m%d%H%M"), window, radar, log_file  )
+        cmd = _get_aws_string % ( start.strftime("%Y%m%d%H%M"), window, radar, os.path.join(outdir, radar), log_file  )
         
         if debug:
             print(cmd)
@@ -104,7 +107,8 @@ def parse_NEWSe_radar_file(radar_file_csh, start, window, outdir):
 
 def getS3FileList(radar, datetime, window):
 
-    noaas3 = boto3.client('s3', region_name = _region)
+    # access s3 anonymously
+    noaas3 = boto3.client('s3', region_name = _region, config=Config(signature_version=UNSIGNED))
 
     files = []
 
@@ -181,9 +185,9 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
 
     if options.start == None:
-        print "\n                NO START DATE AND HOUR SUPPLIED, EXITING.... \n "
+        print("\n                NO START DATE AND HOUR SUPPLIED, EXITING.... \n ")
         parser.print_help()
-        print
+        print()
         sys.exit(1)
     else:
         start   = DT.datetime.strptime(options.start, "%Y%m%d%H%M") 
@@ -197,9 +201,9 @@ if __name__ == "__main__":
         DT_window = DT.timedelta(minutes=options.window)
 
     if options.radar == None and options.newse == None:
-        print "\n                NO RADAR SUPPLIED, EXITING.... \n "
+        print("\n                NO RADAR SUPPLIED, EXITING.... \n ")
         parser.print_help()
-        print
+        print()
         sys.exit(1)
     else:
         radar = options.radar
@@ -246,8 +250,7 @@ if __name__ == "__main__":
      
          cmd = "%s%s -P %s" % (_wget_string, file, out_dir)
          
-         if debug:
-             print(cmd)
+         print(cmd)
          
          pool.apply_async(RunProcess, (cmd,))
  
@@ -256,9 +259,9 @@ if __name__ == "__main__":
 
     cpu0 = cpu.time() - c0
  
-    print "\nDownload from Amazon took   %f  secs\n" % (round(cpu0, 3))
+    print("\nDownload from Amazon took   %f  secs\n" % (round(cpu0, 3)))
 
 
     cpu0 = cpu.time() - c0
     
-    print "\Downloading %s files took   %f  secs\n" % (radar, round(cpu0, 3))
+    print("\nDownloading %s files took   %f  secs\n" % (radar, round(cpu0, 3)))
