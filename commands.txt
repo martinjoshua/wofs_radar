@@ -1,2 +1,0 @@
-/home/louis.wicker/python_software/wofs_radar/pyOPAWS/opaws2d.py -d /work/LDM/NEXRAD2/KDVN -o ./VR/20190411 -w --window 2019,04,11,23,00 -p 3 --onlyVR --dx 5000.000000  --roi 1000.000000
-/home/louis.wicker/python_software/wofs_radar/pyOPAWS/opaws2d.py -d /work/LDM/NEXRAD2/KMKX -o ./VR/20190411 -w --window 2019,04,11,23,00 -p 3 --onlyVR --dx 5000.000000  --roi 1000.000000

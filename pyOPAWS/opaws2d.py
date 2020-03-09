@@ -29,6 +29,13 @@ import glob
 import re
 import time as timeit
 
+# Need to set the backend BEFORE loading pyplot
+import matplotlib as mpl
+mpl.use('Agg')
+
+import warnings
+warnings.filterwarnings("ignore")
+
 import numpy as np
 import scipy.interpolate
 import scipy.ndimage as ndimage
@@ -42,12 +49,11 @@ from dart_tools import *
 from radar_QC import *
 import xarray as xr
 import pandas as pd
+import metpy.calc as mpcalc
+from metpy.units import units
 
 import cressman
 import pyart
-
-import warnings
-warnings.filterwarnings("ignore")
 
 from pyproj import Proj
 import pylab as plt  
@@ -83,7 +89,7 @@ _plot_counties = True
 
 # Colorscale information
 _ref_scale = (0.,74.)
-_vr_scale  = (-40.,40.)
+_vr_scale  = (-50.,50.)
 
 # Need for Lambert conformal (default) coordinate projection
 truelat1, truelat2 = 30.0, 60.0
@@ -113,7 +119,9 @@ _grid_dict = {
 _radar_parameters = {
                      'min_dbz_analysis': 25.0, 
                      'max_range': 150000.,
-                     'max_Nyquist_factor': 4,                    # dont allow output of velocities > Nyquist*factor
+                     'max_Nyquist_factor': 3,                    # Filter(Vr): dont allow output of velocities > Nyquist*factor
+                     'max_Radial_Velocity': 50.,                  # Filter(Vr): mask any Vr's greater, likely to be poor unfolding
+                     'region_interval_splits': 5,                # default is 3, increase to improve mesoscale regions of unfolding.  
                      'field_label_trans': [False, "DBZC", "VR"]  # RaxPol 31 May - must specify for edit sweep files
                     }
 
@@ -125,6 +133,9 @@ _obs_errors = {
                 'velocity'      : 3.0
               }
         
+# default plot levels when more than 1 is desired - mostly for debugging
+_plevels = [0, 1, 2, 3, 4, 5]
+
 # List for when window is used to find a file within a specific window - units are minutes
            
 _window_param = [ -10, 10 ]
@@ -143,6 +154,30 @@ class Gridded_Field(object):
       
   def keys(self):
     return self.__dict__
+
+#=========================================================================================
+# Read in sounding file
+
+def get_sounding(file=None):
+    
+    if file == None:
+        file = './KGRB_2019072000_raob.txt'
+        df = pd.read_fwf(file, skiprows=1, usecols=[1,6,7],
+        names=['height', 'direction', 'speed'])
+        wind_dir = df['direction'].values * units.degrees
+        wind_spd = df['speed'].values*.514
+        u, v = mpcalc.wind_components(wind_spd, wind_dir)
+
+        for n in np.arange(u.shape[0]):
+            print("%8.1f  %6.3f  %6.3f  %5.2f  %5.2f  %5.2f" % 
+                   (df['height'].values[n], df['direction'].values[n], wind_spd[n], u[n], v[n]))
+
+        return Gridded_Field('sounding', height = df['height'].values,
+                                         u_wind = u,
+                                         v_wind = v)
+    else:
+        print('No sounding found')
+        return None
 
 #=========================================================================================
 # DBZ Mask
@@ -226,12 +261,10 @@ def vel_masking(vel, ref, volume):
 
 # Limit max/min values of radial velocity (bad unfolding, too much "truth")
 
-#  Commented out because of high velocities in hurricanes
-
-#  for m in np.arange(volume.nsweeps):
+   for m in np.arange(vel.data.shape[0]):
 #      Vr_max = volume.get_nyquist_vel(m)
-#      mask1  = (np.abs(vel.data[m]) > _radar_parameters['max_Nyquist_factor']*Vr_max)                 
-#      vel.data.mask[m] = np.logical_or(vel.data.mask[m], mask1)
+       mask1  = (np.abs(vel.data[m]) > _radar_parameters['max_Radial_Velocity'])
+       vel.data.mask[m] = np.logical_or(vel.data.mask[m], mask1)
         
    if _grid_dict['max_height'] > 0:
       mask1 = (vel.zg - vel.radar_hgt) > _grid_dict['max_height']
@@ -503,8 +536,10 @@ def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, intera
   if fsuffix == None:
       print("\n opaws2D.grid_plot:  No output file name is given, writing to %s" % "VR_RF_...png")
       filename = "%s/VR_RF_%2.2d_plot.png" % (dir, sweep)
+      print("\n opaws2D.grid_plot:  No output file name is given, writing to %s" % filename)
   else:
-       filename = "%s_%2.2d.png" % (os.path.join(dir, fsuffix), sweep)
+      filename = "%s_%2.2d.png" % (os.path.join(dir, fsuffix), sweep)
+      print("\n opaws2D.grid_plot:  Writing plot to %s" % filename)
 
   fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(14,10))
   
@@ -561,7 +596,7 @@ def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, intera
 
   try:
       r_mask = (ref.zero_dbz.mask == False)
-      print("\n Plotting zeros from MRMS level\n")
+#     print("\n Plotting zeros from MRMS level\n")
       bgmap.scatter(xg_2d[r_mask], yg_2d[r_mask], s=25, facecolors='none', \
                     edgecolors='k', alpha=1.0, ax=ax1) 
                     
@@ -593,12 +628,11 @@ def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, intera
 
   vr_mask = (vel.data.mask == False)[sweep]
   vr_data = vel.data[sweep]
-  print(np.sum(vr_data.mask == False))
   
   im1 = bgmap.pcolormesh(xe, ye, vr_data, cmap=cmapv, vmin=_vr_scale[0], vmax=_vr_scale[1], ax=ax2)
   cbar = bgmap.colorbar(im1,location='right')
   cbar.set_label('Dealised Radial Velocity (meters_per_second)')
-  ax2.set_title('Thresholded, Unfolded Radial Velocity (Gridded)') 
+  ax2.set_title('Gridded/Thresholded/Unfolded VR / Nyquist: %4.1f m/s' % vel.nyquist[sweep]) 
   bgmap.scatter(xoffset,yoffset, c='k', s=50., alpha=0.8, ax=ax2)
 
   at = AnchoredText("Max Vr: %4.1f \nMin Vr: %4.1f " % \
@@ -927,8 +961,8 @@ if __name__ == "__main__":
    parser.add_option(      "--window",    dest="window",    type="string", default=None,  \
                                     help = "Time of window location in YYYY,MM,DD,HH,MM")
 
-   parser.add_option("-u", "--unfold",    dest="unfold",    default="phase",  type="string", \
-           help = "dealiasing method to use (phase or region, default = phase)")
+   parser.add_option("-u", "--unfold",    dest="unfold",    default="region",  type="string", \
+           help = "dealiasing method to use (phase or region, default = region)")
                      
    parser.add_option("-w", "--write",     dest="write",   default=False, \
            help = "Boolean flag to write DART ascii file", action="store_true")
@@ -948,7 +982,7 @@ if __name__ == "__main__":
    parser.add_option(     "--roi",     dest="roi",   default=None, type="float", \
            help = "Radius of influence in meters for superob regrid")
 
-   parser.add_option("-p", "--plot",      dest="plot",      default=-1,  type="int",      \
+   parser.add_option("-p", "--plot",      dest="plot",      default=0,  type="int",      \
            help = "Specify a number between 0 and # elevations to plot ref and vr in that co-plane")
                      
    parser.add_option("-i", "--interactive", dest="interactive", default=False,  action="store_true",     \
@@ -1074,11 +1108,14 @@ if __name__ == "__main__":
    if options.roi:
       _grid_dict['ROI'] = options.roi
 
-   if options.plot < 0:
-       plot_grid = False
+   if options.plot == 0:
+       sweep_num = []
+   elif options.plot > 0:
+       sweep_num = [options.plot]
+       if not os.path.exists("images"):
+           os.mkdir("images")
    else:
-       sweep_num = options.plot
-       plot_grid = True
+       sweep_num = _plevels
        if not os.path.exists("images"):
            os.mkdir("images")
 
@@ -1111,7 +1148,6 @@ if __name__ == "__main__":
                print '\n File {} is less than 2 mb, skipping...'.format(fname)
                continue
        except:
-           print("what?")
            continue
 
        tim0 = timeit.time() 
@@ -1127,7 +1163,6 @@ if __name__ == "__main__":
              volume = pyart.io.read_cfradial(fname)
        else:
          try:
-           print("1")
            volume = pyart.io.read_nexrad_archive(fname, field_names=None, 
                                                  additional_metadata=None, file_field_names=False, 
                                                  delay_field_loading=False, 
@@ -1136,7 +1171,6 @@ if __name__ == "__main__":
            print '\n File {} cannot be read, skipping...\n'.format(fname)
            continue
 
-       print("2")
        opaws2D_io_cpu = timeit.time() - tim0
   
        print "\n Time for reading in LVL2: {} seconds".format(opaws2D_io_cpu)
@@ -1148,7 +1182,7 @@ if __name__ == "__main__":
 # Now we do QC
 
        tim0 = timeit.time()
-
+ 
        if options.qc == "None":
            print("\n No quality control will be done on data")
            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False, \
@@ -1157,8 +1191,8 @@ if __name__ == "__main__":
            print("\n QC type:  %s " % options.qc)
            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref, \
                                     max_range = _radar_parameters['max_range'])
-
-
+ 
+ 
        opaws2D_QC_cpu = timeit.time() - tim0
        
        print "\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu)
@@ -1175,66 +1209,24 @@ if __name__ == "__main__":
            vr_field = "velocity"
            vr_label = "Radial Velocity"
        else:
-           try:
-               print("\n Trying %s-based unfolding method\n" % unfold_type)
-               ret = velocity_unfold(volume, unfold_type=unfold_type, gatefilter=gatefile) 
-               vr_field = "unfolded velocity"
-               vr_label = "Unfolded Radial Velocity"
-           except:
-               print("\n ----> %s unfolding method has failed!! Trying alternate unfolding method\n" % unfold_type)
-               try:
-                   unfold_type2 = "region"
-                   if unfold_type == "region":    
-                       unfold_type2 = "phase"
-                   ret = velocity_unfold(volume, unfold_type=unfold_type2, gatefilter=gatefilter) 
-                   vr_field = "unfolded velocity"
-                   vr_label = "Unfolded Radial Velocity"
-                   print("\n ----> Alternate [ %s ] unfolding method worked!!\n" % unfold_type2)
-               except:
-                   print("\n ----> Both unfolding methods have failed!! Turning off unfolding\n\n")
-                   vr_field = "velocity"
-                   vr_label = "Radial Velocity"
+           vr_field, vr_label = velocity_unfold(volume, unfold_type=unfold_type, 
+                                                gatefilter=gatefilter, 
+                                                interval_splits=_radar_parameters['region_interval_splits'],
+                                                wind_profile = None)
 
        opaws2D_unfold_cpu = timeit.time() - tim0
 
        print "\n Time for unfolding velocity: {} seconds".format(opaws2D_unfold_cpu)
-
        print '\n ================================================================================'
   
-# Now we do QC
-
-#        tim0 = timeit.time()
-# 
-#        if options.qc == "None":
-#            print("\n No quality control will be done on data")
-#            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False, \
-#                                     max_range = _radar_parameters['max_range'])
-#        else:
-#            print("\n QC type:  %s " % options.qc)
-#            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref, \
-#                                     max_range = _radar_parameters['max_range'])
-# 
-# 
-#        opaws2D_QC_cpu = timeit.time() - tim0
-#        
-#        print "\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu)
-#        print '\n ================================================================================'
-#        
-
-       tim0 = timeit.time()
-       
 # Now grid the reflectivity (embedded call) and then mask it off based on parameters set at top
 
        ref = dbz_masking(grid_data(volume, "reflectivity", LatLon=cLatLon), thin_zeros=_grid_dict['thin_zeros'])
 
 # Finally, regrid the radial velocity
  
-       if unfold_type == None:  
-           vel = grid_data(volume, "velocity", LatLon=cLatLon)
+       vel = grid_data(volume, vr_field, LatLon=cLatLon)
        
-       else:
-           vel = grid_data(volume, "unfolded velocity", LatLon=cLatLon)
-
 # Mask it off based on dictionary parameters set at top
 
        if _grid_dict['mask_vr_with_dbz']:
@@ -1260,10 +1252,11 @@ if __name__ == "__main__":
                ret = write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
                                   obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
            
-       if plot_grid:
+       if len(sweep_num) > 0:
            fplotname = os.path.basename(out_filenames[0])
-           plottime = plot_gridded(ref, vel, sweep_num, fsuffix=fplotname, dir=options.out_dir, \
-                      shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
+           for pl in sweep_num:
+               plottime = plot_gridded(ref, vel, pl, fsuffix=fplotname, dir=options.out_dir, \
+                          shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
 
    opaws2D_cpu_time = timeit.time() - t0
 
