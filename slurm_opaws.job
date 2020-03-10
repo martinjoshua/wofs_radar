@@ -65,7 +65,7 @@ _analysis_dt = DT.timedelta(minutes=15)
 
 # Okay guts of the code
 #-------------------------------------------------------------------------------
-class AsyncFactory:
+class AsyncFactory(object):
     def __init__(self, func, cb_func):
         self.func = func
         self.cb_func = cb_func
@@ -181,7 +181,7 @@ def main(argv=None):
 
     if options.start == None:   # this is an error, always have to have one time
         parser.print_help()
-        print 
+        print() 
         print("\n ============================================================================")
         print("\n SLURM_OPAWS:  CANNOT process command line, no start time given")
         print("\n SLURM_OPAWS:  No observational file created EXITING.....")
@@ -293,7 +293,7 @@ def main(argv=None):
     if options.cmdfile:
         commands_h.close()
 
-    print "\n Time for slurm_opaws: {} seconds".format(time.time() - tim0)
+    print("\n Time for slurm_opaws: {} seconds".format(time.time() - tim0))
 #-------------------------------------------------------------------------------
 # Main program for testing...
 #
