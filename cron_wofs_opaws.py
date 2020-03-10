@@ -22,34 +22,32 @@ import time
 import os
 import sys
 import datetime as DT
+import calendar
 import logging
 import subprocess
-
-_wofs_VEL_dir       = "/scratch/wicker/REALTIME/VEL"
-_wofs_radar_dir     = "/scratch/LDM/NEXRAD2"
-_slurm_opaws_string = "/work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
-_slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/slurm_combine_VR_ncdf.py -d %s -f %s > slurm_combine_VR.log"
-
-_TEST = False
+import Config.Settings as settings
 
 # Used by combine to get the correct directory
 _hour_offset = 12
+_wofs_VEL_dir       = settings.get_opaws('obs_seq')
+_slurm_opaws_string = settings.get_job('opaws')
+_slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/slurm_combine_VR_ncdf.py -d %s -f %s > slurm_combine_VR.log"
+_TEST = settings.is_debug()
 
 if _TEST == True:
    rtimes = ', '.join(str(t) for t in range(60))    #test the code every minute
 else:
-   rtimes = "6,21,36,51"    # T+5min radar processing start time
-
-#-------------------------------------------------------------------------------
-# This is a handy function to make sure we get the correct day for radar file
-#      I.E., we need to figure out what day it is, even if UTC is after 00Z
+   rtimes = settings.get_default('runtimes')    # T+5min radar processing start time
 
 def utc_to_local(utc_dt):
+    """
+    This is a handy function to make sure we get the correct day for radar file
+    I.E., we need to figure out what day it is, even if UTC is after 00Z
+    """
     # get integer timestamp to avoid precision lost
     timestamp = calendar.timegm(utc_dt.timetuple())
     local_dt = DT.datetime.fromtimestamp(timestamp)
     assert utc_dt.resolution >= DT.timedelta(microseconds=1)
-#   return local_dt.replace(microsecond=utc_dt.microsecond)
     return local_dt.replace(microsecond=utc_dt.microsecond) - DT.timedelta(hours=_hour_offset)
 
 
@@ -69,6 +67,7 @@ today = "%s%2.2d%2.2d" % (local_today.tm_year, local_today.tm_mon, local_today.t
 
 print("\n ==============================================================================")
 print("\n Starting cron_wofs_radar script at: %s " % time.strftime("%Y-%m-%d %H:%M:%S"))
+print("\n Runtimes: %s " % rtimes)
 print("\n ==============================================================================\n")
 
 # Need to start a log file...
@@ -115,7 +114,7 @@ def scheduled_job():
         except:
             print("\n Slurm_opaws job failed: %s" % (now))
             
-# combine all the files...
+    # combine all the files...
     directory = "%s/%s" % (_wofs_VEL_dir,yyyy_mm_dd_directory.strftime("%Y%m%d"))
     wildcard =  "_VR_{}.nc"
     cmd = (_slurm_concatenate % (directory, wildcard.format(cycle_time_str2)))
