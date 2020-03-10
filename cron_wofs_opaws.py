@@ -29,9 +29,6 @@ import Config.Settings as settings
 
 # Used by combine to get the correct directory
 _hour_offset = 12
-_wofs_VEL_dir       = settings.get_opaws('obs_seq')
-_slurm_opaws_string = settings.get_job('opaws')
-_slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/slurm_combine_VR_ncdf.py -d %s -f %s > slurm_combine_VR.log"
 _TEST = settings.is_debug()
 
 if _TEST == True:
@@ -49,7 +46,6 @@ def utc_to_local(utc_dt):
     local_dt = DT.datetime.fromtimestamp(timestamp)
     assert utc_dt.resolution >= DT.timedelta(microseconds=1)
     return local_dt.replace(microsecond=utc_dt.microsecond) - DT.timedelta(hours=_hour_offset)
-
 
 #-----------------------------------------------------------------------------
 # Utility to round a datetime object to nearest 15 min....
@@ -103,7 +99,7 @@ def scheduled_job():
     print("\n Begin processing for cycle time:  %s" % (cycle_time_str))
 
     # OPAWS processing
-    cmd = (_slurm_opaws_string % (cycle_time_str))
+    cmd = (settings.get_job('opaws') % (cycle_time_str))
     print("\n Cmd: %s \n" % (cmd))
     
     if _TEST != True:
@@ -115,9 +111,9 @@ def scheduled_job():
             print("\n Slurm_opaws job failed: %s" % (now))
             
     # combine all the files...
-    directory = "%s/%s" % (_wofs_VEL_dir,yyyy_mm_dd_directory.strftime("%Y%m%d"))
+    directory = "%s/%s" % (settings.get_opaws('obs_seq'),yyyy_mm_dd_directory.strftime("%Y%m%d"))
     wildcard =  "_VR_{}.nc"
-    cmd = (_slurm_concatenate % (directory, wildcard.format(cycle_time_str2)))
+    cmd = (settings.get_job('combine') % (directory, wildcard.format(cycle_time_str2)))
 
     if _TEST != True:
         try:
