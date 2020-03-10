@@ -34,15 +34,16 @@ import datetime as DT
 import calendar
 from optparse import OptionParser
 from multiprocessing import Pool
+import Config.Settings as settings
 
 # Import wofs_dirs to tell you where things are....
-from wofs_dirs import _WSR88D_feed, _VR_obs_seq_dir, _WOFS_grid_info, _opaws2D, _opaws_logs
+#from wofs_dirs import _WSR88D_feed, _VR_obs_seq_dir, _WOFS_grid_info, _opaws2D, _opaws_logs
 
-#_WSR88D_feed     = "/scratch/wicker/realtime/OBSGEN/NEXRAD"
-#_VR_obs_seq_dir  = "/scratch/wicker/REALTIME/VEL"
-#_WOFS_grid_info  = "/scratch/wof/realtime/radar_files"
-#_opaws2D         = "~/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py"
-#_opaws_logs      = "/scratch/wicker/REALTIME/VEL/logs"
+_WSR88D_feed     = settings.get_opaws('feed')
+_VR_obs_seq_dir  = settings.get_opaws('obs_seq')
+_WOFS_grid_info  = settings.get_default('grid_info')
+_opaws2D         = "~/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py"
+_opaws_logs      = settings.get_opaws('log')
 _command_file    = "./commands.txt"
 
 # offset to get the correct date for file directories and radar file
@@ -97,7 +98,7 @@ def utc_to_local(utc_dt):
 def process_opaws(utc_time, radar, command_file):
 
     # Log files are labeled on the local day, not UTC
-#   local_time   = utc_to_local(DT.datetime.strptime(utc_time, "%Y%m%d%H%M"))
+    # local_time   = utc_to_local(DT.datetime.strptime(utc_time, "%Y%m%d%H%M"))
     local_time   = DT.datetime.strptime(utc_time, "%Y%m%d%H%M") - DT.timedelta(hours=_hour_offset)
 
     log_filename = os.path.join(_opaws_logs, "OPAWS_%s_%s.log" % (radar, local_time.strftime("%Y%m%d")))
@@ -110,7 +111,7 @@ def process_opaws(utc_time, radar, command_file):
         log_h.write("\n ============================================================================\n")
     except:
         log_h.write("\n ============================================================================")
-        log_h.write("\n CANNOT process command line supplied YYYYMMDDHHMM:  %s" % date_time)
+        log_h.write("\n CANNOT process command line supplied YYYYMMDDHHMM:  %s" % utc_time)
         log_h.write("|n No observational file created EXITING.....")
         log_h.write("\n ============================================================================")
         return False
@@ -123,14 +124,14 @@ def process_opaws(utc_time, radar, command_file):
     log_h.write("\n Radar output will be written to directory %s " % (obs_seq_out_dir))
     log_h.write("\n ============================================================================")
 
-# Main catchup loop
+    # Main catchup loop
 
     WSR88D_dir = os.path.join(_WSR88D_feed, radar)
 
     log_h.write("\n Reading from operational WSR88D directory:  %s\n" % WSR88D_dir)
 
-# Do one radar for a test
-# opaws2d.py -p 1 -o $outdir -d $indir -w --window 2018,05,02,23,45 --onlyVR --dx 5000. --roi 1000.
+    # Do one radar for a test
+    # opaws2d.py -p 1 -o $outdir -d $indir -w --window 2018,05,02,23,45 --onlyVR --dx 5000. --roi 1000.
     
     log_h.write("\n >>>>=======BEGIN===============================================================")
     cmd = "%s -d %s -o %s -w --window %s --onlyVR -p %d --dx %f  --roi %f"  %  \
@@ -168,9 +169,9 @@ def process_opaws(utc_time, radar, command_file):
 def main(argv=None):
 
     tim0 = time.time()
-#
-# Command line interface
-#
+    #
+    # Command line interface
+    #
     parser = OptionParser()
     parser.add_option("-s", "--start", dest="start", default=None,  type="string", help = "YYYYMMDDHHMM to process mrms")
     parser.add_option("-e", "--end",   dest="end",   default=None,  type="string", help = "YYYYMMDDHHMM end time")
@@ -294,6 +295,7 @@ def main(argv=None):
         commands_h.close()
 
     print("\n Time for slurm_opaws: {} seconds".format(time.time() - tim0))
+    
 #-------------------------------------------------------------------------------
 # Main program for testing...
 #

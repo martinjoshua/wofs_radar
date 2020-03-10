@@ -1,1 +1,10 @@
 apscheduler=3.6.3
+numpy
+scipy
+matplotlib
+pyart
+pyproj
+netCDF4
+matplotlib
+optparse
+timeit
