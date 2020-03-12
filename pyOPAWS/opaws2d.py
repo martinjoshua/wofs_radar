@@ -1124,7 +1124,7 @@ def run(options):
                                                         station=None, scans=None, linear_interp=True)
             except:
                 print('\n File {} cannot be read, skipping...\n'.format(fname))
-            continue
+                continue
 
         opaws2D_io_cpu = timeit.time() - tim0
 
