@@ -946,18 +946,284 @@ def clock_string():
 ########################################################################
 # Main function
 
+def run(options):
+    print(' ================================================================================')
+    print('')
+    print('                   BEGIN PROGRAM opaws2D                     ')
+    print('')
+    print('')
+    print(' ================================================================================')
+
+    # Create directory for output files
+
+    if not os.path.exists(options.out_dir):
+        os.mkdir(options.out_dir)
+
+    out_filenames = []
+    in_filenames  = []
+
+    if options.dname == None:
+            
+        if options.fname == None:
+            print("\n\n ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE! *****")
+            print("\n\n *****                     OR                               *****")
+            print("\n\n *****               CFRADIAL FILE!                         *****")
+            print("\n                         EXITING!\n\n")
+            parser.print_help()
+            print()
+            sys.exit(1)
+        
+        else:
+            in_filenames.append(os.path.abspath(options.fname))
+            strng = os.path.basename(in_filenames[0]).split("_V06")[0]
+            strng = strng[0:4] + "_" + strng[4:]
+            strng = os.path.join(options.out_dir, strng)
+            out_filenames.append(strng) 
+
+    else:
+
+        if options.window:
+            ttime      = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
+            start_time = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[0])
+            stop_time  = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[1])
+
+            if _AWS_L2Files:
+                in_filenames = glob.glob(_AWS_L2Name_Style % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"))) \
+                            + glob.glob(_AWS_L2Name_Style % (os.path.abspath(options.dname),stop_time.strftime("%Y%m%d_%H")))
+            else:
+                in_filenames = glob.glob(_LDM_L2Name_Style % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"))) \
+                            + glob.glob(_LDM_L2Name_Style % (os.path.abspath(options.dname),stop_time.strftime("%Y%m%d_%H")))
+
+            if len(in_filenames) == 0:
+                print("\n COULD NOT find any files for radar %s between %s and %s, EXITING" \
+                        % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"),stop_time.strftime("%Y%m%d_%H")))
+                sys.exit(0)
+            else:
+                print("\n WINDOW IS SUPPLIED, WILL LOOK FOR AN INDIVIDUAL FILE.... \n ")
+                print("\n WINDOW_START:  %s" % start_time.strftime("%Y,%m,%d,%H,%M") )
+                print(" WINDOW_END:    %s, will search %d files for closest time " \
+                        % (stop_time.strftime("%Y,%m,%d,%H,%M"), len(in_filenames)) )
+        else:
+            in_filenames = glob.glob("%s/*" % os.path.abspath(options.dname))
+            if len(in_filenames) == 0:
+                print("\n COULD NOT find any files for radar: %s, EXITING" % (os.path.abspath(options.dname)))
+                sys.exit(0)
+            else:
+                print("\n NO WINDOW SUPPLIED, PROCESSING WHOLE DIRECTORY.... \n ")
+                print("\n opaws2D:  Processing %d files in the directory:  %s\n" % (len(in_filenames), options.dname))
+                print("\n opaws2D:  First file is %s" % (in_filenames[0]))
+                print("\n opaws2D:  Last  file is %s" % (in_filenames[-1]))
+
+        if debug:  
+            print(in_filenames)
+
+    # if cfradial files....
+        if in_filenames[0][-3:] == ".nc":
+            for item in in_filenames:
+                strng = os.path.basename(item).split(".")[0:2]
+                strng = strng[0] + "_" + strng[1]
+                strng = os.path.join(options.out_dir, strng)
+                out_filenames.append(strng) 
+    # WSR88D files
+        else:
+            for item in in_filenames:
+                if options.window:   # for real time processing, we will timestamp the file with the analysis time
+                    strng = "%s_VR_%s" % (os.path.basename(item)[0:4], ttime.strftime("%Y%m%d_%H%M"))
+                    strng = os.path.join(options.out_dir, strng)
+                    out_filenames.append(strng)
+                else:
+                    strng = os.path.basename(item)[0:18]
+                    strng = os.path.join(options.out_dir, strng)
+                    out_filenames.append(strng)
+
+    if options.unfold == "phase":
+        print("\n opaws2D dealias_unwrap_phase unfolding will be used\n")
+        unfold_type = "phase"
+    elif options.unfold == "region":
+        print("\n opaws2D dealias_region_based unfolding will be used\n")
+        unfold_type = "region"
+    else:
+        print("\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****")
+        print("\n          NO VELOCITY UNFOLDING DONE...\n\n")
+        unfold_type = None
+
+    if options.newse:
+        print(" \n now processing NEWSe radar file....\n ")
+        cLatLon = parse_NEWSe_radar_file(options.newse, getLatLon=True)
+    else:
+        cLatLon = None
+
+    if options.method:
+        _grid_dict['anal_method'] = options.method
+
+    if options.dx:
+        _grid_dict['grid_spacing_xy'] = options.dx
+        _grid_dict['ROI'] = options.dx / 0.707
+        
+    if options.roi:
+        _grid_dict['ROI'] = options.roi
+
+    if options.plot == 0:
+        sweep_num = []
+    elif options.plot > 0:
+        sweep_num = [options.plot]
+        if not os.path.exists("images"):
+            os.mkdir("images")
+    else:
+        sweep_num = _plevels
+        if not os.path.exists("images"):
+            os.mkdir("images")
+
+    # Read input file and create radar object
+
+    t0 = timeit.time()
+
+    # Preprocessing to find closest file....
+
+    if options.window:
+        try:
+            analysisT     = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
+            xfiles        = [os.path.basename(f) for f in in_filenames]
+            if _AWS_L2Files:
+                xfiles_DT     = [DT.datetime.strptime("%s" % f[4:19], "%Y%m%d_%H%M%S") for f in xfiles]
+            else:
+                xfiles_DT     = [DT.datetime.strptime("%s" % f[5:20], "%Y%m%d_%H%M%S") for f in xfiles]
+            in_filenames  = [in_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
+            out_filenames = [out_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
+            print("\n FOUND CLOSEST FILE:   %s" % in_filenames[0] )
+        except:
+            print("\n COULD NOT FILE CLOSEST FILE, exiting: %s <----> %s" % (in_filenames[0], in_filenames[-1]) )
+            sys.exit(0)
+
+    for n, fname in enumerate(in_filenames):
+
+        # the check for file size is to make sure there is data in the LVL2 file
+        try:
+            if os.path.getsize(fname) < 2048000:
+                print('\n File {} is less than 2 mb, skipping...'.format(fname))
+                continue
+        except:
+            continue
+
+        tim0 = timeit.time() 
+
+        print('\n READING: {}\n'.format(fname))
+
+        if fname[-3:] == ".nc":
+            if _radar_parameters['field_label_trans'][0] == True:
+                REF_LABEL = _radar_parameters['field_label_trans'][1]
+                VEL_LABEL = _radar_parameters['field_label_trans'][2]
+                volume = pyart.io.read_cfradial(fname, field_names={REF_LABEL:"reflectivity", VEL_LABEL:"velocity"})
+            else:
+                volume = pyart.io.read_cfradial(fname)
+        else:
+            try:
+                volume = pyart.io.read_nexrad_archive(fname, field_names=None, 
+                                                        additional_metadata=None, file_field_names=False, 
+                                                        delay_field_loading=False, 
+                                                        station=None, scans=None, linear_interp=True)
+            except:
+                print('\n File {} cannot be read, skipping...\n'.format(fname))
+            continue
+
+        opaws2D_io_cpu = timeit.time() - tim0
+
+        print("\n Time for reading in LVL2: {} seconds".format(opaws2D_io_cpu))
+
+        # Modern level-II files need to be mapped to figure out where the super-res velocity and reflectivity fields are located in file
+
+        ret = volume_mapping(volume)
+
+        # Now we do QC
+
+        tim0 = timeit.time()
+
+        if options.qc == "None":
+            print("\n No quality control will be done on data")
+            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False, \
+                                    max_range = _radar_parameters['max_range'])
+        else:
+            print("\n QC type:  %s " % options.qc)
+            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref, \
+                                    max_range = _radar_parameters['max_range'])
+
+
+        opaws2D_QC_cpu = timeit.time() - tim0
+        
+        print("\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu))
+        print('\n ================================================================================')
+        
+                
+    # For some reason, you need to do velocity unfolding first....then QC the rest of the data
+
+        tim0 = timeit.time()      
+
+        print('\n ================================================================================')
+
+        if unfold_type == None:
+            vr_field = "velocity"
+            vr_label = "Radial Velocity"
+        else:
+            vr_field, vr_label = velocity_unfold(volume, unfold_type=unfold_type, 
+                                                gatefilter=gatefilter, 
+                                                interval_splits=_radar_parameters['region_interval_splits'],
+                                                wind_profile = None)
+
+        opaws2D_unfold_cpu = timeit.time() - tim0
+
+        print("\n Time for unfolding velocity: {} seconds".format(opaws2D_unfold_cpu))
+        print('\n ================================================================================')
+
+    # Now grid the reflectivity (embedded call) and then mask it off based on parameters set at top
+
+        ref = dbz_masking(grid_data(volume, "reflectivity", LatLon=cLatLon), thin_zeros=_grid_dict['thin_zeros'])
+
+    # Finally, regrid the radial velocity
+
+        vel = grid_data(volume, vr_field, LatLon=cLatLon)
+        
+    # Mask it off based on dictionary parameters set at top
+
+        if _grid_dict['mask_vr_with_dbz']:
+            vel = vel_masking(vel, ref, volume)
+
+        opaws2D_regrid_cpu = timeit.time() - tim0
+
+        print("\n Time for gridding fields: {} seconds".format(opaws2D_regrid_cpu))
+        
+        print('\n ================================================================================')
+
+        if options.write == True:      
+            print('\n WRITING XARRAY: {}\n'.format(out_filenames[n]))
+            ret = write_obs_seq_xarray(vel, filename=out_filenames[n], obs_error= _obs_errors['velocity'], \
+                                        volume_name=os.path.basename(fname))
+
+            print('\n WRITING DART: {}\n'.format(out_filenames[n]))
+            ret = write_DART_ascii(vel, filename=out_filenames[n], grid_dict=_grid_dict, \
+                                    obs_error=[_obs_errors['velocity']] )
+
+            if options.onlyVR != True:
+                print('\n WRITING DART ONLY VR: {}\n'.format(out_filenames[n]))
+                ret = write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
+                                    obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
+            
+        if len(sweep_num) > 0:
+            fplotname = os.path.basename(out_filenames[0])
+            for pl in sweep_num:
+                plottime = plot_gridded(ref, vel, pl, fsuffix=fplotname, dir=options.out_dir, \
+                            shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
+
+    opaws2D_cpu_time = timeit.time() - t0
+
+    print("\n Time for opaws2D operations: {} seconds".format(opaws2D_cpu_time))
+
+    print("\n PROGRAM opaws2D COMPLETED\n")
+
 if __name__ == "__main__":
-
-   print(' ================================================================================')
-   print('')
-   print('                   BEGIN PROGRAM opaws2D                     ')
-   print('')
-
    parser = OptionParser()
-   
    parser.add_option("-d", "--dir",       dest="dname",     default=None,  type="string", \
            help = "Directory of files to process")
-                     
+               
    parser.add_option("-o", "--out",       dest="out_dir",     default="opaws_files",  type="string", \
            help = "Directory to place output files in")
                      
@@ -1001,271 +1267,4 @@ if __name__ == "__main__":
            help = "NEWSe radars description file to parse for model grid lat and lon" )
 
    (options, args) = parser.parse_args()
-  
-   print('')
-   print(' ================================================================================')
-
-# Create directory for output files
-  
-   if not os.path.exists(options.out_dir):
-       os.mkdir(options.out_dir)
-
-   out_filenames = []
-   in_filenames  = []
-
-   if options.dname == None:
-          
-       if options.fname == None:
-           print("\n\n ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE! *****")
-           print("\n\n *****                     OR                               *****")
-           print("\n\n *****               CFRADIAL FILE!                         *****")
-           print("\n                         EXITING!\n\n")
-           parser.print_help()
-           print()
-           sys.exit(1)
-      
-       else:
-           in_filenames.append(os.path.abspath(options.fname))
-           strng = os.path.basename(in_filenames[0]).split("_V06")[0]
-           strng = strng[0:4] + "_" + strng[4:]
-           strng = os.path.join(options.out_dir, strng)
-           out_filenames.append(strng) 
-
-   else:
-
-       if options.window:
-           ttime      = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
-           start_time = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[0])
-           stop_time  = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[1])
-
-           if _AWS_L2Files:
-               in_filenames = glob.glob(_AWS_L2Name_Style % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"))) \
-                            + glob.glob(_AWS_L2Name_Style % (os.path.abspath(options.dname),stop_time.strftime("%Y%m%d_%H")))
-           else:
-               in_filenames = glob.glob(_LDM_L2Name_Style % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"))) \
-                            + glob.glob(_LDM_L2Name_Style % (os.path.abspath(options.dname),stop_time.strftime("%Y%m%d_%H")))
-
-           if len(in_filenames) == 0:
-               print("\n COULD NOT find any files for radar %s between %s and %s, EXITING" \
-                     % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"),stop_time.strftime("%Y%m%d_%H")))
-               sys.exit(0)
-           else:
-               print("\n WINDOW IS SUPPLIED, WILL LOOK FOR AN INDIVIDUAL FILE.... \n ")
-               print("\n WINDOW_START:  %s" % start_time.strftime("%Y,%m,%d,%H,%M") )
-               print(" WINDOW_END:    %s, will search %d files for closest time " \
-                     % (stop_time.strftime("%Y,%m,%d,%H,%M"), len(in_filenames)) )
-       else:
-           in_filenames = glob.glob("%s/*" % os.path.abspath(options.dname))
-           if len(in_filenames) == 0:
-               print("\n COULD NOT find any files for radar: %s, EXITING" % (os.path.abspath(options.dname)))
-               sys.exit(0)
-           else:
-               print("\n NO WINDOW SUPPLIED, PROCESSING WHOLE DIRECTORY.... \n ")
-               print("\n opaws2D:  Processing %d files in the directory:  %s\n" % (len(in_filenames), options.dname))
-               print("\n opaws2D:  First file is %s" % (in_filenames[0]))
-               print("\n opaws2D:  Last  file is %s" % (in_filenames[-1]))
- 
-       if debug:  
-           print(in_filenames)
-
-# if cfradial files....
-       if in_filenames[0][-3:] == ".nc":
-           for item in in_filenames:
-               strng = os.path.basename(item).split(".")[0:2]
-               strng = strng[0] + "_" + strng[1]
-               strng = os.path.join(options.out_dir, strng)
-               out_filenames.append(strng) 
-# WSR88D files
-       else:
-           for item in in_filenames:
-               if options.window:   # for real time processing, we will timestamp the file with the analysis time
-                   strng = "%s_VR_%s" % (os.path.basename(item)[0:4], ttime.strftime("%Y%m%d_%H%M"))
-                   strng = os.path.join(options.out_dir, strng)
-                   out_filenames.append(strng)
-               else:
-                   strng = os.path.basename(item)[0:18]
-                   strng = os.path.join(options.out_dir, strng)
-                   out_filenames.append(strng)
-
-   if options.unfold == "phase":
-       print("\n opaws2D dealias_unwrap_phase unfolding will be used\n")
-       unfold_type = "phase"
-   elif options.unfold == "region":
-       print("\n opaws2D dealias_region_based unfolding will be used\n")
-       unfold_type = "region"
-   else:
-       print("\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****")
-       print("\n          NO VELOCITY UNFOLDING DONE...\n\n")
-       unfold_type = None
-
-   if options.newse:
-       print(" \n now processing NEWSe radar file....\n ")
-       cLatLon = parse_NEWSe_radar_file(options.newse, getLatLon=True)
-   else:
-       cLatLon = None
-    
-   if options.method:
-        _grid_dict['anal_method'] = options.method
-
-   if options.dx:
-        _grid_dict['grid_spacing_xy'] = options.dx
-        _grid_dict['ROI'] = options.dx / 0.707
-       
-   if options.roi:
-      _grid_dict['ROI'] = options.roi
-
-   if options.plot == 0:
-       sweep_num = []
-   elif options.plot > 0:
-       sweep_num = [options.plot]
-       if not os.path.exists("images"):
-           os.mkdir("images")
-   else:
-       sweep_num = _plevels
-       if not os.path.exists("images"):
-           os.mkdir("images")
-
-# Read input file and create radar object
-
-   t0 = timeit.time()
-   
-# Preprocessing to find closest file....
-
-   if options.window:
-       try:
-           analysisT     = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
-           xfiles        = [os.path.basename(f) for f in in_filenames]
-           if _AWS_L2Files:
-               xfiles_DT     = [DT.datetime.strptime("%s" % f[4:19], "%Y%m%d_%H%M%S") for f in xfiles]
-           else:
-               xfiles_DT     = [DT.datetime.strptime("%s" % f[5:20], "%Y%m%d_%H%M%S") for f in xfiles]
-           in_filenames  = [in_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
-           out_filenames = [out_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
-           print("\n FOUND CLOSEST FILE:   %s" % in_filenames[0] )
-       except:
-           print("\n COULD NOT FILE CLOSEST FILE, exiting: %s <----> %s" % (in_filenames[0], in_filenames[-1]) )
-           sys.exit(0)
-
-   for n, fname in enumerate(in_filenames):
-   
- # the check for file size is to make sure there is data in the LVL2 file
-       try:
-           if os.path.getsize(fname) < 2048000:
-               print('\n File {} is less than 2 mb, skipping...'.format(fname))
-               continue
-       except:
-           continue
-
-       tim0 = timeit.time() 
-
-       print('\n READING: {}\n'.format(fname))
-
-       if fname[-3:] == ".nc":
-         if _radar_parameters['field_label_trans'][0] == True:
-             REF_LABEL = _radar_parameters['field_label_trans'][1]
-             VEL_LABEL = _radar_parameters['field_label_trans'][2]
-             volume = pyart.io.read_cfradial(fname, field_names={REF_LABEL:"reflectivity", VEL_LABEL:"velocity"})
-         else:
-             volume = pyart.io.read_cfradial(fname)
-       else:
-         try:
-           volume = pyart.io.read_nexrad_archive(fname, field_names=None, 
-                                                 additional_metadata=None, file_field_names=False, 
-                                                 delay_field_loading=False, 
-                                                 station=None, scans=None, linear_interp=True)
-         except:
-           print('\n File {} cannot be read, skipping...\n'.format(fname))
-           continue
-
-       opaws2D_io_cpu = timeit.time() - tim0
-  
-       print("\n Time for reading in LVL2: {} seconds".format(opaws2D_io_cpu))
-
-# Modern level-II files need to be mapped to figure out where the super-res velocity and reflectivity fields are located in file
- 
-       ret = volume_mapping(volume)
-
-# Now we do QC
-
-       tim0 = timeit.time()
- 
-       if options.qc == "None":
-           print("\n No quality control will be done on data")
-           gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False, \
-                                    max_range = _radar_parameters['max_range'])
-       else:
-           print("\n QC type:  %s " % options.qc)
-           gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref, \
-                                    max_range = _radar_parameters['max_range'])
- 
- 
-       opaws2D_QC_cpu = timeit.time() - tim0
-       
-       print("\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu))
-       print('\n ================================================================================')
-       
-             
-# For some reason, you need to do velocity unfolding first....then QC the rest of the data
-
-       tim0 = timeit.time()      
-
-       print('\n ================================================================================')
-
-       if unfold_type == None:
-           vr_field = "velocity"
-           vr_label = "Radial Velocity"
-       else:
-           vr_field, vr_label = velocity_unfold(volume, unfold_type=unfold_type, 
-                                                gatefilter=gatefilter, 
-                                                interval_splits=_radar_parameters['region_interval_splits'],
-                                                wind_profile = None)
-
-       opaws2D_unfold_cpu = timeit.time() - tim0
-
-       print("\n Time for unfolding velocity: {} seconds".format(opaws2D_unfold_cpu))
-       print('\n ================================================================================')
-  
-# Now grid the reflectivity (embedded call) and then mask it off based on parameters set at top
-
-       ref = dbz_masking(grid_data(volume, "reflectivity", LatLon=cLatLon), thin_zeros=_grid_dict['thin_zeros'])
-
-# Finally, regrid the radial velocity
- 
-       vel = grid_data(volume, vr_field, LatLon=cLatLon)
-       
-# Mask it off based on dictionary parameters set at top
-
-       if _grid_dict['mask_vr_with_dbz']:
-           vel = vel_masking(vel, ref, volume)
-    
-       opaws2D_regrid_cpu = timeit.time() - tim0
-  
-       print("\n Time for gridding fields: {} seconds".format(opaws2D_regrid_cpu))
-       
-       print('\n ================================================================================')
-
-       if options.write == True:      
-           print('\n WRITING XARRAY: {}\n'.format(out_filenames[n]))
-           ret = write_obs_seq_xarray(vel, filename=out_filenames[n], obs_error= _obs_errors['velocity'], \
-                                      volume_name=os.path.basename(fname))
-
-           print('\n WRITING DART: {}\n'.format(out_filenames[n]))
-           ret = write_DART_ascii(vel, filename=out_filenames[n], grid_dict=_grid_dict, \
-                                  obs_error=[_obs_errors['velocity']] )
-
-           if options.onlyVR != True:
-               print('\n WRITING DART ONLY VR: {}\n'.format(out_filenames[n]))
-               ret = write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
-                                  obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
-           
-       if len(sweep_num) > 0:
-           fplotname = os.path.basename(out_filenames[0])
-           for pl in sweep_num:
-               plottime = plot_gridded(ref, vel, pl, fsuffix=fplotname, dir=options.out_dir, \
-                          shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
-
-   opaws2D_cpu_time = timeit.time() - t0
-
-   print("\n Time for opaws2D operations: {} seconds".format(opaws2D_cpu_time))
-
-   print("\n PROGRAM opaws2D COMPLETED\n")
+   run(options)
