@@ -42,7 +42,7 @@ import Config.Settings as settings
 _WSR88D_feed     = settings.get_opaws('feed')
 _VR_obs_seq_dir  = settings.get_opaws('obs_seq')
 _WOFS_grid_info  = settings.get_default('grid_info')
-_opaws2D         = "~/REALTIME/WOFS_radar/pyOPAWS/opaws2d.py"
+_opaws2D         = settings.get_opaws('opaws2D')
 _opaws_logs      = settings.get_opaws('log')
 _command_file    = "./commands.txt"
 
@@ -134,7 +134,7 @@ def process_opaws(utc_time, radar, command_file):
     # opaws2d.py -p 1 -o $outdir -d $indir -w --window 2018,05,02,23,45 --onlyVR --dx 5000. --roi 1000.
     
     log_h.write("\n >>>>=======BEGIN===============================================================")
-    cmd = "%s -d %s -o %s -w --window %s --onlyVR -p %d --dx %f  --roi %f"  %  \
+    cmd = "python -m %s -d %s -o %s -w --window %s --onlyVR -p %d --dx %f  --roi %f"  %  \
           (_opaws2D, WSR88D_dir, obs_seq_out_dir, opaws_time.strftime("%Y,%m,%d,%H,%M"), _plot_level, _dx, _roi)
 
     print(cmd)
@@ -295,7 +295,7 @@ def main(argv=None):
         commands_h.close()
 
     print("\n Time for slurm_opaws: {} seconds".format(time.time() - tim0))
-    
+
 #-------------------------------------------------------------------------------
 # Main program for testing...
 #

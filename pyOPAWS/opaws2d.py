@@ -28,6 +28,7 @@ from builtins import map
 from builtins import zip
 from builtins import range
 from builtins import object
+
 import os
 import sys
 import glob
@@ -47,17 +48,17 @@ import scipy.ndimage as ndimage
 import scipy.spatial
 from optparse import OptionParser
 from matplotlib.offsetbox import AnchoredText
+from .dart_tools import *
+from .radar_QC import *
+
 import netCDF4 as ncdf
 import datetime as DT
-
-from dart_tools import *
-from radar_QC import *
 import xarray as xr
 import pandas as pd
 import metpy.calc as mpcalc
 from metpy.units import units
 
-import cressman
+from .cressman import *
 import pyart
 
 from pyproj import Proj
@@ -437,7 +438,7 @@ def grid_data(volume, field, LatLon=None):
        iy = np.searchsorted(yg, yob)
     
        if obs.size > 0:
-           tmp = cressman.obs_2_grid2d(obs, xob, yob, xg, yg, ix, iy, anal_method, min_count, min_weight, min_range, \
+           tmp = obs_2_grid2d(obs, xob, yob, xg, yg, ix, iy, anal_method, min_count, min_weight, min_range, \
                                        2.0*grid_spacing_xy, _missing)
            new_grid[n] = tmp
            new_mask[n] = (tmp <= _missing)
@@ -466,7 +467,7 @@ def grid_data(volume, field, LatLon=None):
 #      tmp=inverse_distance(xob, yob, zobs, xg, yg, 2.0*grid_spacing_xy, gamma=None, kappa=None,
 #                    min_neighbors=min_count, kind='cressman')
 
-       tmp = cressman.obs_2_grid2d(zobs, xob, yob, xg, yg, ix, iy, 1, 1, 0.1, min_range, 2.0*grid_spacing_xy, -99999.)
+       tmp = obs_2_grid2d(zobs, xob, yob, xg, yg, ix, iy, 1, 1, 0.1, min_range, 2.0*grid_spacing_xy, -99999.)
        zgrid[n] = tmp
     
    print("\n %f secs to run superob analysis for all levels \n" % (timeit.clock()-tt))
@@ -912,7 +913,7 @@ def write_obs_seq_xarray(field, filename=None, obs_error=3., volume_name=None):
    xa = xr.Dataset(pd.DataFrame.from_records(out))
 
 #  # reset index to be a master index across all obs
-   xa.rename({'dim_0': 'index'}, inplace=True)
+   xa = xa.rename({'dim_0': 'index'})
 
    # Write the xarray file out (this is all there is, very nice guys!)
    xa.to_netcdf(filename, mode='w')

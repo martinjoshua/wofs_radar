@@ -1,2 +1,6 @@
 RADAR/*
+!RADAR/*.csh
+
 *.pyc
+
+out/*
