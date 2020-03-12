@@ -17,6 +17,8 @@ class TestOPAWS(unittest.TestCase):
         obj.unfold = 'region'
         obj.newse = None
         obj.method = None
+        obj.shapefiles = None
+        obj.interactive = None
         run(obj)
 
 if __name__ == '__main__':
