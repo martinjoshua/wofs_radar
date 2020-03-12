@@ -7,12 +7,13 @@ dependencies:
   - appdirs=1.4.3=py_1
   - apscheduler=3.6.3=py36_0
   - arm_pyart=1.11.0=py36hc1659b7_1
+  - astroid=2.3.3=py36_0
   - basemap=1.2.1=py36hd759880_1
   - basemap-data-hires=1.2.1=0
   - bzip2=1.0.8=h516909a_2
-  - ca-certificates=2019.11.28=hecc5488_0
+  - ca-certificates=2020.1.1=0
   - cartopy=0.17.0=py36hd759880_1006
-  - certifi=2019.11.28=py36h9f0ad1d_1
+  - certifi=2019.11.28=py36_0
   - cffi=1.14.0=py36hd463f26_0
   - cftime=1.0.4.2=py36hc1659b7_0
   - chardet=3.0.4=py36_1003
@@ -34,9 +35,11 @@ dependencies:
   - icu=58.2=hf484d3e_1000
   - idna=2.9=py_1
   - ipython_genutils=0.2.0=py_1
+  - isort=4.3.21=py36_0
   - jpeg=9c=h14c3975_1001
   - kiwisolver=1.1.0=py36hc9558a2_0
   - krb5=1.16.4=h173b8e3_0
+  - lazy-object-proxy=1.4.3=py36h7b6447c_0
   - ld_impl_linux-64=2.33.1=h53a641e_7
   - libblas=3.8.0=14_openblas
   - libcblas=3.8.0=14_openblas
@@ -59,12 +62,13 @@ dependencies:
   - lz4-c=1.8.3=he1b5a44_1001
   - matplotlib=3.1.3=py36_0
   - matplotlib-base=3.1.3=py36hef1b27d_0
+  - mccabe=0.6.1=py36_1
   - metpy=0.12.0=py_0
   - ncurses=6.2=he6710b0_0
   - netcdf4=1.5.3=nompi_py36hd35fb8e_102
   - numpy=1.18.1=py36h7314795_0
   - olefile=0.46=py_0
-  - openssl=1.1.1d=h516909a_0
+  - openssl=1.1.1d=h7b6447c_4
   - owslib=0.19.1=py_0
   - packaging=20.1=py_0
   - pandas=1.0.1=py36hb3f55d8_0
@@ -78,6 +82,7 @@ dependencies:
   - pycparser=2.20=py_0
   - pyepsg=0.4.0=py_0
   - pykdtree=1.3.1=py36hc1659b7_1002
+  - pylint=2.4.4=py36_0
   - pyopenssl=19.1.0=py_1
   - pyparsing=2.4.6=py_0
   - pyproj=1.9.6=py36h516909a_1002
@@ -101,9 +106,11 @@ dependencies:
   - tornado=6.0.4=py36h8c4c3a4_1
   - traitlets=4.3.3=py36h9f0ad1d_1
   - trmm_rsl=1.49=3
+  - typed-ast=1.4.1=py36h7b6447c_0
   - tzlocal=2.0.0=py_0
   - urllib3=1.25.7=py36_0
   - wheel=0.34.2=py36_0
+  - wrapt=1.11.2=py36h7b6447c_0
   - xarray=0.15.0=py_0
   - xorg-libxau=1.0.9=h14c3975_0
   - xorg-libxdmcp=1.1.3=h516909a_0
