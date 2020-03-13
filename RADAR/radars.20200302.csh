@@ -12,3 +12,4 @@ setenv lat_ur 40.719490
 setenv lon_ll -92.307889
 setenv lon_ur -82.157048
 setenv start_hr 18
+ 
