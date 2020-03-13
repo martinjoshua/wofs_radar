@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 #############################################################
 #
@@ -96,21 +97,21 @@ def ObType_LookUp(name,DART_name=False,Print_Table=False):
                  }
    
    if Print_Table:
-         print
-         print "VALID INPUT VARIABLE NAME              KIND  DART NAME"
-         print "=========================================================================="
-         for key in Look_Up_Table.keys():
-               print "%35s    %3d    %s" % (key, Look_Up_Table[key][0], Look_Up_Table[key][1])
+         print()
+         print("VALID INPUT VARIABLE NAME              KIND  DART NAME")
+         print("==========================================================================")
+         for key in list(Look_Up_Table.keys()):
+               print("%35s    %3d    %s" % (key, Look_Up_Table[key][0], Look_Up_Table[key][1]))
          return
   
    name2 = name.upper().strip()
-   if Look_Up_Table.has_key(name2):
+   if name2 in Look_Up_Table:
          if DART_name == True:
                return Look_Up_Table[name2][0], Look_Up_Table[name2][1]
          else:
               return Look_Up_Table[name2][0]
    else:
-         print "ObType_LookUp cannot find variable:  ", name, name2
+         print("ObType_LookUp cannot find variable:  ", name, name2)
          raise SystemExit
 
 ########################################################################
@@ -228,7 +229,7 @@ def write_DART_ascii(obs, filename=None, obs_error=None, zero_dbz_obtype=_zero_d
        filename =  os.path.join(dirname, basename)
       
    if obs_error == None:
-       print "write_DART_ascii:  No obs error defined for observation, exiting"
+       print("write_DART_ascii:  No obs error defined for observation, exiting")
        raise SystemExit
 
 # Open ASCII file for DART obs to be written into.  We will add header info afterward
@@ -529,7 +530,7 @@ def write_netcdf_radar_file(ref, vel, filename=None):
 
 #filename = os.path.join(path, "%s_%s%s" % ("Inflation", DT.strftime("%Y-%m-%d_%H:%M:%S"), ".nc" ))
 
-   print "\n -->  Writing %s as the radar file..." % (filename)
+   print("\n -->  Writing %s as the radar file..." % (filename))
    
    rootgroup = ncdf.Dataset(filename, 'w', format='NETCDF4')
      
