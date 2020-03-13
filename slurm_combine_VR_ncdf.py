@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 import pandas as pd
 import numpy as np
 from netcdftime import utime
@@ -22,15 +19,15 @@ sec_utime   = utime("seconds since 1970-01-01 00:00:00")
 
 class myobject(object):
 
-  def __init__(self, name, data=None, **kwargs):
-    self.name = name
-    self.data = data
+    def __init__(self, name, data=None, **kwargs):
+        self.name = name
+        self.data = data
 
     if kwargs != None:
-      for key in kwargs:  setattr(self, key, kwargs[key])
+        for key in kwargs:  setattr(self, key, kwargs[key])
 
-  def keys(self):
-    return self.__dict__
+    def keys(self):
+        return self.__dict__
 
 #=========================================================================================
 # Parse and return a datetime object from obs_seq filename (notice, no seconds in filename)
@@ -71,18 +68,18 @@ def main(argv=None):
     
     if options.dir == None:
 
-        print "\n                NO INPUT DIRECTORY IS SUPPLIED, EXITING.... \n "
+        print("\n                NO INPUT DIRECTORY IS SUPPLIED, EXITING.... \n ")
         parser.print_help()
-        print
+        print()
         sys.exit(1)
 
     else:
 
         suffix = options.file
         wild = os.path.abspath(options.dir)+"/obs_seq_K*"+suffix
-        print wild
+        print(wild)
         rawlist = glob.glob(wild)
-        print rawlist
+        print(rawlist)
         
         files = sorted( rawlist, key = lambda file: os.path.getmtime(file))
         

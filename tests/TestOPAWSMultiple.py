@@ -7,7 +7,7 @@ import datetime
 
 from pyOPAWS.opaws2d import run
 
-class TestOPAWS(unittest.TestCase):
+class TestOPAWSMultiple(unittest.TestCase):
 
     def test_multiple(self):
         start_time = datetime.datetime(2020, 3, 2, 17, 0, 0)
