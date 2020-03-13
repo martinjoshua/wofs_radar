@@ -48,7 +48,7 @@ import scipy.ndimage as ndimage
 import scipy.spatial
 from optparse import OptionParser
 from matplotlib.offsetbox import AnchoredText
-from .dart_tools import *
+from utils.dart_tools import opaws_write_DART_ascii
 from .radar_QC import *
 
 import netCDF4 as ncdf
@@ -1199,12 +1199,12 @@ def run(options):
                                         volume_name=os.path.basename(fname))
 
             print('\n WRITING DART: {}\n'.format(out_filenames[n]))
-            ret = write_DART_ascii(vel, filename=out_filenames[n], grid_dict=_grid_dict, \
+            ret = opaws_write_DART_ascii(vel, filename=out_filenames[n], grid_dict=_grid_dict, \
                                     obs_error=[_obs_errors['velocity']] )
 
             if options.onlyVR != True:
                 print('\n WRITING DART ONLY VR: {}\n'.format(out_filenames[n]))
-                ret = write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
+                ret = opaws_write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
                                     obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
             
         if len(sweep_num) > 0:

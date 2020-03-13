@@ -14,6 +14,11 @@
 # created by Lou Wicker Feb 2017
 #
 #############################################################
+from __future__ import print_function
+from builtins import filter
+from builtins import zip
+from builtins import range
+from builtins import object
 import os
 import sys
 import glob
@@ -41,7 +46,7 @@ from pyproj import Proj
 from pyart.graph import cm
 import datetime as DT
 from numpy import ma
-from dart_tools import *
+from utils.dart_tools import mrms_write_DART_ascii
 import xarray as xr
 import pandas as pd
 
@@ -189,7 +194,7 @@ def Get_Closest_Elevations(path, anal_time, sub_dir=None, window=_dt_window):
 
        # This code finds the latest file that exists in the list - using only a single tilt per volume.
        if bool(tilt_time):
-            maxtime = max(tilt_time.items(),key=lambda d:(d[1]))
+            maxtime = max(list(tilt_time.items()),key=lambda d:(d[1]))
             ObsFileList.append(os.path.join(full_path,maxtime[0]))
        del(tilt_time)
 
@@ -201,7 +206,7 @@ def Get_Closest_Elevations(path, anal_time, sub_dir=None, window=_dt_window):
        print("\n Prep_MRMS.Get_Closest_Elevations:  No obs found \n")
 
    # Handy sort command that will give me the the lowest tilts first....       
-   ObsFileList.sort(key=lambda f: int(filter(str.isdigit, f)))
+   ObsFileList.sort(key=lambda f: int(list(filter(str.isdigit, f))))
 
    return ObsFileList
                  
@@ -407,11 +412,11 @@ def plot_shapefiles(map, shapefiles=None, color='k', linewidth=0.5, ax=None, \
                     s = map.readshapefile(shapefile,'myshapes',drawbounds=False)
 
                     for shape in map.counties:
-                        xx, yy = zip(*shape)
+                        xx, yy = list(zip(*shape))
                         map.plot(xx, yy, color=color, linewidth=linewidth, ax=ax, zorder=4)
 
         except OSError:
-            print "PLOT_SHAPEFILES:  NO SHAPEFILE ENV VARIABLE FOUND "
+            print("PLOT_SHAPEFILES:  NO SHAPEFILE ENV VARIABLE FOUND ")
             
     if counties:
         map.drawcounties(ax=ax, linewidth=0.25, color='0.5', zorder=5)
@@ -420,14 +425,14 @@ def plot_shapefiles(map, shapefiles=None, color='k', linewidth=0.5, ax=None, \
         map.drawstates(ax=ax, linewidth=0.75, color='k', zorder=5)
    
     if parallels:
-        map.drawparallels(range(10,80,1),    labels=[1,0,0,0], linewidth=0.5, ax=ax)
+        map.drawparallels(list(range(10,80,1)),    labels=[1,0,0,0], linewidth=0.5, ax=ax)
     else:
-        map.drawparallels(range(10,80,1),    labels=[1,0,0,0], linewidth=0.001, ax=ax)
+        map.drawparallels(list(range(10,80,1)),    labels=[1,0,0,0], linewidth=0.001, ax=ax)
 
     if meridians:
-        map.drawmeridians(range(-170,-10,1), labels=[0,0,0,1], linewidth=0.5, ax=ax)
+        map.drawmeridians(list(range(-170,-10,1)), labels=[0,0,0,1], linewidth=0.5, ax=ax)
     else:
-        map.drawmeridians(range(-170,-10,1), labels=[0,0,0,1], linewidth=0.001, ax=ax)
+        map.drawmeridians(list(range(-170,-10,1)), labels=[0,0,0,1], linewidth=0.001, ax=ax)
             
 ########################################################################
 #
@@ -747,7 +752,7 @@ def write_obs_seq_xarray(field, filename=None, obs_error=None,
    if volume_name != None:
        fnc.version = "Created from the MRMS radar volume:  %s" % volume_name
     
-   for key in attributes.keys():
+   for key in list(attributes.keys()):
        fnc.variables[key].units = attributes[key][0]
        fnc.variables[key].description = attributes[key][1]
 
@@ -794,17 +799,17 @@ def main(argv=None):
 
    if options.dir == None:
           
-      print "\n\n ***** USER MUST SPECIFY A DIRECTORY WHERE FILES ARE *****"
-      print "\n                         EXITING!\n\n"
+      print("\n\n ***** USER MUST SPECIFY A DIRECTORY WHERE FILES ARE *****")
+      print("\n                         EXITING!\n\n")
       parser.print_help()
-      print
+      print()
       sys.exit(1)
       
    if options.loc == None:
-      print "\n\n ***** USER MUST SPECIFY LAT/LON CENTER POINT *****"
-      print "\n                         EXITING!\n\n"
+      print("\n\n ***** USER MUST SPECIFY LAT/LON CENTER POINT *****")
+      print("\n                         EXITING!\n\n")
       parser.print_help()
-      print
+      print()
       sys.exit(1)
 
    if options.thin > 1:
@@ -888,23 +893,23 @@ def main(argv=None):
                                obs_error=[_grid_dict['reflectivity'], _grid_dict['0reflectivity']], 
                                QC_info=_grid_dict['QC_info'], zero_levels=_grid_dict['zero_levels'], 
                                volume_name=rlt_filename)
-       print "\n --> Time for netCDF write: {} seconds".format(timeit.time() - tNCDF)
+       print("\n --> Time for netCDF write: {} seconds".format(timeit.time() - tNCDF))
        
        tDART = timeit.time()
-       ret = write_DART_ascii(ref_obj, filename=out_filename, levels=np.arange(len(_grid_dict['levels'])),
+       ret = mrms_write_DART_ascii(ref_obj, filename=out_filename, levels=np.arange(len(_grid_dict['levels'])),
                               obs_error=[_grid_dict['reflectivity'], _grid_dict['0reflectivity']], 
                               QC_info=_grid_dict['QC_info'], zero_levels=_grid_dict['zero_levels'])
-       print "\n --> Time for DART write: {} seconds".format(timeit.time() - tDART)
+       print("\n --> Time for DART write: {} seconds".format(timeit.time() - tDART))
    
    if plot_grid_flag:
        tPLOT = timeit.time()
        fsuffix = "OpMRMS_%s" % (ref_obj.time.strftime('%Y%m%d_%H%M'))
        plot_filename = os.path.join(options.out_dir, fsuffix)
        plot_grid(ref_obj, sweep_num, plot_filename = plot_filename, debug=_debug)
-       print "\n --> Time to plot image: {} seconds".format(timeit.time() - tPLOT)
+       print("\n --> Time to plot image: {} seconds".format(timeit.time() - tPLOT))
    
-   print "\n ----> Time for MRMS operations: {} seconds".format(timeit.time() - tMAIN)
-   print "\n PROGRAM MRMS COMPLETED\n"    
+   print("\n ----> Time for MRMS operations: {} seconds".format(timeit.time() - tMAIN))
+   print("\n PROGRAM MRMS COMPLETED\n")    
 #-------------------------------------------------------------------------------
 # Main program for testing...
 #
