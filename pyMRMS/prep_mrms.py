@@ -206,7 +206,8 @@ def Get_Closest_Elevations(path, anal_time, sub_dir=None, window=_dt_window):
        print("\n Prep_MRMS.Get_Closest_Elevations:  No obs found \n")
 
    # Handy sort command that will give me the the lowest tilts first....       
-   ObsFileList.sort(key=lambda f: int(list(filter(str.isdigit, f))))
+   ObsFileList.sort()
+   print(ObsFileList)
 
    return ObsFileList
                  
