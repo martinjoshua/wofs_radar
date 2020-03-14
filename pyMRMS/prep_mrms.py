@@ -768,14 +768,14 @@ def run(options):
       print("\n                         EXITING!\n\n")
       parser.print_help()
       print()
-      sys.exit(1)
+      return 1
       
    if options.loc == None:
       print("\n\n ***** USER MUST SPECIFY LAT/LON CENTER POINT *****")
       print("\n                         EXITING!\n\n")
       parser.print_help()
       print()
-      sys.exit(1)
+      return 1
 
    if options.thin > 1:
        _grid_dict['thin_grid'] = options.thin
@@ -813,7 +813,7 @@ def run(options):
            print("\n Prep_MRMS cannot find a RF file between [%2.2d,%2.2d] min of %s, exiting" % 
                 (_dt_window[0], _dt_window[1], a_time.strftime("%Y%m%d%H%M")))
            print("\n============================================================================")
-           sys.exit(1)
+           return 1
 
    else:
        in_filenames = Get_Closest_Elevations(options.dir, a_time)
@@ -831,7 +831,7 @@ def run(options):
            print("\n**********************   FATAL ERROR!!  ************************************")
            print("\n PREP_GRID3D:  Cannot create output dir:  %s\n" % options.out_dir)
            print("\n**********************   FATAL ERROR!!  ************************************")      
-           sys.exit(1)
+           return 1
 
 #-------------------------------------------------------------------------------
    if options.realtime != None:
@@ -875,6 +875,7 @@ def run(options):
    
    print("\n ----> Time for MRMS operations: {} seconds".format(timeit.time() - tMAIN))
    print("\n PROGRAM MRMS COMPLETED\n")    
+   return 0
 
 #-------------------------------------------------------------------------------
 # Main function defined to return correct sys.exit() calls
@@ -909,7 +910,7 @@ def main(argv=None):
                     
     (options, args) = parser.parse_args()
 
-    run(options)
+    return run(options)
 
 #-------------------------------------------------------------------------------
 

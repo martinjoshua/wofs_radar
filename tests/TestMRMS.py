@@ -5,7 +5,7 @@ from multiprocessing import Pool
 
 class TestMRMS(unittest.TestCase):
 
-    def test_mrms_single(self):
+    def test_mrms_multiple(self):
         start_time = datetime.datetime(2020, 3, 2, 17, 0, 0)
         total_minutes  = 845
         dtime      = 15 # minutes
