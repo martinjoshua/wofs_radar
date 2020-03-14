@@ -46,7 +46,7 @@ class TestMRMS(unittest.TestCase):
 
             return (lat, lon)
 
-        lat, lon = getLatLon('./RADAR', start_time)
+        lat, lon = getLatLon('/scratch/wicker/REALTIME', start_time)
  
         def getOptions(runtime):
             obj = types.SimpleNamespace()
@@ -62,8 +62,10 @@ class TestMRMS(unittest.TestCase):
  
         times = [start_time + datetime.timedelta(minutes=i*dtime) for i in range(int(total_minutes/dtime))]
 
-        pool = Pool(5)
-        pool.map(run, list(map(lambda t: getOptions(t), times)))
+        for time in times:
+            run(getOptions(time))
+        # pool = Pool(5)
+        # pool.map(run, list(map(lambda t: getOptions(t), times)))
 
 
 if __name__ == '__main__':
