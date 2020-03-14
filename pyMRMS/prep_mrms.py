@@ -77,7 +77,7 @@ _dt_window = [-5,2]
 
 # Debug
 
-_debug = False
+_debug = True
 
 ##########################################################################################
 # Parameter dict for reflectivity masking
