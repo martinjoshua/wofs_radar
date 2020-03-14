@@ -758,43 +758,8 @@ def write_obs_seq_xarray(field, filename=None, obs_error=None,
 
    fnc.sync()  
    fnc.close()
-#-------------------------------------------------------------------------------
-# Main function defined to return correct sys.exit() calls
 
-def main(argv=None):
-   if argv is None:
-       argv = sys.argv
-#
-# Command line interface 
-#
-   parser = OptionParser()
-   parser.add_option("-d", "--dir",   dest="dir",    default=None,  type="string", help = "Directory where MRMS files are")
-   
-   parser.add_option(      "--realtime",  dest="realtime",   default=None,  \
-               help = "Boolean flag to uses this YYYYMMDDHHMM time stamp for the realtime processing")
- 
-   parser.add_option("-g", "--grep",  dest="grep",   default="*.netcdf.gz", type="string", help = "Pattern grep, [*.nc, *VR.h5]")
-   
-   parser.add_option("-w", "--write", dest="write",   default=False, \
-                           help = "Boolean flag to write DART ascii file", action="store_true")
-                           
-   parser.add_option("-o", "--out",      dest="out_dir",  default="ref_files",  type="string", \
-                           help = "Directory to place output files in")
-                           
-   parser.add_option("-p", "--plot",      dest="plot",      default=-1,  type="int",      \
-                     help = "Specify a number between 0 and 20 to plot reflectivity")
- 
-   parser.add_option(     "--loc",      dest="loc",  type="float", default=None, nargs = 2,      \
-                     help = "Specify location of NEWSe grid center (lat,lon)")
-                  
-                 
-   parser.add_option(      "--thin",      dest="thin",      default=1,  type="int",      \
-                     help = "Specify a number between 2 and 5 thin reflectivity")
-                  
-   (options, args) = parser.parse_args()
-
-#-------------------------------------------------------------------------------
-
+def run(options):
    tMAIN = timeit.time()
 
    if options.dir == None:
@@ -910,6 +875,44 @@ def main(argv=None):
    
    print("\n ----> Time for MRMS operations: {} seconds".format(timeit.time() - tMAIN))
    print("\n PROGRAM MRMS COMPLETED\n")    
+
+#-------------------------------------------------------------------------------
+# Main function defined to return correct sys.exit() calls
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+
+    parser = OptionParser()
+    parser.add_option("-d", "--dir",   dest="dir",    default=None,  type="string", help = "Directory where MRMS files are")
+
+    parser.add_option(      "--realtime",  dest="realtime",   default=None,  \
+                help = "Boolean flag to uses this YYYYMMDDHHMM time stamp for the realtime processing")
+
+    parser.add_option("-g", "--grep",  dest="grep",   default="*.netcdf.gz", type="string", help = "Pattern grep, [*.nc, *VR.h5]")
+
+    parser.add_option("-w", "--write", dest="write",   default=False, \
+                            help = "Boolean flag to write DART ascii file", action="store_true")
+                            
+    parser.add_option("-o", "--out",      dest="out_dir",  default="ref_files",  type="string", \
+                            help = "Directory to place output files in")
+                            
+    parser.add_option("-p", "--plot",      dest="plot",      default=-1,  type="int",      \
+                        help = "Specify a number between 0 and 20 to plot reflectivity")
+
+    parser.add_option(     "--loc",      dest="loc",  type="float", default=None, nargs = 2,      \
+                        help = "Specify location of NEWSe grid center (lat,lon)")
+                    
+                    
+    parser.add_option(      "--thin",      dest="thin",      default=1,  type="int",      \
+                        help = "Specify a number between 2 and 5 thin reflectivity")
+                    
+    (options, args) = parser.parse_args()
+
+    run(options)
+
+#-------------------------------------------------------------------------------
+
 #-------------------------------------------------------------------------------
 # Main program for testing...
 #
