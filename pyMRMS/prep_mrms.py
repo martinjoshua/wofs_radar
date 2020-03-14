@@ -260,9 +260,13 @@ def assemble_3D_grid(filenames, loc=None, debug=False):
             print("\n Running......%s" % (cmd))
 
         os.system(cmd)
-         
-        f = ncdf.Dataset(_temp_netcdf_file, "r")
-         
+        
+        try:
+            f = ncdf.Dataset(_temp_netcdf_file, "r")
+        except:
+            print('Could not open file %s' % _temp_netcdf_file)
+            continue
+
         if n == 0:
              
             nlons  = len(f.dimensions['Lon'])
