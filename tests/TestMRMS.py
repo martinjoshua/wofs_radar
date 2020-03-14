@@ -46,6 +46,8 @@ class TestMRMS(unittest.TestCase):
 
             return (lat, lon)
 
+        lat, lon = getLatLon('./RADAR', start_time)
+ 
         def getOptions(runtime):
             obj = types.SimpleNamespace()
             obj.dir = os.path.join(_MRMS_feed, runtime.strftime("%Y/%m/%d"))
@@ -53,7 +55,7 @@ class TestMRMS(unittest.TestCase):
             obj.out_dir = os.path.join(_MRMS_obs_seq, start_time.strftime("%Y%m%d"))
             obj.realtime = runtime.strftime("%Y%m%d%H%M")
             obj.plot = 3
-            obj.loc = getLatLon('./RADAR', start_time)
+            obj.loc = [lat, lon]
             obj.grep = '*.netcdf.gz'
             obj.thin = 1
             return obj
