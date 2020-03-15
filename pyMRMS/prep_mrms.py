@@ -15,6 +15,9 @@
 #
 #############################################################
 from __future__ import print_function
+from __future__ import division
+
+from past.utils import old_div
 from builtins import filter
 from builtins import zip
 from builtins import range
@@ -290,10 +293,10 @@ def assemble_3D_grid(filenames, loc=None, debug=False):
                 ic     = get_loc(f_lons, loc[1], 0.5)[0]
                 jc     = get_loc(f_lats, loc[0], 0.5)[0]
             else:
-                ic, jc = nlats/2, nlons/2
+                ic, jc = old_div(nlats,2), old_div(nlons,2)
 
-            i0, i1 = ic-NX/2, ic+NX/2
-            j0, j1 = jc-NY/2, jc+NY/2
+            i0, i1 = ic-old_div(NX,2), ic+old_div(NX,2)
+            j0, j1 = jc-old_div(NY,2), jc+old_div(NY,2)
 
 # Fixing things when the NEWSe domain goes out of bounds
 
