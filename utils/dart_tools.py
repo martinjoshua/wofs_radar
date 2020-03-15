@@ -702,7 +702,7 @@ def mrms_write_DART_ascii(obs, filename=None, obs_error=None, zero_dbz_obtype=_z
     # to read back in the entire contents of the obs-seq file, store it, rewrite the file
     # with header information first, and then dump the contents of obs-seq back inp.  Yuck.
 
-    with file(filename, 'r') as f: f_obs_seq = f.read()
+    with open(filename, 'r') as f: f_obs_seq = f.read()
 
     fi = open(filename, "w")
 
