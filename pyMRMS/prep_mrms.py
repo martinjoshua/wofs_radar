@@ -746,7 +746,7 @@ def write_obs_seq_xarray(field, filename=None, obs_error=None,
    xa = xr.Dataset(pd.DataFrame.from_records(out))
    
    # reset index to be a master index across all obs
-   xa.rename({'dim_0': 'index'}, inplace=True)
+   xa = xa.rename({'dim_0': 'index'})
    
    # Write the xarray file out (this is all there is, very nice guys!)
    xa.to_netcdf(filename, mode='w')
