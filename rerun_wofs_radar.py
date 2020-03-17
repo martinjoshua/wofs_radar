@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import time
 import os
 import sys
@@ -8,20 +6,10 @@ import logging
 import subprocess
 from optparse import OptionParser
 
-<<<<<<< HEAD
 _VR_obs_seq_dir     = "/scratch/wicker/REALTIME/VEL"
 _slurm_mrms_string  = "/work/wicker/REALTIME/WOFS_radar/slurm_mrms.job --start %s"
 _slurm_opaws_string = "/work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
 _slurm_concatenate  = "/work/wicker/REALTIME/WOFS_radar/slurm_combine_VR_ncdf.py -d %s -f %s > slurm_combine_VR.log"
-=======
-# Import wofs_dirs to tell you where things are....
-from wofs_dirs import _VR_obs_seq_dir, _slurm_mrms_string, _slurm_opaws_string, _slurm_concatenate
-
-#_VR_obs_seq_dir     = "/scratch/wicker/REALTIME/VEL"
-#_slurm_mrms_string  = "~/REALTIME/WOFS_radar/slurm_mrms.job --start %s"
-#_slurm_opaws_string = "~/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
-#_slurm_concatenate  = "~/REALTIME/WOFS_radar/obs_seq_combine_ncdf.py -d %s -f %s"
->>>>>>> 02f7101dbc80e9c7f0a3a18745227138944d6b99
 
 _TEST = False
 
@@ -128,13 +116,13 @@ if __name__ == "__main__":
 
    (options, args) = parser.parse_args()
 
-   print ''
-   print ' ================================================================================'
+   print('')
+   print(' ================================================================================')
 
    if options.start == None:         
-       print "\n\n ***** USER MUST SPECIFY AT LEAST A SINGLE TIME   **"
+       print("\n\n ***** USER MUST SPECIFY AT LEAST A SINGLE TIME   **")
        parser.print_help()
-       print
+       print()
        sys.exit(1)
 
 #-----------------------------------------------------------------------------

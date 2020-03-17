@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import time
 import os
 import sys
@@ -25,7 +23,7 @@ dbz_dir = os.path.join(_wofs_radar_dir, "REF", time_str)
 print("\n Checking status of WOFS MRMS directory\n")
 os.system("ls -las %s" % dbz_dir)
 print("\n")
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")
 print("\n Checking status of WOFS velocity directory\n")
 vel_dir = os.path.join(_wofs_radar_dir, "VEL", time_str)
 os.system("ls -las %s" % vel_dir)

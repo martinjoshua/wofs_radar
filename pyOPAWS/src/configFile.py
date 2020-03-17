@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 _grid_param = {
               'grid_spacing_xy' : 5000.,         # meters
               'domain_radius_xy': 150000.,       # meters
@@ -38,6 +36,6 @@ _radar_parameters = {
 
 def getConfig(dict,key):
     str = "%s['%s']" % (dict, key)
-    print str
+    print(str)
     param = eval(str)
     return param

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import time
 import os
 import sys
@@ -53,13 +54,13 @@ def run_MRMS_Programs(Init_Dockers):
 
     print("\n Starting Grid_Driver program")
     os.system("cp %s %s" % ("./Radar3DGrid_Driver.cmd", _MRMS_Grid_Driver_exe[0]))
-    os.chmod(_MRMS_Grid_Driver_exe[0],0775)
+    os.chmod(_MRMS_Grid_Driver_exe[0],0o775)
     with open(_MRMS_log_files[1], 'w') as fp1:
         p = subprocess.Popen(_MRMS_Grid_Driver_exe, stdout=fp1, shell=True)
 
     print("\n Starting MsgMaker program")
     os.system("cp %s %s" % ("./Radar3DGrid_MsgMaker.cmd", _MRMS_Grid_MsgMaker_exe[0]))
-    os.chmod(_MRMS_Grid_MsgMaker_exe[0],0775)
+    os.chmod(_MRMS_Grid_MsgMaker_exe[0],0o775)
     with open(_MRMS_log_files[2], 'w') as fp2:
         p = subprocess.Popen(_MRMS_Grid_MsgMaker_exe, stdout=fp2, shell=True)
 
@@ -75,7 +76,7 @@ def run_MRMS_Setup():
 
     p = subprocess.Popen(_MRMS_Grid_Setup_exe, stdout=subprocess.PIPE)
     file_txt = p.communicate()[0]
-    print file_txt
+    print(file_txt)
 
     if debug:
         f = open("Grid_Setup_DEBUG.txt", "w")
@@ -85,7 +86,7 @@ def run_MRMS_Setup():
 # Write out the radars file
 
     txt = file_txt.split('\n')
-    print txt
+    print(txt)
     start = txt.index("Recommeded radarinfo file:") + 1
     end   = len(txt) - 1 #blank line in output
 
@@ -93,7 +94,7 @@ def run_MRMS_Setup():
     radars = ""
     f = open(_MRMS_radar_config_file,"w")
     for item in txt[start:end]:
-        print item
+        print(item)
         f.write("%s\n" % item)
         radars = ("%s%s," % (radars, item[0:4]))
     f.close()

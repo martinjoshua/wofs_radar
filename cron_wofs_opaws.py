@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 #-----------------------------------------------------------------------
 #
 # Documentation
@@ -17,6 +15,10 @@
 #                  This is done using "_hour_offset" variable
 #-----------------------------------------------------------------------
 
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
 from apscheduler.schedulers.blocking import BlockingScheduler
 import time
 import os
@@ -25,7 +27,7 @@ import datetime as DT
 import calendar
 import logging
 import subprocess
-import Config.Settings as settings
+from . import Config.Settings as settings
 
 # Used by combine to get the correct directory
 _hour_offset = 12

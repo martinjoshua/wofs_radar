@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import time
 import logging
 import os, sys
@@ -59,7 +57,7 @@ radar_list = ['KMAF']
 
 while start_time < stop_time:
 
-    print start_time.strftime("%Y,%m,%d,%H,%M")
+    print(start_time.strftime("%Y,%m,%d,%H,%M"))
 
     for radar in radar_list:
         print("\n ============================================================================")

@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import map
+from builtins import zip
 import matplotlib.pyplot as plt
 import pyart
 import matplotlib
@@ -17,7 +21,7 @@ warnings.filterwarnings("ignore")
 
 from mpl_toolkits.basemap import Basemap
 from pyproj import Proj
-from radar_QC import *
+from .radar_QC import *
 
 #---------------------------------------------------------------------------------------------------
 #
@@ -100,16 +104,16 @@ def mybasemap(glon, glat, r_lon, r_lat, scale = 1.0, supress_ticks = True,
           s = map.readshapefile(shapefile,'shapeinfo',drawbounds=False)
 
           for shape in maplt.shapeinfo:
-              xx, yy = zip(*shape)
+              xx, yy = list(zip(*shape))
               map.plot(xx,yy,color=color,linewidth=linewidth,ax=ax)
 
    # pickle the class instance.
 
-   if _debug:  print(timeit.clock()-tt,' secs to create original Basemap instance')
+   if _debug:  print((timeit.clock()-tt,' secs to create original Basemap instance'))
 
    if pickle:
       pickle.dump(map,open('mymaplt.pickle','wb'),-1)
-      print(timeit.clock()-tt,' secs to create original Basemap instance and pickle it')
+      print((timeit.clock()-tt,' secs to create original Basemap instance and pickle it'))
 
    return map
 
@@ -134,8 +138,8 @@ def create_ppi_map(radar, xr, yr, plot_range_rings=_plot_RangeRings, ax=None, **
 
    map = mybasemap(lon, lat, radar_lon, radar_lat, ax=ax, **kwargs)
 
-   radar_x, radar_y = map(radar_lon, radar_lat)
-   xmap, ymap = map(lon, lat)
+   radar_x, radar_y = list(map(radar_lon, radar_lat))
+   xmap, ymap = list(map(lon, lat))
 
    if plot_range_rings:
       angle = np.linspace(0., 2.0 * np.pi, 360)
@@ -200,9 +204,9 @@ def plot_ppi_map(radar, field, level = 0, cmap=pyart.graph.cm.Carbone42, vRange=
 
 if __name__ == "__main__":
 
-  print ' ================================================================================\n\n'
-  print '                          BEGIN PROGRAM lvl2_plot                   '
-  print '\n================================================================================\n'
+  print(' ================================================================================\n\n')
+  print('                          BEGIN PROGRAM lvl2_plot                   ')
+  print('\n================================================================================\n')
 
   parser = OptionParser()
   parser.add_option("-d", "--dir",       dest="dname",     default=None,  type="string", \
@@ -238,8 +242,8 @@ if __name__ == "__main__":
                      
   (options, args) = parser.parse_args()
   
-  print ''
-  print ' ================================================================================'
+  print('')
+  print(' ================================================================================')
   
   if not os.path.exists(options.out_dir):
     os.mkdir(options.out_dir)
@@ -250,10 +254,10 @@ if __name__ == "__main__":
   if options.dname == None:
           
     if options.fname == None:
-      print "\n\n ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE OR DIRECTORY! *****"
-      print "\n                         EXITING!\n\n"
+      print("\n\n ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE OR DIRECTORY! *****")
+      print("\n                         EXITING!\n\n")
       parser.print_help()
-      print
+      print()
       sys.exit(1)
       
     else:
@@ -279,11 +283,11 @@ if __name__ == "__main__":
   if options.unfold == "phase":
       unfold_type = "phase"
   elif options.unfold == "region":
-      print "\n lvl2_plot dealias_region_based unfolding will be used\n"
+      print("\n lvl2_plot dealias_region_based unfolding will be used\n")
       unfold_type = "region"
   else:
-      print "\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****"
-      print "\n          NO VELOCITY UNFOLDING DONE...\n\n"
+      print("\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****")
+      print("\n          NO VELOCITY UNFOLDING DONE...\n\n")
       unfold_type = None
       
   if options.shapefiles:

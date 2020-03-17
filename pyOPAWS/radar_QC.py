@@ -1,6 +1,8 @@
 from __future__ import print_function
+from __future__ import division
 ####
 
+from past.utils import old_div
 import sys
 import numpy as np
 import scipy.interpolate
@@ -162,10 +164,10 @@ def texture(input, radius=3, oneD=False):
         i2 = input.filled(fill_value=np.nan)
         
         if len(i2.shape) == 1 or oneD == True:
-            kernel = np.ones((radius))/np.float(radius)
+            kernel = old_div(np.ones((radius)),np.float(radius))
             kernel2 = kernel
         else:
-            kernel = np.ones((radius,radius))/np.float(radius**2)
+            kernel = old_div(np.ones((radius,radius)),np.float(radius**2))
             kernel2 = kernel
 
         if len(i2.shape) == 2 and oneD == True:       
@@ -209,11 +211,11 @@ def trap4point( input, y1, y2, y3, y4):
     output[mask2] = 0.0
 
     mask3 = np.logical_and((input > x1), (input < x2))
-    tmp = (input-x1) / (x2-x1)
+    tmp = old_div((input-x1), (x2-x1))
     output[mask3] = tmp[mask3]
 
     mask4 = np.logical_and((input > x3), (input < x4))
-    tmp = (x4 - input) / (x4-x3)
+    tmp = old_div((x4 - input), (x4-x3))
     output[mask4] = tmp[mask4]
         
     return output
