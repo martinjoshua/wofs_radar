@@ -27,7 +27,7 @@ import datetime as DT
 import calendar
 import logging
 import subprocess
-from . import Config.Settings as settings
+import Config.Settings as settings
 
 # Used by combine to get the correct directory
 _hour_offset = 12
