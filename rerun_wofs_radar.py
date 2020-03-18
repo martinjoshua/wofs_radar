@@ -9,7 +9,7 @@ from Config import settings
 
 _VR_obs_seq_dir     = settings.opaws_obs_seq
 _slurm_mrms_string  = "/work/wicker/REALTIME/WOFS_radar/slurm_mrms.job --start %s"
-_slurm_opaws_string = "/work/wicker/REALTIME/WOFS_radar/slurm_opaws.job --start %s"
+_slurm_opaws_string = "python slurm_opaws.job --start %s"
 _slurm_concatenate  = "python -m slurm_combine_VR_ncdf -d %s -f %s > slurm_combine_VR.log"
 
 _TEST = False
