@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #############################################################
 # opaws2D: A program to process LVL-2 volumes, unfold       #
 #          radial velocities, and thin the radar data       #

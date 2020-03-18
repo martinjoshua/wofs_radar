@@ -27,16 +27,16 @@ import datetime as DT
 import calendar
 import logging
 import subprocess
-import Config.Settings as settings
+import Config as settings
 
 # Used by combine to get the correct directory
 _hour_offset = 12
-_TEST = settings.is_debug()
+_TEST = settings.default_is_debug
 
 if _TEST == True:
    rtimes = ', '.join(str(t) for t in range(60))    #test the code every minute
 else:
-   rtimes = settings.get_default('runtimes')    # T+5min radar processing start time
+   rtimes = settings.default_runtimes    # T+5min radar processing start time
 
 def utc_to_local(utc_dt):
     """

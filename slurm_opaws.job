@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 #-----------------------------------------------------------------------
 #
 # Documentation
@@ -34,23 +32,23 @@ import datetime as DT
 import calendar
 from optparse import OptionParser
 from multiprocessing import Pool
-import Config.Settings as settings
+from Config import settings
 
 # Import wofs_dirs to tell you where things are....
 #from wofs_dirs import _WSR88D_feed, _VR_obs_seq_dir, _WOFS_grid_info, _opaws2D, _opaws_logs
 
-_WSR88D_feed     = settings.get_opaws('feed')
-_VR_obs_seq_dir  = settings.get_opaws('obs_seq')
-_WOFS_grid_info  = settings.get_default('grid_info')
-_opaws2D         = settings.get_opaws('opaws2D')
-_opaws_logs      = settings.get_opaws('log')
+_WSR88D_feed     = settings.opaws_feed
+_VR_obs_seq_dir  = settings.opaws_obs_seq
+_WOFS_grid_info  = settings.default_grid_info
+_opaws2D         = settings.opaws_opaws2d
+_opaws_logs      = settings.opaws_log
 _command_file    = "./commands.txt"
 
 # offset to get the correct date for file directories and radar file
 _hour_offset = 12
 
 # Cressman parameters
-_dx  = 5000.
+_dx  = 3000.
 _roi = 1000.
 
 # Plot this level
