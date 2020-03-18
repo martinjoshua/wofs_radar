@@ -23,8 +23,8 @@ class myobject(object):
         self.name = name
         self.data = data
 
-    if kwargs != None:
-        for key in kwargs:  setattr(self, key, kwargs[key])
+        if kwargs != None:
+            for key in kwargs:  setattr(self, key, kwargs[key])
 
     def keys(self):
         return self.__dict__

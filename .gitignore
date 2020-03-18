@@ -2,5 +2,6 @@ RADAR/*
 !RADAR/*.csh
 
 *.pyc
+*.log
 
 out/*
