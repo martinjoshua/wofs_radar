@@ -48,7 +48,7 @@ import scipy.spatial
 from optparse import OptionParser
 from matplotlib.offsetbox import AnchoredText
 from utils.dart_tools import opaws_write_DART_ascii
-from .radar_QC import *
+from pyOPAWS.radar_QC import *
 
 import netCDF4 as ncdf
 import datetime as DT
