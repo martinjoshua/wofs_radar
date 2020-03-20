@@ -7,4 +7,4 @@
 #SBATCH -t 00:59:00
 
 export PROJ_LIB=$HOME/miniconda3/envs/wofs/share/proj
-$HOME/miniconda3/envs/wofs/bin/python -m slurm_combine_VR_ncdf -f ${COMBINETIME} 
+$HOME/miniconda3/envs/wofs/bin/python -m slurm_combine_VR_ncdf -f _VR_${COMBINETIME}.nc 
