@@ -27,11 +27,12 @@ import datetime as DT
 import calendar
 import logging
 import subprocess
-import Config as settings
+from Config import settings
+from utils.radar import getFromFile
 
 # Used by combine to get the correct directory
 _hour_offset = 12
-_TEST = settings.default_is_debug
+_TEST = bool(settings.default_debug)
 
 if _TEST == True:
    rtimes = ', '.join(str(t) for t in range(60))    #test the code every minute
@@ -101,7 +102,16 @@ def scheduled_job():
     print("\n Begin processing for cycle time:  %s" % (cycle_time_str))
 
     # OPAWS processing
-    cmd = (settings.get_job('opaws') % (cycle_time_str))
+    cmd = (settings.jobs_opaws % (cycle_time_str))
+
+    #array will depend on num of radars in file
+
+    
+    radars = getFromFile(cycle_time)
+
+    cmd = "sbatch --job-name=opaws --output=opaws.out --error=opaws.err --nodes=1 --time 00:59:00 --array=0-%i python -m pyOPAWS.slurm_run --window %s" % (len(radars)-1, cycle_time.strftime("%Y,%m,%d,%H,%M"))
+
+
     print("\n Cmd: %s \n" % (cmd))
     
     if _TEST != True:
