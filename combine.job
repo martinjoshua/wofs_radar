@@ -6,5 +6,6 @@
 #SBATCH -e opaws-combine.error
 #SBATCH -t 00:59:00
 
-export PROJ_LIB=$HOME/miniconda3/envs/wofs/share/proj
-$HOME/miniconda3/envs/wofs/bin/python -m slurm_combine_VR_ncdf -f _VR_${COMBINETIME}.nc 
+source $HOME/miniconda3/bin/activate wofs
+
+python -m slurm_combine_VR_ncdf -f _VR_${COMBINETIME}.nc 

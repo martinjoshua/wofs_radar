@@ -6,5 +6,6 @@
 #SBATCH -e opaws.error
 #SBATCH -t 00:59:00
 
-export PROJ_LIB=$HOME/miniconda3/envs/wofs/share/proj
-$HOME/miniconda3/envs/wofs/bin/python -m pyOPAWS.slurm_run --cycle ${CYCLETIME} --radarIndex ${SLURM_ARRAY_TASK_ID}
+source $HOME/miniconda3/bin/activate wofs
+
+python -m pyOPAWS.slurm_run --cycle ${CYCLETIME} --radarIndex ${SLURM_ARRAY_TASK_ID}
