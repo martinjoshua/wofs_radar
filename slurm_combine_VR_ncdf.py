@@ -6,6 +6,7 @@ import sys, os, glob
 import time
 import datetime as DT
 from optparse import OptionParser
+from Config import settings
 import xarray as xr
 import netCDF4 as ncdf
 
@@ -67,43 +68,37 @@ def main(argv=None):
     (options, args) = parser.parse_args()
     
     if options.dir == None:
+        options.dir = settings.opaws_obs_seq
 
-        print("\n                NO INPUT DIRECTORY IS SUPPLIED, EXITING.... \n ")
-        parser.print_help()
-        print()
-        sys.exit(1)
-
-    else:
-
-        suffix = options.file
-        wild = os.path.abspath(options.dir)+"/obs_seq_K*"+suffix
-        print(wild)
-        rawlist = glob.glob(wild)
-        print(rawlist)
-        
-        files = sorted( rawlist, key = lambda file: os.path.getmtime(file))
-        
-        print("\n Obs_seq.final files sorted by modification time\n")
-        for file in files:
-            print(" {} - {}".format(file, time.ctime(os.path.getmtime(file))) )
-        
-        # Fix in case we picked up some none obs_seq files
-        for n, file in enumerate(files):
-             if file.find(".out") != -1:  
-                 print("\n Removing file:  %s from list" % file)
-                 del files[n]
+    suffix = options.file
+    wild = os.path.abspath(options.dir)+"/obs_seq_K*"+suffix
+    print(wild)
+    rawlist = glob.glob(wild)
+    print(rawlist)
     
-        print("\n Dart_cc:  Processing %d files in the directory:  %s" % (len(files), options.dir))
-        print(" Dart_cc:  First file is %s" % (files[0]))
-        print(" Dart_cc:  Last  file is %s" % (files[-1]))
-        
-        if options.fprefix == None:
-            tmp         = os.path.basename(files[0])
-            netcdf_file = os.path.join(options.dir, "%s%s" % (tmp[0:7], tmp[12:]))
-        else:
-            netcdf_file = ("%s.%s" % (options.fprefix, os.path.split(files[0])[1][-12:-4]+".nc"))
+    files = sorted( rawlist, key = lambda file: os.path.getmtime(file))
+    
+    print("\n Obs_seq.final files sorted by modification time\n")
+    for file in files:
+        print(" {} - {}".format(file, time.ctime(os.path.getmtime(file))) )
+    
+    # Fix in case we picked up some none obs_seq files
+    for n, file in enumerate(files):
+            if file.find(".out") != -1:  
+                print("\n Removing file:  %s from list" % file)
+                del files[n]
 
-        print("\n Dart_cc:  netCDF4 file to be written is %s\n" % (netcdf_file))
+    print("\n Dart_cc:  Processing %d files in the directory:  %s" % (len(files), options.dir))
+    print(" Dart_cc:  First file is %s" % (files[0]))
+    print(" Dart_cc:  Last  file is %s" % (files[-1]))
+    
+    if options.fprefix == None:
+        tmp         = os.path.basename(files[0])
+        netcdf_file = os.path.join(options.dir, "%s%s" % (tmp[0:7], tmp[12:]))
+    else:
+        netcdf_file = ("%s.%s" % (options.fprefix, os.path.split(files[0])[1][-12:-4]+".nc"))
+
+    print("\n Dart_cc:  netCDF4 file to be written is %s\n" % (netcdf_file))
                 
     dataset = []
     nobs_total = 0

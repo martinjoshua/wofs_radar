@@ -1,9 +1,10 @@
 #!/bin/bash
 #SBATCH --ntasks-per-node=20
 #SBATCH --nodes=1
-#SBATCH -J opaws
-#SBATCH -o opaws.out
-#SBATCH -e opaws.error
+#SBATCH -J opaws-combine
+#SBATCH -o opaws-combine.out
+#SBATCH -e opaws-combine.error
 #SBATCH -t 00:59:00
 
-$HOME/miniconda3/envs/wofs/bin/python -m pyOPAWS.slurm_run --cycle ${CYCLETIME} --radarIndex ${SLURM_ARRAY_TASK_ID}
+export PROJ_LIB=$HOME/miniconda3/envs/wofs/share/proj
+$HOME/miniconda3/envs/wofs/bin/python -m slurm_combine_VR_ncdf -f ${COMBINETIME} 

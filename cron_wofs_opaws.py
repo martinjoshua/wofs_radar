@@ -104,14 +104,6 @@ def scheduled_job():
     # OPAWS processing
     cmd = (settings.jobs_opaws % (cycle_time_str))
 
-    #array will depend on num of radars in file
-
-    
-    radars = getFromFile(cycle_time)
-
-    cmd = "sbatch --job-name=opaws --output=opaws.out --error=opaws.err --nodes=1 --time 00:59:00 --array=0-%i python -m pyOPAWS.slurm_run --window %s" % (len(radars)-1, cycle_time.strftime("%Y,%m,%d,%H,%M"))
-
-
     print("\n Cmd: %s \n" % (cmd))
     
     if _TEST != True:

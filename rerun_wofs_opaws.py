@@ -19,10 +19,10 @@ def main(start_time, end_time):
     radars = getFromFile(start_time)
     
     for cycle_time in runtimes:
-        cmd = "sbatch --array=0-%i --export=CYCLETIME=%s opaws.job" % (len(radars)-1, cycle_time.strftime("%Y%m%d%H%M"))
+        cmd = "JOBID=$(sbatch --parsable --array=0-%i --export=CYCLETIME=%s opaws.job) && sbatch --export=COMBINETIME=%s --depend=afterany:$JOBID combine.job" % (len(radars)-1, cycle_time.strftime("%Y%m%d%H%M"), cycle_time.strftime("%Y%m%d_%H%M"))
         print(cmd)
         OPAWSret = subprocess.Popen([cmd],shell=True)
-        OPAWSret.wait()
+        OPAWSret.wait()        
         print("\n Slurm_opaws job completed at %s" % DT.datetime.now().strftime("%H:%M:%S"))
 
 if __name__ == "__main__":
