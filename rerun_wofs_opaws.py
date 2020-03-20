@@ -19,7 +19,7 @@ def main(start_time, end_time):
     radars = getFromFile(start_time)
     
     for cycle_time in runtimes:
-        cmd = "sbatch --job-name=opaws --output=opaws.out --error=opaws.err --nodes=1 --time 00:59:00 --array=0-%i python -m pyOPAWS.slurm_run --window %s" % (len(radars)-1, cycle_time.strftime("%Y,%m,%d,%H,%M"))
+        cmd = "sbatch --array=0-%i --export=CYCLETIME=%s opaws.job" % (len(radars)-1, cycle_time.strftime("%Y%m%d%H%M"))
         print(cmd)
         OPAWSret = subprocess.Popen([cmd],shell=True)
         OPAWSret.wait()
