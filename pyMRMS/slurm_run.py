@@ -9,7 +9,7 @@ def main(start_time):
     lat, lon = getLatLonFromFile(start_time)
 
     obj = types.SimpleNamespace()
-    obj.dir = settings.mrms_feed
+    obj.dir = os.path.join(settings.mrms_feed, start_time.strftime("%Y/%m/%d"))
     obj.realtime = start_time.strftime("%Y%m%d%H%M")
     obj.grep = '*.netcdf.gz'
     obj.write = True
