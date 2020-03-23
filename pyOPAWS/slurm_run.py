@@ -6,8 +6,6 @@ from Config import settings
 from utils.radar import getFromFile
 
 def main(start_time, radarIndex):
-    # radar_index = int(os.environ['SLURM_ARRAY_TASK_ID'])
-
     radars = getFromFile(start_time)
 
     radar = radars[radarIndex]

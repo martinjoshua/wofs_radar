@@ -5,6 +5,7 @@ from pyOPAWS.opaws2d import run
 from optparse import OptionParser
 from Config import settings
 from utils.radar import getFromFile
+from slurm.jobs import runMRMSForTime, runOPAWSForTime
 
 def main(start_time, end_time):
 
@@ -19,11 +20,8 @@ def main(start_time, end_time):
     radars = getFromFile(start_time)
     
     for cycle_time in runtimes:
-        cmd = "JOBID=$(sbatch --parsable --array=0-%i --export=CYCLETIME=%s opaws.job) && sbatch --export=COMBINETIME=%s --depend=afterany:$JOBID combine.job" % (len(radars)-1, cycle_time.strftime("%Y%m%d%H%M"), cycle_time.strftime("%Y%m%d_%H%M"))
-        print(cmd)
-        OPAWSret = subprocess.Popen([cmd],shell=True)
-        OPAWSret.wait()        
-        print("\n Slurm_opaws job completed at %s" % DT.datetime.now().strftime("%H:%M:%S"))
+        runMRMSForTime(cycle_time)
+        runOPAWSForTime(cycle_time, len(radars))
 
 if __name__ == "__main__":
     parser = OptionParser()

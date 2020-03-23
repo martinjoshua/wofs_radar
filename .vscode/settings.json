@@ -1,5 +1,5 @@
 {
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
-    "python.pythonPath": "/home/joshua/miniconda3/envs/wofs3/bin/python"
+    "python.pythonPath": "/home/joshua/miniconda3/envs/wofs/bin/python"
 }

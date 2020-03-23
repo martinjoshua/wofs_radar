@@ -1,0 +1,11 @@
+#!/bin/bash
+#SBATCH --ntasks-per-node=20
+#SBATCH --nodes=1
+#SBATCH -J mrms
+#SBATCH -o mrms.out
+#SBATCH -e mrms.error
+#SBATCH -t 00:02:30
+
+source $HOME/miniconda3/bin/activate wofs
+
+python -m pyMRMS.slurm_run --cycle ${CYCLETIME}

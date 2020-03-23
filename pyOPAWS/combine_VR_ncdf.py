@@ -15,34 +15,6 @@ day_utime   = utime("days since 1601-01-01 00:00:00")
 sec_utime   = utime("seconds since 1970-01-01 00:00:00")
 
 #=========================================================================================
-# A generic class variable used to create containers
-#
-
-class myobject(object):
-
-    def __init__(self, name, data=None, **kwargs):
-        self.name = name
-        self.data = data
-
-        if kwargs != None:
-            for key in kwargs:  setattr(self, key, kwargs[key])
-
-    def keys(self):
-        return self.__dict__
-
-#=========================================================================================
-# Parse and return a datetime object from obs_seq filename (notice, no seconds in filename)
-#
-# Not used...
-#
-def obs_seq_file_DT(filename):
-    try:
-        return DT.datetime.strptime(os.path.split(filename)[1][-17:-4], "%Y%m%d_%H%M")
-    except:
-        print("\n Cannot parse filename:  %s, exiting program \n" % os.path.split(filename)[1])
-        sys.exit(0)
-
-#=========================================================================================
 # Write out obs_seq files to netCDF for faster inspection
 #-------------------------------------------------------------------------------
 # Main function defined to return correct sys.exit() calls

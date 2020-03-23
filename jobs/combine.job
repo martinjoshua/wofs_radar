@@ -4,8 +4,8 @@
 #SBATCH -J opaws-combine
 #SBATCH -o opaws-combine.out
 #SBATCH -e opaws-combine.error
-#SBATCH -t 00:59:00
+#SBATCH -t 00:01:00
 
 source $HOME/miniconda3/bin/activate wofs
 
-python -m slurm_combine_VR_ncdf -f _VR_${COMBINETIME}.nc 
+python -m pyOPAWS.combine_VR_ncdf -f _VR_${COMBINETIME}.nc 

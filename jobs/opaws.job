@@ -4,7 +4,7 @@
 #SBATCH -J opaws
 #SBATCH -o opaws.out
 #SBATCH -e opaws.error
-#SBATCH -t 00:59:00
+#SBATCH -t 00:02:30
 
 source $HOME/miniconda3/bin/activate wofs
 
