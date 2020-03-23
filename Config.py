@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 import warnings
 
-section_names = 'DEFAULT', 'MRMS', 'JOBS', 'OPAWS'
+section_names = 'DEFAULT', 'MRMS', 'OPAWS'
 
 class AppConfiguration(object):  
     def __init__(self, *file_names):
