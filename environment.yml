@@ -92,6 +92,7 @@ dependencies:
   - pyshp=2.1.0=py_0
   - pysocks=1.7.1=py36_0
   - python=3.6.10=h0371630_0
+  - python-crontab=2.4.1=pyh9f0ad1d_0
   - python-dateutil=2.8.1=py_0
   - python_abi=3.6=1_cp36m
   - pytz=2019.3=py_0

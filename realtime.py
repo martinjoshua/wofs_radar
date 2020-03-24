@@ -10,46 +10,57 @@ from Config import settings
 from utils.radar import getFromFile
 from slurm.jobs import runOPAWSForTime, runMRMSForTime
 
+from optparse import OptionParser
+from crontab import CronTab
+
+
 _hour_offset = 12
 _TEST = bool(settings.default_debug)
-radars = getFromFile(DT.datetime.utcnow())
+
 
 if _TEST == True:
-   rtimes = ', '.join(str(t) for t in range(60))    #test the code every minute
+   rtimes = ','.join(str(t) for t in range(60))    #test the code every minute
 else:
    rtimes = settings.default_runtimes    # T+5min radar processing start time
 
 logging.basicConfig()
 
-wofs_sched = BlockingScheduler()
-
 def get_time_for_cycle(the_time):
     minute = (the_time.minute//15)*15
     return the_time.replace(minute=0, second=0)+DT.timedelta(minutes=minute)
 
-@wofs_sched.scheduled_job('cron', minute=rtimes)
-def opaws():
-    gmt = time.gmtime()  # for file names, here we need to use GMT time
-    cycle_time = get_time_for_cycle(DT.datetime(*gmt[:6]))
+def setCronJob(doEnable):
+    comment='WoFS VR Realtime'
+    cron = CronTab(user=True)
+    job = next(cron.find_comment(comment), None)
+    if job == None: 
+        job = cron.new(command = 'bin/bash $HOME/wofs_radar/jobs/realtime.sh >> /var/log/wofs-radar.log 2>&1', comment = comment)
+    mins = list(map(int, rtimes.split(',')))
+    job.minute.on(*mins)
+    if doEnable == False:
+        cron.remove(job)
+    cron.write()
 
-    print("\n >>>> BEGIN OPAWS ======================================================================")
-    print("\n Begin processing for cycle time:  %s" % (cycle_time.strftime("%Y%m%d_%H%M")))
-
-    runOPAWSForTime(cycle_time, len(radars))
+def main(options):
+    if options.start == True:
+        setCronJob(True)
     
-    print("\n <<<<< END =======================================================================")
+    if options.stop == True:
+        setCronJob(False)
 
-@wofs_sched.scheduled_job('cron', minute=rtimes)
-def mrms():
-    gmt = time.gmtime()  # for file names, here we need to use GMT time
-    cycle_time = get_time_for_cycle(DT.datetime(*gmt[:6]))
+    if options.now == True:
+        gmt = time.gmtime() 
+        cycle_time = get_time_for_cycle(DT.datetime(*gmt[:6]))
+        radars = getFromFile(DT.datetime.utcnow())
+        runMRMSForTime(cycle_time)
+        runOPAWSForTime(cycle_time, len(radars))
 
-    print("\n >>>> BEGIN MRMS ======================================================================")
-    print("\n Begin processing for cycle time:  %s" % (cycle_time.strftime("%Y%m%d_%H%M")))
+if __name__ == "__main__":
+    parser = OptionParser()
+    parser.add_option("-n", "--now", dest="now", default=False,  action = 'store_true')
+    parser.add_option("-s", "--start", dest="start", default=False,  action = 'store_true')
+    parser.add_option("-e", "--stop",   dest="stop",   default=False,  action = 'store_true')
 
-    runMRMSForTime(cycle_time)
-    
-    print("\n <<<<< END =======================================================================")
+    (options, args) = parser.parse_args()
 
-# Start the ball rolling here....
-wofs_sched.start()
+    main(options)
