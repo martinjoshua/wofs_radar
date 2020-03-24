@@ -1,9 +1,8 @@
 #!/bin/bash
 #SBATCH --ntasks-per-node=20
 #SBATCH --nodes=1
-#SBATCH -J opaws
-#SBATCH -o opaws.out
-#SBATCH -e opaws.error
+#SBATCH -o opaws-%j.out
+#SBATCH -e opaws-%j.error
 #SBATCH -t 00:02:30
 
 source $HOME/miniconda3/bin/activate wofs
