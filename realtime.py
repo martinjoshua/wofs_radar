@@ -34,7 +34,7 @@ def setCronJob(doEnable):
     cron = CronTab(user=True)
     job = next(cron.find_comment(comment), None)
     if job == None: 
-        job = cron.new(command = 'bin/bash $HOME/wofs_radar/jobs/realtime.sh >> /var/log/wofs-radar.log 2>&1', comment = comment)
+        job = cron.new(command = "{0}/jobs/realtime.sh {0} >> {0}/wofs-radar.log 2>&1".format(os.getcwd()), comment = comment)
     mins = list(map(int, rtimes.split(',')))
     job.minute.on(*mins)
     if doEnable == False:
