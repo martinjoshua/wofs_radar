@@ -64,7 +64,7 @@ from pyproj import Proj
 import pylab as plt  
 from mpl_toolkits.basemap import Basemap
 from pyart.graph import cm
-
+from pyOPAWS.load_mrms_ppi import getRadarProducts
 
 # Ignore annoying warnings (unless the code breaks, then comment these lines out)
 import warnings
@@ -942,6 +942,140 @@ def clock_string():
                                          local_time.tm_hour, \
                                          local_time.tm_min)
 
+
+def processVolume(volume, unfold_type, options, cLatLon, sweep_num, out_filename):
+    # Modern level-II files need to be mapped to figure out where the super-res velocity and reflectivity fields are located in file
+
+    ret = volume_mapping(volume)
+
+    # Now we do QC
+
+    tim0 = timeit.time()
+
+    if options.qc == "None":
+        print("\n No quality control will be done on data")
+        gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False, \
+                                max_range = _radar_parameters['max_range'])
+    else:
+        print("\n QC type:  %s " % options.qc)
+        gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref, \
+                                max_range = _radar_parameters['max_range'])
+
+
+    opaws2D_QC_cpu = timeit.time() - tim0
+    
+    print("\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu))
+    print('\n ================================================================================')
+    
+            
+    # For some reason, you need to do velocity unfolding first....then QC the rest of the data
+
+    tim0 = timeit.time()      
+
+    print('\n ================================================================================')
+
+    if unfold_type == None:
+        vr_field = "velocity"
+        vr_label = "Radial Velocity"
+    else:
+        vr_field, vr_label = velocity_unfold(volume, unfold_type=unfold_type, 
+                                            gatefilter=gatefilter, 
+                                            interval_splits=_radar_parameters['region_interval_splits'],
+                                            wind_profile = None)
+
+    opaws2D_unfold_cpu = timeit.time() - tim0
+
+    print("\n Time for unfolding velocity: {} seconds".format(opaws2D_unfold_cpu))
+    print('\n ================================================================================')
+
+    # Now grid the reflectivity (embedded call) and then mask it off based on parameters set at top
+
+    ref = dbz_masking(grid_data(volume, "reflectivity", LatLon=cLatLon), thin_zeros=_grid_dict['thin_zeros'])
+
+    # Finally, regrid the radial velocity
+
+    vel = grid_data(volume, vr_field, LatLon=cLatLon)
+    
+    # Mask it off based on dictionary parameters set at top
+
+    if _grid_dict['mask_vr_with_dbz']:
+        vel = vel_masking(vel, ref, volume)
+
+    opaws2D_regrid_cpu = timeit.time() - tim0
+
+    print("\n Time for gridding fields: {} seconds".format(opaws2D_regrid_cpu))
+    
+    print('\n ================================================================================')
+
+    if options.write == True:      
+        print('\n WRITING XARRAY: {}\n'.format(out_filename))
+        ret = write_obs_seq_xarray(vel, filename=out_filename, obs_error= _obs_errors['velocity'], \
+                                    volume_name=os.path.basename(fname))
+
+        print('\n WRITING DART: {}\n'.format(out_filename))
+        ret = opaws_write_DART_ascii(vel, filename=out_filename, grid_dict=_grid_dict, \
+                                obs_error=[_obs_errors['velocity']] )
+
+        if options.onlyVR != True:
+            print('\n WRITING DART ONLY VR: {}\n'.format(out_filename))
+            ret = opaws_write_DART_ascii(ref, filename=out_filename+"_RF", grid_dict=_grid_dict, \
+                                obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
+        
+    if len(sweep_num) > 0:
+        fplotname = os.path.basename(out_filename)
+        for pl in sweep_num:
+            plottime = plot_gridded(ref, vel, pl, fsuffix=fplotname, dir=options.out_dir, \
+                        shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
+
+
+def processVolumes(radar, run_time, options):
+    if options.unfold == "phase":
+        print("\n opaws2D dealias_unwrap_phase unfolding will be used\n")
+        unfold_type = "phase"
+    elif options.unfold == "region":
+        print("\n opaws2D dealias_region_based unfolding will be used\n")
+        unfold_type = "region"
+    else:
+        print("\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****")
+        print("\n          NO VELOCITY UNFOLDING DONE...\n\n")
+        unfold_type = None
+
+    if options.newse:
+        print(" \n now processing NEWSe radar file....\n ")
+        cLatLon = parse_NEWSe_radar_file(options.newse, getLatLon=True)
+    else:
+        cLatLon = None
+
+    if options.method:
+        _grid_dict['anal_method'] = options.method
+
+    if options.dx:
+        _grid_dict['grid_spacing_xy'] = options.dx
+        _grid_dict['ROI'] = options.dx / 0.707
+        
+    if options.roi:
+        _grid_dict['ROI'] = options.roi
+
+    if options.plot == 0:
+        sweep_num = []
+    elif options.plot > 0:
+        sweep_num = [options.plot]
+        if not os.path.exists("images"):
+            os.mkdir("images")
+    else:
+        sweep_num = _plevels
+        if not os.path.exists("images"):
+            os.mkdir("images")
+
+    # Read input file and create radar object
+
+    t0 = timeit.time()
+
+    for volume in getRadarProducts(radar, run_time):
+        out_file = os.path.join(options.out_dir, "%s_VR_%s" % (radar, run_time.strftime("%Y%m%d_%H%M")))
+        processVolume(volume, unfold_type, options, cLatLon, sweep_num, out_file)
+
+
 ########################################################################
 # Main function
 
@@ -961,8 +1095,7 @@ def run(options):
     out_filenames = []
     in_filenames  = []
 
-    if options.dname == None:
-            
+    if options.dname == None: 
         if options.fname == None:
             print("\n\n ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE! *****")
             print("\n\n *****                     OR                               *****")
@@ -971,16 +1104,13 @@ def run(options):
             parser.print_help()
             print()
             sys.exit(1)
-        
         else:
             in_filenames.append(os.path.abspath(options.fname))
             strng = os.path.basename(in_filenames[0]).split("_V06")[0]
             strng = strng[0:4] + "_" + strng[4:]
             strng = os.path.join(options.out_dir, strng)
             out_filenames.append(strng) 
-
     else:
-
         if options.window:
             ttime      = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
             start_time = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[0])
@@ -1016,14 +1146,14 @@ def run(options):
         if debug:  
             print(in_filenames)
 
-    # if cfradial files....
+        # if cfradial files....
         if in_filenames[0][-3:] == ".nc":
             for item in in_filenames:
                 strng = os.path.basename(item).split(".")[0:2]
                 strng = strng[0] + "_" + strng[1]
                 strng = os.path.join(options.out_dir, strng)
                 out_filenames.append(strng) 
-    # WSR88D files
+        # WSR88D files
         else:
             for item in in_filenames:
                 if options.window:   # for real time processing, we will timestamp the file with the analysis time
@@ -1128,89 +1258,8 @@ def run(options):
         opaws2D_io_cpu = timeit.time() - tim0
 
         print("\n Time for reading in LVL2: {} seconds".format(opaws2D_io_cpu))
-
-        # Modern level-II files need to be mapped to figure out where the super-res velocity and reflectivity fields are located in file
-
-        ret = volume_mapping(volume)
-
-        # Now we do QC
-
-        tim0 = timeit.time()
-
-        if options.qc == "None":
-            print("\n No quality control will be done on data")
-            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False, \
-                                    max_range = _radar_parameters['max_range'])
-        else:
-            print("\n QC type:  %s " % options.qc)
-            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref, \
-                                    max_range = _radar_parameters['max_range'])
-
-
-        opaws2D_QC_cpu = timeit.time() - tim0
         
-        print("\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu))
-        print('\n ================================================================================')
-        
-                
-    # For some reason, you need to do velocity unfolding first....then QC the rest of the data
-
-        tim0 = timeit.time()      
-
-        print('\n ================================================================================')
-
-        if unfold_type == None:
-            vr_field = "velocity"
-            vr_label = "Radial Velocity"
-        else:
-            vr_field, vr_label = velocity_unfold(volume, unfold_type=unfold_type, 
-                                                gatefilter=gatefilter, 
-                                                interval_splits=_radar_parameters['region_interval_splits'],
-                                                wind_profile = None)
-
-        opaws2D_unfold_cpu = timeit.time() - tim0
-
-        print("\n Time for unfolding velocity: {} seconds".format(opaws2D_unfold_cpu))
-        print('\n ================================================================================')
-
-    # Now grid the reflectivity (embedded call) and then mask it off based on parameters set at top
-
-        ref = dbz_masking(grid_data(volume, "reflectivity", LatLon=cLatLon), thin_zeros=_grid_dict['thin_zeros'])
-
-    # Finally, regrid the radial velocity
-
-        vel = grid_data(volume, vr_field, LatLon=cLatLon)
-        
-    # Mask it off based on dictionary parameters set at top
-
-        if _grid_dict['mask_vr_with_dbz']:
-            vel = vel_masking(vel, ref, volume)
-
-        opaws2D_regrid_cpu = timeit.time() - tim0
-
-        print("\n Time for gridding fields: {} seconds".format(opaws2D_regrid_cpu))
-        
-        print('\n ================================================================================')
-
-        if options.write == True:      
-            print('\n WRITING XARRAY: {}\n'.format(out_filenames[n]))
-            ret = write_obs_seq_xarray(vel, filename=out_filenames[n], obs_error= _obs_errors['velocity'], \
-                                        volume_name=os.path.basename(fname))
-
-            print('\n WRITING DART: {}\n'.format(out_filenames[n]))
-            ret = opaws_write_DART_ascii(vel, filename=out_filenames[n], grid_dict=_grid_dict, \
-                                    obs_error=[_obs_errors['velocity']] )
-
-            if options.onlyVR != True:
-                print('\n WRITING DART ONLY VR: {}\n'.format(out_filenames[n]))
-                ret = opaws_write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
-                                    obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
-            
-        if len(sweep_num) > 0:
-            fplotname = os.path.basename(out_filenames[0])
-            for pl in sweep_num:
-                plottime = plot_gridded(ref, vel, pl, fsuffix=fplotname, dir=options.out_dir, \
-                            shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
+        processVolume(volume, unfold_type, options, cLatLon, sweep_num, out_filenames[n])
 
     opaws2D_cpu_time = timeit.time() - t0
 
