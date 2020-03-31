@@ -32,7 +32,7 @@ from utils.radar import getFromFile
 
 # Used by combine to get the correct directory
 _hour_offset = 12
-_TEST = bool(settings.default_debug)
+_TEST = settings.default_debug
 
 if _TEST == True:
    rtimes = ', '.join(str(t) for t in range(60))    #test the code every minute

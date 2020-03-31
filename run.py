@@ -12,14 +12,12 @@ from slurm.jobs import runOPAWSForTime, runMRMSForTime
 from optparse import OptionParser
 from crontab import CronTab
 
-_TEST = bool(settings.default_debug)
-
-if _TEST == True:
+if settings.default_debug == True:
    rtimes = ','.join(str(t) for t in range(60))    #test the code every minute
 else:
    rtimes = settings.default_runtimes    # T+5min radar processing start time
 
-logging.basicConfig()
+logging.basicConfig() 
 
 def get_time_for_cycle(the_time):
     minute = (the_time.minute//15)*15
