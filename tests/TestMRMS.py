@@ -72,11 +72,11 @@ class TestMRMS(unittest.TestCase):
     def test_mrms_opaws(self):
         obj = types.SimpleNamespace()
         #obj.dname = settings.opaws_feed + '/KDMX'
-        obj.out_dir = settings.opaws_obs_seq + '/out/20200302'
+        obj.out_dir = settings.opaws_obs_seq + '/20200302'
         obj.write = True
         #obj.window = '2020,03,03,06,23'
         obj.onlyVR = True
-        obj.plot = 3
+        obj.plot = 0
         obj.dx = 5000.000000
         obj.roi = 1000.000000
         obj.qc = 'Minimal'
@@ -86,6 +86,10 @@ class TestMRMS(unittest.TestCase):
         obj.shapefiles = None
         obj.interactive = None
         processVolumes('KOHX', datetime.datetime(2020, 3, 3, 6, 1, 0), obj)
+
+        processVolumes('KOHX', datetime.datetime(2020, 3, 3, 6, 13, 0), obj)
+
+        processVolumes('KOHX', datetime.datetime(2020, 3, 3, 6, 15, 0), obj)
 
 
 
