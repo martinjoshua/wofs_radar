@@ -89,17 +89,16 @@ def load_mrms_ppi(fdict, **kwargs):
     _range                 = filemetadata('range')
     
     _scan_type             = 'other'
-    
+
     _fields                = {}  # dict to hold data
+
+    _instr_params = None
 
     # loop through files..
 
     for n, d in enumerate(fdict):
 
-        ncfile                     = ncdf.Dataset(d['file'])
-        pvar                       = d['pvar']
-        ncvar                      = d['ncvar']
-                      
+        ncfile                     = ncdf.Dataset(d['file'])                      
         gwidth                     = ncfile.variables['GateWidth'][:].mean()        
 
         if n == 0:  # do these things once
@@ -108,8 +107,8 @@ def load_mrms_ppi(fdict, **kwargs):
             _time['data']                  = np.array([ncfile.FractionalTime][:])
             _time['units']                 = make_time_unit_str(start_time)
 
-            _latitude['data']              = np.array(ncfile.Latitude)
-            _longitude['data']             = np.array(ncfile.Longitude)
+            _latitude['data']              = ncfile.Latitude
+            _longitude['data']             = ncfile.Longitude
             _altitude['data']              = np.array([ncfile.Height], 'float64')
             
             _range['data']                 = ncfile.RangeToFirstGate + ncfile.variables['GateWidth'][0] \
@@ -136,24 +135,33 @@ def load_mrms_ppi(fdict, **kwargs):
                     _metadata[metadata_key] = ncfile.getncattr(netcdf_attr)
   
         # Okay do the big stuff.
- 
-        _dict         = get_metadata(pvar)
-        _dict['data'] = np.ma.array(ncfile.variables[ncvar][:,0:_mygate-1])
-            
-        sw = ncfile.variables 
+        for varset in d['variables']:
+            pvar                       = varset['pvar']
+            ncvar                      = varset['ncvar']
+            _dict         = get_metadata(pvar)
 
-        if 'MissingData' in ncfile.ncattrs():
-            _dict['data'][_dict['data'] == ncfile.MissingData] = np.ma.masked
-        if 'RangeFolded' in ncfile.ncattrs():
-            _dict['data'][_dict['data'] == ncfile.RangeFolded] = np.ma.masked
-            
-        _dict['units'] = ncfile.getncattr('Unit-value')
+            if len(ncfile.variables[ncvar].shape) == 2:
+                _dict['data'] = np.ma.array(ncfile.variables[ncvar][:,0:_mygate-1])
+            else: 
+                _dict['data'] = np.ma.array(ncfile.variables[ncvar][:])
+                
+            sw = ncfile.variables 
 
-        if _debug > 299:
-            print(ncfile.variables[ncvar][:,0:_mygate-1].shape)
-            print(_dict['data'].shape)
+            if 'MissingData' in ncfile.ncattrs():
+                _dict['data'][_dict['data'] == ncfile.MissingData] = np.ma.masked
+            if 'RangeFolded' in ncfile.ncattrs():
+                _dict['data'][_dict['data'] == ncfile.RangeFolded] = np.ma.masked
+                
+            _dict['units'] = ncfile.getncattr('Unit-value')
 
-        _fields[pvar] = _dict
+            if _debug > 299:
+                print(ncfile.variables[ncvar][:,0:_mygate-1].shape)
+                print(_dict['data'].shape)
+
+            if pvar == 'nyquist_velocity':
+                _instr_params = {'nyquist_velocity': _dict}
+            else:
+                _fields[pvar] = _dict
  
     # With elevation and azimuth in the radar object, lets recalculate
     # gate latitude, longitude and altitude,
@@ -171,8 +179,8 @@ def load_mrms_ppi(fdict, **kwargs):
     return Radar( _time, _range, _fields, _metadata, _scan_type,                    \
                   _latitude, _longitude, _altitude,                                 \
                   _sweep_number, _sweep_mode, _fixed_angle, _sweep_start_ray_index, \
-                  _sweep_end_ray_index,                                             \
-                  _azimuth, _elevation, instrument_parameters=None)
+                  _sweep_end_ray_index,                                              \
+                  _azimuth, _elevation, instrument_parameters=_instr_params)
 
 
 def getProducts(radar, run_time, tilt):
@@ -188,11 +196,11 @@ def getProducts(radar, run_time, tilt):
 
     v = getNearestFile(run_time, os.listdir(vel_path))
     if v is not None:
-        yield {'file': os.path.join(vel_path, v[1]), 'ncvar': 'Velocity', 'pvar': 'velocity'}
+        yield {'file': os.path.join(vel_path, v[1]), 'variables': [{'ncvar': 'Velocity', 'pvar': 'velocity'}, {'ncvar': 'NyquistVelocity', 'pvar': 'nyquist_velocity'}]}
 
     r = getNearestFile(run_time, os.listdir(refl_path))
     if r is not None:
-        yield {'file': os.path.join(refl_path, r[1]), 'ncvar': 'ReflectivityQC', 'pvar': "reflectivity"}
+        yield {'file': os.path.join(refl_path, r[1]), 'variables': [{'ncvar': 'ReflectivityQC', 'pvar': "reflectivity"}]}
 
 def getTiltProducts(radar, run_time):
     base_path = os.path.join(settings.mrms_radar_path, run_time.strftime("%Y%m%d"), radar)
@@ -205,10 +213,13 @@ def getTiltProducts(radar, run_time):
 
 def getRadarProducts(radar, run_time):
     for fileset in getTiltProducts(radar, run_time):
+        if len(fileset['files']) < 2: 
+            continue
+
         myradar = load_mrms_ppi(fileset['files'])
         myradar.init_gate_altitude()
         myradar.init_gate_longitude_latitude()
-        yield myradar
+        yield { "tilt": fileset['tilt'], "radar": myradar }
 
  
 

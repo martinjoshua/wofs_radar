@@ -1,7 +1,7 @@
 import unittest
 import types, calendar, os, datetime
 from pyMRMS.prep_mrms import run
-from pyOPAWS.opaws2d import processVolumes
+from pyOPAWS.opaws_mrms import processVolumes
 from Config import settings
 from multiprocessing import Pool
 

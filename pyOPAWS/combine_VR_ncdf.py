@@ -56,9 +56,9 @@ def main(argv=None):
     
     # Fix in case we picked up some none obs_seq files
     for n, file in enumerate(files):
-            if file.find(".out") != -1:  
-                print("\n Removing file:  %s from list" % file)
-                del files[n]
+        if file.find(".out") != -1:  
+            print("\n Removing file:  %s from list" % file)
+            del files[n]
 
     print("\n Dart_cc:  Processing %d files in the directory:  %s" % (len(files), options.dir))
     print(" Dart_cc:  First file is %s" % (files[0]))

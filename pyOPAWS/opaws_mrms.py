@@ -184,71 +184,71 @@ def get_sounding(file=None):
         print('No sounding found')
         return None
 
-#=========================================================================================
-# DBZ Mask
-
 def dbz_masking(ref, thin_zeros=2):
+    """
+        DBZ Mask
+    """
 
-  if _grid_dict['MRMS_zeros'][0] == True:   # create one layer of zeros based on composite ref
-  
-      print("\n Creating new 0DBZ levels for output\n")
-      
-      nz, ny, nx = ref.data.shape
-      
-      zero_dbz = np.ma.zeros((ny, nx), dtype=np.float32)
-
-      c_ref = ref.data.max(axis=0)  
-      
-      raw_field = np.where(c_ref.mask==True, 0.0, c_ref.data)
-      
-      max_neighbor = (ndimage.maximum_filter(raw_field, size=_grid_dict['halo_footprint']) > 0.1)
-      
-      zero_dbz.mask = np.where(max_neighbor, True, False)
-
-# the trick here was to realize that you need to first flip the zero_dbz_mask array and then thin by shutting off mask      
-      if thin_zeros > 0:
-          mask2 = np.logical_not(zero_dbz.mask)                                            # true for dbz>10
-          mask2[::thin_zeros, ::thin_zeros] = False
-          zero_dbz.mask = np.logical_or(max_neighbor, mask2)
-      
-      ref.zero_dbz = zero_dbz
-
-      new_z = np.ma.zeros((2, ny, nx), dtype=np.float32)
-
-      for n, z in enumerate(_grid_dict['MRMS_zeros'][1:]):
-          new_z[n] = z
-                
-      ref.zero_dbz_zg = new_z
-      ref.cref        = c_ref
-     
-  else: 
-      mask = (ref.data.mask == True)  # this is the original no data mask from interp
-  
-      ref.data.mask = False           # set the ref mask to false everywhere
+    if _grid_dict['MRMS_zeros'][0] == True:   # create one layer of zeros based on composite ref
     
-      ref.data[mask] = 0.0             
-  
-      nlevel = ref.data.shape[0]
-  
-      for n in np.arange(nlevel):  
-          max_values = ndimage.maximum_filter(ref.data[n,:,:], size=_grid_dict['halo_footprint'])
-          halo  = (max_values > 0.1) & mask[n]    
-          ref.data.mask[n,halo] = True
-
-      if thin_zeros > 0:
-
-          for n in np.arange(nlevel):   
-              mask1 = np.logical_and(ref.data[n] < 0.1, ref.data.mask[n] == False)  # true for dbz=0
-              mask2 = ref.data.mask[n]                                              # true for dbz>10
-              mask1[::thin_zeros, ::thin_zeros] = False
-              ref.data.mask[n] = np.logical_or(mask1, mask2)
-
-  if _grid_dict['max_height'] > 0:
-      mask1  = (ref.zg - ref.radar_hgt) > _grid_dict['max_height']
-      mask2 = ref.data.mask
-      ref.data.mask = np.logical_or(mask1, mask2)
+        print("\n Creating new 0DBZ levels for output\n")
         
-  return ref
+        nz, ny, nx = ref.data.shape
+        
+        zero_dbz = np.ma.zeros((ny, nx), dtype=np.float32)
+
+        c_ref = ref.data.max(axis=0)  
+        
+        raw_field = np.where(c_ref.mask==True, 0.0, c_ref.data)
+        
+        max_neighbor = (ndimage.maximum_filter(raw_field, size=_grid_dict['halo_footprint']) > 0.1)
+        
+        zero_dbz.mask = np.where(max_neighbor, True, False)
+
+    # the trick here was to realize that you need to first flip the zero_dbz_mask array and then thin by shutting off mask      
+        if thin_zeros > 0:
+            mask2 = np.logical_not(zero_dbz.mask)                                            # true for dbz>10
+            mask2[::thin_zeros, ::thin_zeros] = False
+            zero_dbz.mask = np.logical_or(max_neighbor, mask2)
+        
+        ref.zero_dbz = zero_dbz
+
+        new_z = np.ma.zeros((2, ny, nx), dtype=np.float32)
+
+        for n, z in enumerate(_grid_dict['MRMS_zeros'][1:]):
+            new_z[n] = z
+                    
+        ref.zero_dbz_zg = new_z
+        ref.cref        = c_ref
+        
+    else: 
+        mask = (ref.data.mask == True)  # this is the original no data mask from interp
+    
+        ref.data.mask = False           # set the ref mask to false everywhere
+        
+        ref.data[mask] = 0.0             
+    
+        nlevel = ref.data.shape[0]
+    
+        for n in np.arange(nlevel):  
+            max_values = ndimage.maximum_filter(ref.data[n,:,:], size=_grid_dict['halo_footprint'])
+            halo  = (max_values > 0.1) & mask[n]    
+            ref.data.mask[n,halo] = True
+
+        if thin_zeros > 0:
+
+            for n in np.arange(nlevel):   
+                mask1 = np.logical_and(ref.data[n] < 0.1, ref.data.mask[n] == False)  # true for dbz=0
+                mask2 = ref.data.mask[n]                                              # true for dbz>10
+                mask1[::thin_zeros, ::thin_zeros] = False
+                ref.data.mask[n] = np.logical_or(mask1, mask2)
+
+    if _grid_dict['max_height'] > 0:
+        mask1  = (ref.zg - ref.radar_hgt) > _grid_dict['max_height']
+        mask2 = ref.data.mask
+        ref.data.mask = np.logical_or(mask1, mask2)
+            
+    return ref
 
 def vel_masking(vel, ref, volume):
     """
@@ -291,8 +291,8 @@ def grid_data(volume, field, LatLon=None):
         domain_length   = _grid_dict['domain_radius_xy']
         grid_pts_xy     = 1 + 2*np.int(domain_length/grid_spacing_xy)
         nx, ny          = (grid_pts_xy, grid_pts_xy)
-        radar_lat       = volume.latitude['data'][0]
-        radar_lon       = volume.longitude['data'][0]
+        radar_lat       = volume.latitude['data']
+        radar_lon       = volume.longitude['data']
         xg              = -domain_length + grid_spacing_xy * np.arange(grid_pts_xy)
         yg              = -domain_length + grid_spacing_xy * np.arange(grid_pts_xy)
         
@@ -392,11 +392,12 @@ def grid_data(volume, field, LatLon=None):
         print("\n No dealiased velocity present, gridding RAW radial velocity\n")
         v_iter = volume.iter_field("velocity")
         field_name = "velocity"
-        
-    if field == "reflectivity":
-        sweeps = volume.reflectivity
-    else:
-        sweeps = volume.velocity
+
+    sweeps = []        
+    # if field == "reflectivity":
+    #     sweeps = volume.reflectivity
+    # else:
+    #     sweeps = volume.velocity
 
     #####################################################################################
     # Create 3D arrays for analysis grid, the vertical dimension is the number of tilts
@@ -474,7 +475,7 @@ def grid_data(volume, field, LatLon=None):
                             xg = xg, yg = yg, zg = np.ma.array(zgrid, mask=new_mask),                   
                             lats = lats, lons = lons, elevations=elevations,
                             radar_lat = radar_lat, radar_lon = radar_lon, radar_hgt=volume.altitude['data'][0],
-                            time = volume.time, sweep_time = sweep_time, metadata = volume.metadata, nyquist = nyquist  ) 
+                            time = volume.time, sweep_time = sweep_time, metadata = volume.metadata, nyquist = nyquist) #
 
 ###########################################################################################
 #
@@ -818,116 +819,116 @@ def obs_seq_xarray(len):
                           })
 
 #####################################################################################################
-def write_obs_seq_xarray(field, filename=None, obs_error=3., volume_name=None):
+def write_obs_seq_xarray(fields, filename=None, obs_error=3.):
 
-   _time_units    = 'seconds since 1970-01-01 00:00:00'
-   _calendar      = 'standard'
+    _time_units    = 'seconds since 1970-01-01 00:00:00'
+    _calendar      = 'standard'
 
-   if filename == None:
-      print("\n WRITE_DATA_XARRAY:  No output file name is given, writing to %s" % "obs_seq.txt")
-      filename = "obs_seq.nc"
-   else:
-      dirname = os.path.dirname(filename)
-      basename = "%s_%s.nc" % ("obs_seq", os.path.basename(filename))
-      filename =  os.path.join(dirname, basename)
+    if filename == None:
+        print("\n WRITE_DATA_XARRAY:  No output file name is given, writing to %s" % "obs_seq.txt")
+        filename = "obs_seq.nc"
+    else:
+        dirname = os.path.dirname(filename)
+        basename = "%s_%s.nc" % ("obs_seq", os.path.basename(filename))
+        filename =  os.path.join(dirname, basename)
 
-   _stringlen     = 8
-   _datelen       = 19
+    _stringlen     = 8
+    _datelen       = 19
 
-# Extract data.city data
+    # Extract data.city data
 
-   fld           = field.data.data[:,:,:]
-   mask          = field.data.mask[:,:,:]
-   lats          = field.lats
-   lons          = field.lons
-   xgrid         = field.xg[:]
-   ygrid         = field.yg[:]
-   zgrid         = field.zg[:,:,:]
-   msl_hgt       = field.zg[:,:,:] + field.radar_hgt
+    for field in fields:
 
-   platform_lat  = field.radar_lat
-   platform_lon  = field.radar_lon
-   platform_hgt  = field.radar_hgt
+        fld           = field.data.data[:,:,:]
+        mask          = field.data.mask[:,:,:]
+        lats          = field.lats
+        lons          = field.lons
+        xgrid         = field.xg[:]
+        ygrid         = field.yg[:]
+        zgrid         = field.zg[:,:,:]
+        msl_hgt       = field.zg[:,:,:] + field.radar_hgt
 
-# Use the volume mean time for the time of the volume
+        platform_lat  = field.radar_lat
+        platform_lon  = field.radar_lon
+        platform_hgt  = field.radar_hgt
 
-   utime   = ncdf.num2date(field.time['data'].mean(), field.time['units'])
-   secs    = ncdf.date2num(utime, units = _time_units)
-# Retain DART time stamps
-   days    = ncdf.date2num(utime, units = "days since 1601-01-01 00:00:00")
-   seconds = np.int(86400.*(days - np.floor(days)))
+        # Use the volume mean time for the time of the volume
 
-   print("\n -->  Writing %s as the radar file..." % (filename))
-#  mask_check = data.mask && numpy.isnan().any()
+        utime   = ncdf.num2date(field.time['data'].mean(), field.time['units'])
+        secs    = ncdf.date2num(utime, units = _time_units)
+        # Retain DART time stamps
+        days    = ncdf.date2num(utime, units = "days since 1601-01-01 00:00:00")
+        seconds = np.int(86400.*(days - np.floor(days)))
 
-   nobs = np.sum(mask==False)
-   print("\n -----> Number of good observations for xarray:  %d" % nobs)
+        print("\n -->  Writing %s as the radar file..." % (filename))
+        #  mask_check = data.mask && numpy.isnan().any()
 
-   # Create numpy rec array that can be converted to a pandas table.
+        nobs = np.sum(mask==False)
+        print("\n -----> Number of good observations for xarray:  %d" % nobs)
 
-   out, attributes = obs_seq_xarray(nobs)
+        # Create numpy rec array that can be converted to a pandas table.
 
-   # There is a far better way to do this but this is fast enough for now...
+        out, attributes = obs_seq_xarray(nobs)
 
-   n = 0
+        # There is a far better way to do this but this is fast enough for now...
 
-   for k in np.arange(fld.shape[0]):
-      for j in np.arange(fld.shape[1]):
-         for i in np.arange(fld.shape[2]):
+        n = 0
 
-            if mask[k,j,i] == False:
+        for k in np.arange(fld.shape[0]):
+            for j in np.arange(fld.shape[1]):
+                for i in np.arange(fld.shape[2]):
 
-               dx    = xgrid[i]
-               dy    = ygrid[j]
-               dz    = zgrid[k,j,i]
-               range = np.sqrt(dx**2 + dy**2 + dz**2)
-               dir1  = dx / range
-               dir2  = dy / range
-               dir3  = dz / range
+                    if mask[k,j,i] == True: continue
 
-               out.value[n]              = fld[k,j,i]
-               out.error_var[n]          = obs_error**2
-               out.lon[n]                = lons[i]
-               out.lat[n]                = lats[j]
-               out.height[n]             = msl_hgt[k,j,i]
-               out.date[n]               = utime
-               out.utime[n]              = secs
-               out.day[n]                = days
-               out.second[n]             = seconds
-               out.platform_lon[n]       = platform_lon
-               out.platform_lat[n]       = platform_lat
-               out.platform_hgt[n]       = platform_hgt
-               out.platform_dir1[n]      = dir1
-               out.platform_dir2[n]      = dir2
-               out.platform_dir3[n]      = dir3
-               out.platform_nyquist[n]   = field.nyquist[k]
+                    dx    = xgrid[i]
+                    dy    = ygrid[j]
+                    dz    = zgrid[k,j,i]
+                    range = np.sqrt(dx**2 + dy**2 + dz**2)
+                    dir1  = dx / range
+                    dir2  = dy / range
+                    dir3  = dz / range
 
-               n = n + 1
-  
-   # Create an xarray dataset for file I/O
-   xa = xr.Dataset(pd.DataFrame.from_records(out))
+                    out.value[n]              = fld[k,j,i]
+                    out.error_var[n]          = obs_error**2
+                    out.lon[n]                = lons[i]
+                    out.lat[n]                = lats[j]
+                    out.height[n]             = msl_hgt[k,j,i]
+                    out.date[n]               = utime
+                    out.utime[n]              = secs
+                    out.day[n]                = days
+                    out.second[n]             = seconds
+                    out.platform_lon[n]       = platform_lon
+                    out.platform_lat[n]       = platform_lat
+                    out.platform_hgt[n]       = platform_hgt
+                    out.platform_dir1[n]      = dir1
+                    out.platform_dir2[n]      = dir2
+                    out.platform_dir3[n]      = dir3
+                    out.platform_nyquist[n]   = field.nyquist[k]
 
-#  # reset index to be a master index across all obs
-   xa = xa.rename({'dim_0': 'index'})
+                    n = n + 1
+    
+    # Create an xarray dataset for file I/O
+    xa = xr.Dataset(pd.DataFrame.from_records(out))
 
-   # Write the xarray file out (this is all there is, very nice guys!)
-   xa.to_netcdf(filename, mode='w')
-   xa.close()
+    #  # reset index to be a master index across all obs
+    xa = xa.rename({'dim_0': 'index'})
 
-   # Add attributes to the files
+    # Write the xarray file out (this is all there is, very nice guys!)
+    xa.to_netcdf(filename, mode='w')
+    xa.close()
 
-   fnc = ncdf.Dataset(filename, mode = 'a')
-   fnc.history = "Created " + DT.datetime.today().strftime("%Y%m%d_%H%M")
-   fnc.version = "Version 1.0a by Lou Wicker and Thomas Jones (NSSL)"
-   if volume_name != None:
-       fnc.version = "Created from the WSR88D radar volume:  %s" % volume_name
+    # Add attributes to the files
 
-   for key in list(attributes.keys()):
-       fnc.variables[key].units = attributes[key][0]
-       fnc.variables[key].description = attributes[key][1]
+    fnc = ncdf.Dataset(filename, mode = 'a')
+    fnc.history = "Created " + DT.datetime.today().strftime("%Y%m%d_%H%M")
+    fnc.version = "Version 1.0a by Lou Wicker and Thomas Jones (NSSL)"
 
-   fnc.sync()
-   fnc.close()
+    for key in list(attributes.keys()):
+        fnc.variables[key].units = attributes[key][0]
+        fnc.variables[key].description = attributes[key][1]
+
+    fnc.sync()
+    fnc.close()
 
 #######################################################################
 def clock_string():
@@ -939,103 +940,38 @@ def clock_string():
                                          local_time.tm_min)
 
 
-def processVolume(volume, unfold_type, options, cLatLon, sweep_num, out_filename):
+def processVolume(volume, options, cLatLon):
     # Modern level-II files need to be mapped to figure out where the super-res velocity and reflectivity fields are located in file
 
-    ret = volume_mapping(volume)
+    tim0 = timeit.time()     
 
-    # Now we do QC
-
-    tim0 = timeit.time()
-
-    if options.qc == "None":
-        print("\n No quality control will be done on data")
-        gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False, \
-                                max_range = _radar_parameters['max_range'])
-    else:
-        print("\n QC type:  %s " % options.qc)
-        gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref, \
-                                max_range = _radar_parameters['max_range'])
-
-
-    opaws2D_QC_cpu = timeit.time() - tim0
-    
-    print("\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu))
-    print('\n ================================================================================')
-    
-            
-    # For some reason, you need to do velocity unfolding first....then QC the rest of the data
-
-    tim0 = timeit.time()      
-
-    print('\n ================================================================================')
-
-    if unfold_type == None:
-        vr_field = "velocity"
-        vr_label = "Radial Velocity"
-    else:
-        vr_field, vr_label = velocity_unfold(volume, unfold_type=unfold_type, 
-                                            gatefilter=gatefilter, 
-                                            interval_splits=_radar_parameters['region_interval_splits'],
-                                            wind_profile = None)
-
-    opaws2D_unfold_cpu = timeit.time() - tim0
-
-    print("\n Time for unfolding velocity: {} seconds".format(opaws2D_unfold_cpu))
-    print('\n ================================================================================')
+    # ret = volume_mapping(volume)
 
     # Now grid the reflectivity (embedded call) and then mask it off based on parameters set at top
 
-    ref = dbz_masking(grid_data(volume, "reflectivity", LatLon=cLatLon), thin_zeros=_grid_dict['thin_zeros'])
+    ref, vel = (None, None)
+
+    if 'reflectivity' in volume.fields.keys():
+        ref = dbz_masking(grid_data(volume, "reflectivity", LatLon=cLatLon), thin_zeros=_grid_dict['thin_zeros'])
 
     # Finally, regrid the radial velocity
 
-    vel = grid_data(volume, vr_field, LatLon=cLatLon)
+    if 'velocity' in volume.fields.keys():
+        vel = grid_data(volume, "velocity", LatLon=cLatLon)
     
     # Mask it off based on dictionary parameters set at top
 
     if _grid_dict['mask_vr_with_dbz']:
         vel = vel_masking(vel, ref, volume)
 
-    opaws2D_regrid_cpu = timeit.time() - tim0
-
-    print("\n Time for gridding fields: {} seconds".format(opaws2D_regrid_cpu))
+    print("\n Time for gridding fields: {} seconds".format(timeit.time() - tim0))
     
     print('\n ================================================================================')
 
-    if options.write == True:      
-        print('\n WRITING XARRAY: {}\n'.format(out_filename))
-        ret = write_obs_seq_xarray(vel, filename=out_filename, obs_error= _obs_errors['velocity'], \
-                                    volume_name=os.path.basename(fname))
-
-        print('\n WRITING DART: {}\n'.format(out_filename))
-        ret = opaws_write_DART_ascii(vel, filename=out_filename, grid_dict=_grid_dict, \
-                                obs_error=[_obs_errors['velocity']] )
-
-        if options.onlyVR != True:
-            print('\n WRITING DART ONLY VR: {}\n'.format(out_filename))
-            ret = opaws_write_DART_ascii(ref, filename=out_filename+"_RF", grid_dict=_grid_dict, \
-                                obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
-        
-    if len(sweep_num) > 0:
-        fplotname = os.path.basename(out_filename)
-        for pl in sweep_num:
-            plottime = plot_gridded(ref, vel, pl, fsuffix=fplotname, dir=options.out_dir, \
-                        shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
+    return vel
 
 
 def processVolumes(radar, run_time, options):
-    if options.unfold == "phase":
-        print("\n opaws2D dealias_unwrap_phase unfolding will be used\n")
-        unfold_type = "phase"
-    elif options.unfold == "region":
-        print("\n opaws2D dealias_region_based unfolding will be used\n")
-        unfold_type = "region"
-    else:
-        print("\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****")
-        print("\n          NO VELOCITY UNFOLDING DONE...\n\n")
-        unfold_type = None
-
     if options.newse:
         print(" \n now processing NEWSe radar file....\n ")
         cLatLon = parse_NEWSe_radar_file(options.newse, getLatLon=True)
@@ -1067,9 +1003,33 @@ def processVolumes(radar, run_time, options):
 
     t0 = timeit.time()
 
-    for volume in getRadarProducts(radar, run_time):
-        out_file = os.path.join(options.out_dir, "%s_VR_%s" % (radar, run_time.strftime("%Y%m%d_%H%M")))
-        processVolume(volume, unfold_type, options, cLatLon, sweep_num, out_file)
+    k = list(getRadarProducts(radar, run_time))
+    gridded_data = [ processVolume(volume['radar'], options, cLatLon) for volume in k ]
+
+    out_filename = os.path.join(options.out_dir, "%s_VR_%s" % (radar, run_time.strftime("%Y%m%d_%H%M")))
+    print('\n WRITING XARRAY: {}\n'.format(out_filename))
+
+    write_obs_seq_xarray(gridded_data, filename=out_filename, obs_error= _obs_errors['velocity'])
+
+    # TODO: move out of loop, compine tilts to single file
+    # if options.write == True:      
+    #     print('\n WRITING XARRAY: {}\n'.format(out_filename))
+    #     ret = write_obs_seq_xarray(vel, filename=out_filename, obs_error= _obs_errors['velocity'], volume_name=os.path.basename(fname))
+
+    #     print('\n WRITING DART: {}\n'.format(out_filename))
+    #     ret = opaws_write_DART_ascii(vel, filename=out_filename, grid_dict=_grid_dict, obs_error=[_obs_errors['velocity']] )
+
+    #     if options.onlyVR != True:
+    #         print('\n WRITING DART ONLY VR: {}\n'.format(out_filename))
+    #         ret = opaws_write_DART_ascii(ref, filename=out_filename+"_RF", grid_dict=_grid_dict, obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
+        
+    # if len(sweep_num) > 0:
+    #     fplotname = os.path.basename(out_filename)
+    #     for pl in sweep_num:
+    #         plottime = plot_gridded(ref, vel, pl, fsuffix=fplotname, dir=options.out_dir, shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
+
+
+
 
 
 ########################################################################
