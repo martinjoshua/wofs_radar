@@ -1,4 +1,3 @@
-from apscheduler.schedulers.blocking import BlockingScheduler
 import time
 import os
 import sys
@@ -13,10 +12,7 @@ from slurm.jobs import runOPAWSForTime, runMRMSForTime
 from optparse import OptionParser
 from crontab import CronTab
 
-
-_hour_offset = 12
 _TEST = bool(settings.default_debug)
-
 
 if _TEST == True:
    rtimes = ','.join(str(t) for t in range(60))    #test the code every minute
@@ -32,14 +28,17 @@ def get_time_for_cycle(the_time):
 def setCronJob(doEnable):
     comment='WoFS VR Realtime'
     cron = CronTab(user=True)
-    job = next(cron.find_comment(comment), None)
-    if job == None: 
+    jobs = list(cron.find_comment(comment))
+    if len(jobs) > 1:
+        raise Exception('Multiple cron jobs were returned with the comment "{}"; there must only be one job with the aforementioned comment per user crontab.')
+    if jobs == None or len(jobs) == 0: 
         job = cron.new(command = "{0}/jobs/realtime.sh {0} >> {0}/wofs-radar.log 2>&1".format(os.getcwd()), comment = comment)
+    else: job = jobs[0]
     mins = list(map(int, rtimes.split(',')))
     job.minute.on(*mins)
     if doEnable == False:
         cron.remove(job)
-    cron.write()
+    cron.write(user=True)
 
 def main(options):
     if options.start == True:
