@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --ntasks-per-node=20
-#SBATCH --nodes=1
+#SBATCH --cpus-per-task=2
+#SBATCH --ntasks=1
 #SBATCH -o opaws-combine-%j.out
 #SBATCH -e opaws-combine-%j.error
 #SBATCH -t 00:01:00

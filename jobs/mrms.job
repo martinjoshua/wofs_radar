@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --ntasks-per-node=20
-#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=1
 #SBATCH -o mrms-%j.out
 #SBATCH -e mrms-%j.error
 #SBATCH -t 00:02:30
