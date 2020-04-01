@@ -64,7 +64,6 @@ from pyproj import Proj
 import pylab as plt  
 from mpl_toolkits.basemap import Basemap
 from pyart.graph import cm
-from pyOPAWS.load_mrms_ppi import getRadarProducts
 
 # Ignore annoying warnings (unless the code breaks, then comment these lines out)
 import warnings
@@ -939,7 +938,7 @@ def clock_string():
                                          local_time.tm_min)
 
 
-def processVolume(volume, unfold_type, options, cLatLon, sweep_num, out_filename):
+def processVolume(volume, unfold_type, options, cLatLon, sweep_num, out_filename, fname):
     # Modern level-II files need to be mapped to figure out where the super-res velocity and reflectivity fields are located in file
 
     ret = volume_mapping(volume)
@@ -1255,7 +1254,7 @@ def run(options):
 
         print("\n Time for reading in LVL2: {} seconds".format(opaws2D_io_cpu))
         
-        processVolume(volume, unfold_type, options, cLatLon, sweep_num, out_filenames[n])
+        processVolume(volume, unfold_type, options, cLatLon, sweep_num, out_filenames[n], fname)
 
     opaws2D_cpu_time = timeit.time() - t0
 

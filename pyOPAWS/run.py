@@ -1,9 +1,10 @@
 import types, os
 import datetime as DT
-from pyOPAWS.opaws2d import run
 from optparse import OptionParser
 from Config import settings
 from utils.radar import getFromFile
+from pyOPAWS.opaws2d import run as wsr
+from pyOPAWS.opaws_mrms import run as mrms
 
 def main(start_time, radarIndex):
     radars = getFromFile(start_time)
@@ -15,19 +16,23 @@ def main(start_time, radarIndex):
     obj = types.SimpleNamespace()
     obj.dname = os.path.join(settings.opaws_feed, radar)
     obj.out_dir = settings.opaws_obs_seq
-    obj.write = True
+    obj.write = settings.opaws_write
     obj.window = start_time.strftime("%Y,%m,%d,%H,%M")
-    obj.onlyVR = True
+    obj.onlyVR = settings.opaws_onlyvr
     obj.plot = int(settings.opaws_plot)
     obj.dx = float(settings.opaws_dx)
     obj.roi = float(settings.opaws_roi)
-    obj.qc = 'Minimal'
-    obj.unfold = 'region'
+    obj.qc = settings.opaws_qc
+    obj.unfold = settings.opaws_unfold
     obj.newse = None
     obj.method = None
     obj.shapefiles = None
     obj.interactive = None
-    run(obj)
+    
+    if settings.opaws_source == 'MRMS':
+        mrms(obj)
+    else:
+        wsr(obj)
 
 if __name__ == "__main__":
     parser = OptionParser()

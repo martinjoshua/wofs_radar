@@ -7,4 +7,4 @@
 
 source $HOME/miniconda3/bin/activate wofs
 
-python -m pyMRMS.slurm_run --cycle ${CYCLETIME}
+python -m pyMRMS.run --cycle ${CYCLETIME}

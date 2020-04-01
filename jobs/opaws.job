@@ -7,4 +7,4 @@
 
 source $HOME/miniconda3/bin/activate wofs
 
-python -m pyOPAWS.slurm_run --cycle ${CYCLETIME} --radarIndex ${SLURM_ARRAY_TASK_ID}
+python -m pyOPAWS.run --cycle ${CYCLETIME} --radarIndex ${SLURM_ARRAY_TASK_ID}

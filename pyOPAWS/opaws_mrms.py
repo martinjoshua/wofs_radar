@@ -122,7 +122,7 @@ _grid_dict = {
 # Parameter dict setting radar data parameters
                
 _radar_parameters = {
-                     'min_dbz_analysis': 25.0, 
+                     'min_dbz_analysis': 5.0, 
                      'max_range': 150000.,
                      'max_Nyquist_factor': 3,                    # Filter(Vr): dont allow output of velocities > Nyquist*factor
                      'max_Radial_Velocity': 50.,                  # Filter(Vr): mask any Vr's greater, likely to be poor unfolding

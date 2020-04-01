@@ -77,7 +77,7 @@ class TestMRMS(unittest.TestCase):
         #obj.window = '2020,03,03,06,23'
         obj.onlyVR = True
         obj.plot = 0
-        obj.dx = 5000.000000
+        obj.dx = 2000.000000
         obj.roi = 1000.000000
         obj.qc = 'Minimal'
         obj.unfold = 'region'
