@@ -3,7 +3,7 @@ import datetime as DT
 from Config import settings
 from multiprocessing import Pool
 from utils.radar import getFromFile
-from pyOPAWS.slurm_run import main
+from pyOPAWS.run import main
 
 def runOPAWSForTime(run_time, totalRadars):
     date = run_time.strftime("%Y%m%d%H%M")
@@ -26,7 +26,7 @@ def runMRMSForTime(run_time):
     if settings.default_slurm_enabled == True:
         cmd = "sbatch --job-name=mrms_%s --export=CYCLETIME=%s jobs/mrms.job" % (date, date)
     else:
-        cmd = "python -m pyMRMS.slurm_run --cycle %s" % date
+        cmd = "python -m pyMRMS.run --cycle %s" % date
     print(cmd)
     OPAWSret = subprocess.Popen([cmd],shell=True)
     OPAWSret.wait()

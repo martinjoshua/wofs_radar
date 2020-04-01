@@ -5,7 +5,7 @@ from pyOPAWS.opaws2d import run
 from optparse import OptionParser
 from Config import settings
 from utils.radar import getFromFile
-from slurm.jobs import runMRMSForTime, runOPAWSForTime
+from jobs.run import runMRMSForTime, runOPAWSForTime
 
 def main(start_time, end_time):
 
