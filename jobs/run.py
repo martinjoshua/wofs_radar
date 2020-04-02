@@ -10,7 +10,7 @@ def runOPAWSForTime(run_time, totalRadars):
     date = run_time.strftime("%Y%m%d%H%M")
     if settings.default_slurm_enabled == True:
         cmd = "JOBID=$(sbatch --job-name=opaws_%s --parsable --array=0-%i --export=CYCLETIME=%s jobs/opaws.job) " % (date, totalRadars-1, date)
-        cmd += "&& sbatch --job-name=opaws_combine_%s --export=COMBINETIME=%s --depend=afterany:$JOBID jobs/combine.job" % (date, run_time.strftime("%Y%m%d_%H%M"))
+        cmd += "&& sbatch --job-name=opaws_combine_%s --export=COMBINETIME=%s,DIR=%s --depend=afterany:$JOBID jobs/combine.job" % (date, run_time.strftime("%Y%m%d_%H%M"), settings.opaws_obs_seq)
         print(cmd)
         OPAWSret = subprocess.Popen([cmd],shell=True)
         OPAWSret.wait()
@@ -26,7 +26,7 @@ def runRASSForTime(run_time, totalRadars):
     date = run_time.strftime("%Y%m%d%H%M")
     if settings.default_slurm_enabled == True:
         cmd = "JOBID=$(sbatch --job-name=rass_%s --parsable --array=0-%i --export=CYCLETIME=%s jobs/rass.job) " % (date, totalRadars-1, date)
-        cmd += "&& sbatch --job-name=rass_combine_%s --export=COMBINETIME=%s --depend=afterany:$JOBID jobs/combine.job" % (date, run_time.strftime("%Y%m%d_%H%M"))
+        cmd += "&& sbatch --job-name=rass_combine_%s --export=COMBINETIME=%s,DIR=%s --depend=afterany:$JOBID jobs/combine.job" % (date, run_time.strftime("%Y%m%d_%H%M"), settings.rass_output)
         print(cmd)
         RASSret = subprocess.Popen([cmd],shell=True)
         RASSret.wait()

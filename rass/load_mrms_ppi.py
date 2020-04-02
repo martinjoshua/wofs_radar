@@ -202,6 +202,7 @@ def getProducts(radar, run_time, tilt):
 
     def getNearestFile(time, files):
         win = int(settings.rass_window)
+        #TODO: clean this up. initial lambda should do the filter check and return None if beyond window for less looping
         files = map(lambda x: (abs((time - datetime.datetime.strptime(os.path.splitext(x)[0], "%Y%m%d-%H%M%S")).total_seconds()), x), files)
         s = sorted(files, key = lambda x: x[0])
         s = list(filter(lambda x: x[0] <= win, s))
