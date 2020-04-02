@@ -27,7 +27,7 @@ def main(start_time, end_time):
 
         if settings.default_slurm_enabled == True:
             print('Pausing for slurm before submitting next job')
-            sleep(300)
+            sleep(180)
 
 if __name__ == "__main__":
     parser = OptionParser()
