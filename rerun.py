@@ -1,4 +1,5 @@
 import types, os
+from time import sleep
 import subprocess
 import datetime as DT
 from pyOPAWS.opaws2d import run
@@ -23,6 +24,10 @@ def main(start_time, end_time):
         if settings.mrms_enabled == True: runMRMSForTime(cycle_time)
         if settings.opaws_enabled == True: runOPAWSForTime(cycle_time, len(radars))
         if settings.rass_enabled == True: runRASSForTime(cycle_time, len(radars))
+
+        if settings.default_slurm_enabled == True:
+            print('Pausing for slurm before submitting next job')
+            sleep(300)
 
 if __name__ == "__main__":
     parser = OptionParser()
