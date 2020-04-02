@@ -977,6 +977,10 @@ def run(radar, run_time, options):
     
     volumes = list(map(lambda a: a['radar'], sorted(tilts, key=lambda a: a['tilt'])))
 
+    if len(volumes) <= 0:
+        print("Exiting for radar %s. No radar files found." % radar)
+        return
+
     ref = dbz_masking(grid_data(volumes, "reflectivity", LatLon=cLatLon), thin_zeros=_grid_dict['thin_zeros'])
     vel = grid_data(volumes, "velocity", LatLon=cLatLon)
     
