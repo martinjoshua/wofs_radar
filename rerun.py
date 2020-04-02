@@ -5,7 +5,7 @@ from pyOPAWS.opaws2d import run
 from optparse import OptionParser
 from Config import settings
 from utils.radar import getFromFile
-from jobs.run import runMRMSForTime, runOPAWSForTime
+from jobs.run import runMRMSForTime, runOPAWSForTime, runRASSForTime
 
 def main(start_time, end_time):
 
@@ -20,8 +20,9 @@ def main(start_time, end_time):
     radars = getFromFile(start_time)
     
     for cycle_time in runtimes:
-        runMRMSForTime(cycle_time)
-        runOPAWSForTime(cycle_time, len(radars))
+        if settings.mrms_enabled == True: runMRMSForTime(cycle_time)
+        if settings.opaws_enabled == True: runOPAWSForTime(cycle_time, len(radars))
+        if settings.rass_enabled == True: runRASSForTime(cycle_time, len(radars))
 
 if __name__ == "__main__":
     parser = OptionParser()

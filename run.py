@@ -7,7 +7,7 @@ import logging
 import subprocess
 from Config import settings
 from utils.radar import getFromFile
-from slurm.jobs import runOPAWSForTime, runMRMSForTime
+from jobs.run import runOPAWSForTime, runMRMSForTime, runRASSForTime
 
 from optparse import OptionParser
 from crontab import CronTab
@@ -49,8 +49,10 @@ def main(options):
         gmt = time.gmtime() 
         cycle_time = get_time_for_cycle(DT.datetime(*gmt[:6]))
         radars = getFromFile(DT.datetime.utcnow())
-        runMRMSForTime(cycle_time)
-        runOPAWSForTime(cycle_time, len(radars))
+
+        if settings.mrms_enabled == True: runMRMSForTime(cycle_time)
+        if settings.opaws_enabled == True: runOPAWSForTime(cycle_time, len(radars))
+        if settings.rass_enabled == True: runRASSForTime(cycle_time, len(radars))
 
 if __name__ == "__main__":
     parser = OptionParser()

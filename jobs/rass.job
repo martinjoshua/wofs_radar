@@ -1,0 +1,10 @@
+#!/bin/bash
+#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=1
+#SBATCH -o rass-%j.out
+#SBATCH -e rass-%j.error
+#SBATCH -t 00:02:30
+
+source $HOME/miniconda3/bin/activate wofs
+
+python -m rass.run --cycle ${CYCLETIME} --radarIndex ${SLURM_ARRAY_TASK_ID}

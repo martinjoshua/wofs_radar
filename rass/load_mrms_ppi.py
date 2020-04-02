@@ -1,4 +1,3 @@
-
 import netCDF4 as ncdf
 import os
 import pyart
@@ -11,6 +10,16 @@ from pyart.config import FileMetadata
 from pyart.config import get_metadata, get_fillvalue
 from pyart.core.radar import Radar
 from Config import settings
+
+def __get_radar_time_path__(radar, run_time): return os.path.join(settings.rass_input, run_time.strftime("%Y%m%d"), radar)
+
+def __get_path_reflectivity__(radar, run_time): return os.path.join(__get_radar_time_path__(radar, run_time), settings.rass_input_refl)
+
+def __get_path_reflectivity_tilt__(radar, run_time, tilt): return os.path.join(__get_path_reflectivity__(radar, run_time), tilt)
+
+def __get_path_velocity__(radar, run_time): return os.path.join(__get_radar_time_path__(radar, run_time), settings.rass_input_vel)
+
+def __get_path_velocity_tilt__(radar, run_time, tilt): return os.path.join(__get_path_velocity__(radar, run_time), tilt)
 
 def load_mrms_ppi(fdict, **kwargs):
     """
@@ -182,11 +191,14 @@ def load_mrms_ppi(fdict, **kwargs):
                   _sweep_end_ray_index,                                              \
                   _azimuth, _elevation, instrument_parameters=_instr_params)
 
-
 def getProducts(radar, run_time, tilt):
-    base_path = os.path.join(settings.mrms_radar_path, run_time.strftime("%Y%m%d"), radar)    
-    refl_path = os.path.join(base_path, 'Reflectivity', tilt)
-    vel_path = os.path.join(base_path, 'Velocity', tilt)
+    """
+        Returns an array of dictionaries in the form of
+        [{'file': '/file/path.netcdf', 'ncvar': 'Velocity', 'pvar': 'corrected_velocity'},
+        {'file': '/file/path.netcdf', 'ncvar': 'ReflectivityQC', 'pvar': "reflectivity"}]
+    """
+    refl_path = __get_path_reflectivity_tilt__(radar, run_time, tilt)
+    vel_path = __get_path_velocity_tilt__(radar, run_time, tilt)
 
     def getNearestFile(time, files):
         files = map(lambda x: (abs((time - datetime.datetime.strptime(os.path.splitext(x)[0], "%Y%m%d-%H%M%S")).total_seconds()), x), files)
@@ -203,16 +215,17 @@ def getProducts(radar, run_time, tilt):
         yield {'file': os.path.join(refl_path, r[1]), 'variables': [{'ncvar': 'ReflectivityQC', 'pvar': "reflectivity"}]}
 
 def getTiltProducts(radar, run_time):
-    base_path = os.path.join(settings.mrms_radar_path, run_time.strftime("%Y%m%d"), radar)
-    refl_tilts = os.listdir(os.path.join(base_path, 'Reflectivity'))
-    vel_tilts = os.listdir(os.path.join(base_path, 'Velocity'))
-    # common set of tilts
+    refl_tilts = os.listdir(__get_path_reflectivity__(radar, run_time))
+    vel_tilts = os.listdir(__get_path_velocity__(radar, run_time))
+    # common set of tilts 
     tilts = set(refl_tilts).intersection(vel_tilts)
     for tilt in tilts:
         yield { "tilt": tilt, "files": list(getProducts(radar, run_time, tilt)) }
 
 def getRadarProducts(radar, run_time):
     for fileset in getTiltProducts(radar, run_time):
+
+        # cannot process vr without reflectivity
         if len(fileset['files']) < 2: 
             continue
 
@@ -220,12 +233,3 @@ def getRadarProducts(radar, run_time):
         myradar.init_gate_altitude()
         myradar.init_gate_longitude_latitude()
         yield { "tilt": fileset['tilt'], "radar": myradar }
-
- 
-
-# fdict = [{'file': os.getcwd()+'/20200302/KOHX/Velocity/00.50/20200303-060515.netcdf', 'ncvar': 'Velocity', 'pvar': 'corrected_velocity'},
-#          {'file': os.getcwd()+'/20200302/KOHX/Reflectivity/00.50/20200303-060458.netcdf', 'ncvar': 'ReflectivityQC', 'pvar': "reflectivity"}]
-
-# fdict = [{'file': os.getcwd()+'/20200302/KOHX/Velocity/04.00/20200303-060220.netcdf', 'ncvar': 'Velocity', 'pvar': 'corrected_velocity'},
-#          {'file': os.getcwd()+'/20200302/KOHX/Reflectivity/04.00/20200303-055559.netcdf', 'ncvar': 'ReflectivityQC', 'pvar': "reflectivity"}]
-

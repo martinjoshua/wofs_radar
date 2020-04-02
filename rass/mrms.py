@@ -57,14 +57,14 @@ import pandas as pd
 import metpy.calc as mpcalc
 from metpy.units import units
 
-from .cressman import *
+from utils.cressman import *
 import pyart
 
 from pyproj import Proj
 import pylab as plt  
 from mpl_toolkits.basemap import Basemap
 from pyart.graph import cm
-from pyOPAWS.load_mrms_ppi import getRadarProducts
+from rass.load_mrms_ppi import getRadarProducts
 
 # Ignore annoying warnings (unless the code breaks, then comment these lines out)
 import warnings
@@ -504,285 +504,285 @@ def plot_shapefiles(map, shapefiles=None, color='k', linewidth=0.5, counties=Fal
     if counties:
             map.drawcounties(ax=ax, linewidth=0.5, color='k', zorder=5)
             
-########################################################################
-#
-# Create two panel plot of processed, gridded velocity and reflectivity data  
 
 def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, interactive=True, LatLon=None):
-  
-# Set up colormaps 
+    """
+        Create two panel plot of processed, gridded velocity and reflectivity data  
+    """
+    # Set up colormaps 
 
-  from matplotlib.colors import BoundaryNorm
-   
-  cmapr = cm.NWSRef
-  cmapr.set_bad('white',1.0)
-  cmapr.set_under('white',1.0)
+    from matplotlib.colors import BoundaryNorm
+    
+    cmapr = cm.NWSRef
+    cmapr.set_bad('white',1.0)
+    cmapr.set_under('white',1.0)
 
-  cmapv = cm.Carbone42
-  cmapv.set_bad('white',1.)
-  cmapv.set_under('black',1.)
-  cmapv.set_over('black',1.)
-  
-  normr = BoundaryNorm(np.arange(10, 85, 5), cmapr.N)
-  normv = BoundaryNorm(np.arange(-48, 50, 2), cmapv.N)
-  
-  min_dbz = _radar_parameters['min_dbz_analysis']  
-  xwidth = ref.xg.max() - ref.xg.min()
-  ywidth = ref.yg.max() - ref.yg.min()
+    cmapv = cm.Carbone42
+    cmapv.set_bad('white',1.)
+    cmapv.set_under('black',1.)
+    cmapv.set_over('black',1.)
+    
+    normr = BoundaryNorm(np.arange(10, 85, 5), cmapr.N)
+    normv = BoundaryNorm(np.arange(-48, 50, 2), cmapv.N)
+    
+    min_dbz = _radar_parameters['min_dbz_analysis']  
+    xwidth = ref.xg.max() - ref.xg.min()
+    ywidth = ref.yg.max() - ref.yg.min()
 
-# Create png file label
+    # Create png file label
 
-  if fsuffix == None:
-      print("\n opaws2D.grid_plot:  No output file name is given, writing to %s" % "VR_RF_...png")
-      filename = "%s/VR_RF_%2.2d_plot.png" % (dir, sweep)
-      print("\n opaws2D.grid_plot:  No output file name is given, writing to %s" % filename)
-  else:
-      filename = "%s_%2.2d.png" % (os.path.join(dir, fsuffix), sweep)
-      print("\n opaws2D.grid_plot:  Writing plot to %s" % filename)
+    if fsuffix == None:
+        print("\n opaws2D.grid_plot:  No output file name is given, writing to %s" % "VR_RF_...png")
+        filename = "%s/VR_RF_%2.2d_plot.png" % (dir, sweep)
+        print("\n opaws2D.grid_plot:  No output file name is given, writing to %s" % filename)
+    else:
+        filename = "%s_%2.2d.png" % (os.path.join(dir, fsuffix), sweep)
+        print("\n opaws2D.grid_plot:  Writing plot to %s" % filename)
 
-  fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(14,10))
-  
-# Set up coordinates for the plots
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(14,10))
+    
+    # Set up coordinates for the plots
 
-  if LatLon == None:
-      bgmap = Basemap(projection=_grid_dict['projection'], width=xwidth, \
-                  height=ywidth, resolution='c', lat_0=ref.radar_lat, lon_0=ref.radar_lon, ax=ax1)
-      xoffset, yoffset = bgmap(ref.radar_lon, ref.radar_lat)
-      xg, yg = bgmap(ref.lons, ref.lats)
-  else:
-      bgmap = Basemap(projection=_grid_dict['projection'], width=xwidth, \
-                  height=ywidth, resolution='c', lat_0=LatLon[0], lon_0=LatLon[1], ax=ax1)
-      xoffset, yoffset = bgmap(ref.radar_lon, ref.radar_lat)    
-      xg, yg = bgmap(ref.lons, ref.lats)
-      
-#   print xg.min(), xg.max(), xg.shape
-#   print yg.min(), yg.max(), yg.shape
-  
-  xg_2d, yg_2d = np.meshgrid(xg, yg)
- 
-#   print xg.min(), xg_2d[0,0], xg_2d[-1,-1], xg.max(), xg.shape
-#   print yg.min(), yg.max(), yg.shape
- 
-# fix xg, yg coordinates so that pcolormesh plots them in the center.
+    if LatLon == None:
+        bgmap = Basemap(projection=_grid_dict['projection'], width=xwidth, \
+                    height=ywidth, resolution='c', lat_0=ref.radar_lat, lon_0=ref.radar_lon, ax=ax1)
+        xoffset, yoffset = bgmap(ref.radar_lon, ref.radar_lat)
+        xg, yg = bgmap(ref.lons, ref.lats)
+    else:
+        bgmap = Basemap(projection=_grid_dict['projection'], width=xwidth, \
+                    height=ywidth, resolution='c', lat_0=LatLon[0], lon_0=LatLon[1], ax=ax1)
+        xoffset, yoffset = bgmap(ref.radar_lon, ref.radar_lat)    
+        xg, yg = bgmap(ref.lons, ref.lats)
+        
+    #   print xg.min(), xg.max(), xg.shape
+    #   print yg.min(), yg.max(), yg.shape
+    
+    xg_2d, yg_2d = np.meshgrid(xg, yg)
+    
+    #   print xg.min(), xg_2d[0,0], xg_2d[-1,-1], xg.max(), xg.shape
+    #   print yg.min(), yg.max(), yg.shape
+    
+    # fix xg, yg coordinates so that pcolormesh plots them in the center.
 
-  dx2 = 0.5*(ref.xg[1] - ref.xg[0])
-  dy2 = 0.5*(ref.yg[1] - ref.yg[0])
-  
-  xe = np.append(xg-dx2, [xg[-1] + dx2])
-  ye = np.append(yg-dy2, [yg[-1] + dy2])
+    dx2 = 0.5*(ref.xg[1] - ref.xg[0])
+    dy2 = 0.5*(ref.yg[1] - ref.yg[0])
+    
+    xe = np.append(xg-dx2, [xg[-1] + dx2])
+    ye = np.append(yg-dy2, [yg[-1] + dy2])
 
-# REFLECTVITY PLOT
+    # REFLECTVITY PLOT
 
-  if shapefiles:
-      plot_shapefiles(bgmap, shapefiles=shapefiles, counties=_plot_counties, ax=ax1)
-  else:
-      plot_shapefiles(bgmap, counties=_plot_counties, ax=ax1)
- 
-  bgmap.drawparallels(list(range(10,80,1)),    labels=[1,0,0,0], linewidth=0.5, ax=ax1)
-  bgmap.drawmeridians(list(range(-170,-10,1)), labels=[0,0,0,1], linewidth=0.5, ax=ax1)
+    if shapefiles:
+        plot_shapefiles(bgmap, shapefiles=shapefiles, counties=_plot_counties, ax=ax1)
+    else:
+        plot_shapefiles(bgmap, counties=_plot_counties, ax=ax1)
+    
+    bgmap.drawparallels(list(range(10,80,1)),    labels=[1,0,0,0], linewidth=0.5, ax=ax1)
+    bgmap.drawmeridians(list(range(-170,-10,1)), labels=[0,0,0,1], linewidth=0.5, ax=ax1)
 
-  im1 = bgmap.pcolormesh(xe, ye, ref.data[sweep], cmap=cmapr, vmin = _ref_scale[0], vmax = _ref_scale[1], ax=ax1)
-  cbar = bgmap.colorbar(im1, location='right')
-  cbar.set_label('Reflectivity (dBZ)')
-  ax1.set_title('Thresholded Reflectivity (Gridded)')
-  bgmap.scatter(xoffset,yoffset, c='k', s=50., alpha=0.8, ax=ax1)
-  
-  at = AnchoredText("Max dBZ: %4.1f" % (ref.data[sweep].max()), loc=4, prop=dict(size=12), frameon=True,)
-  at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
-  ax1.add_artist(at)
+    im1 = bgmap.pcolormesh(xe, ye, ref.data[sweep], cmap=cmapr, vmin = _ref_scale[0], vmax = _ref_scale[1], ax=ax1)
+    cbar = bgmap.colorbar(im1, location='right')
+    cbar.set_label('Reflectivity (dBZ)')
+    ax1.set_title('Thresholded Reflectivity (Gridded)')
+    bgmap.scatter(xoffset,yoffset, c='k', s=50., alpha=0.8, ax=ax1)
+    
+    at = AnchoredText("Max dBZ: %4.1f" % (ref.data[sweep].max()), loc=4, prop=dict(size=12), frameon=True,)
+    at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
+    ax1.add_artist(at)
 
-# Plot zeros as "o"
+    # Plot zeros as "o"
 
-  try:
-      r_mask = (ref.zero_dbz.mask == False)
-#     print("\n Plotting zeros from MRMS level\n")
-      bgmap.scatter(xg_2d[r_mask], yg_2d[r_mask], s=25, facecolors='none', \
-                    edgecolors='k', alpha=1.0, ax=ax1) 
+    try:
+        r_mask = (ref.zero_dbz.mask == False)
+    #     print("\n Plotting zeros from MRMS level\n")
+        bgmap.scatter(xg_2d[r_mask], yg_2d[r_mask], s=25, facecolors='none', \
+                        edgecolors='k', alpha=1.0, ax=ax1) 
+                        
+    except AttributeError:
+        print("\n Plotting zeros from full 3D grid level (non-MRMS form)\n")
+        r_mask = np.logical_and(ref.data[sweep] < 1.0, (ref.data.mask[sweep] == False))
+        bgmap.scatter(xg_2d[r_mask], yg_2d[r_mask], s=25, facecolors='none', \
+                        edgecolors='k', alpha=1.0, ax=ax1)
+    
+    # RADIAL VELOCITY PLOT
+
+    if LatLon == None:
+        bgmap = Basemap(projection=_grid_dict['projection'], width=xwidth, \
+                    height=ywidth, resolution='c', lat_0=ref.radar_lat,lon_0=ref.radar_lon, ax=ax2)
+        xoffset, yoffset = bgmap(ref.radar_lon, ref.radar_lat)
+    else:
+        bgmap = Basemap(projection=_grid_dict['projection'], width=xwidth, \
+                    height=ywidth, resolution='c', lat_0=LatLon[0], lon_0=LatLon[1], ax=ax2)
+        xoffset, yoffset = bgmap(ref.radar_lon, ref.radar_lat)            
+    
                     
-  except AttributeError:
-      print("\n Plotting zeros from full 3D grid level (non-MRMS form)\n")
-      r_mask = np.logical_and(ref.data[sweep] < 1.0, (ref.data.mask[sweep] == False))
-      bgmap.scatter(xg_2d[r_mask], yg_2d[r_mask], s=25, facecolors='none', \
-                    edgecolors='k', alpha=1.0, ax=ax1)
-  
-# RADIAL VELOCITY PLOT
+    if shapefiles:
+        plot_shapefiles(bgmap, shapefiles=shapefiles, counties=_plot_counties, ax=ax2)
+    else:
+        plot_shapefiles(bgmap, counties=_plot_counties, ax=ax2)
+        
+    bgmap.drawparallels(list(range(10,80,1)),labels=[1,0,0,0], linewidth=0.5, ax=ax2)
+    bgmap.drawmeridians(list(range(-170,-10,1)),labels=[0,0,0,1],linewidth=0.5, ax=ax2)
 
-  if LatLon == None:
-      bgmap = Basemap(projection=_grid_dict['projection'], width=xwidth, \
-                  height=ywidth, resolution='c', lat_0=ref.radar_lat,lon_0=ref.radar_lon, ax=ax2)
-      xoffset, yoffset = bgmap(ref.radar_lon, ref.radar_lat)
-  else:
-      bgmap = Basemap(projection=_grid_dict['projection'], width=xwidth, \
-                  height=ywidth, resolution='c', lat_0=LatLon[0], lon_0=LatLon[1], ax=ax2)
-      xoffset, yoffset = bgmap(ref.radar_lon, ref.radar_lat)            
-  
-                  
-  if shapefiles:
-      plot_shapefiles(bgmap, shapefiles=shapefiles, counties=_plot_counties, ax=ax2)
-  else:
-      plot_shapefiles(bgmap, counties=_plot_counties, ax=ax2)
+    vr_mask = (vel.data.mask == False)[sweep]
+    vr_data = vel.data[sweep]
     
-  bgmap.drawparallels(list(range(10,80,1)),labels=[1,0,0,0], linewidth=0.5, ax=ax2)
-  bgmap.drawmeridians(list(range(-170,-10,1)),labels=[0,0,0,1],linewidth=0.5, ax=ax2)
+    im1 = bgmap.pcolormesh(xe, ye, vr_data, cmap=cmapv, vmin=_vr_scale[0], vmax=_vr_scale[1], ax=ax2)
+    cbar = bgmap.colorbar(im1,location='right')
+    cbar.set_label('Dealised Radial Velocity (meters_per_second)')
+    ax2.set_title('Gridded/Thresholded/Unfolded VR / Nyquist: %4.1f m/s' % vel.nyquist[sweep]) 
+    bgmap.scatter(xoffset,yoffset, c='k', s=50., alpha=0.8, ax=ax2)
 
-  vr_mask = (vel.data.mask == False)[sweep]
-  vr_data = vel.data[sweep]
-  
-  im1 = bgmap.pcolormesh(xe, ye, vr_data, cmap=cmapv, vmin=_vr_scale[0], vmax=_vr_scale[1], ax=ax2)
-  cbar = bgmap.colorbar(im1,location='right')
-  cbar.set_label('Dealised Radial Velocity (meters_per_second)')
-  ax2.set_title('Gridded/Thresholded/Unfolded VR / Nyquist: %4.1f m/s' % vel.nyquist[sweep]) 
-  bgmap.scatter(xoffset,yoffset, c='k', s=50., alpha=0.8, ax=ax2)
+    at = AnchoredText("Max Vr: %4.1f \nMin Vr: %4.1f " % \
+                    (vr_data.max(), vr_data.min()), loc=4, prop=dict(size=12), frameon=True,)
+    at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
+    ax2.add_artist(at)  
+        
+    # Now plot locations of nan data
 
-  at = AnchoredText("Max Vr: %4.1f \nMin Vr: %4.1f " % \
-                 (vr_data.max(), vr_data.min()), loc=4, prop=dict(size=12), frameon=True,)
-  at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
-  ax2.add_artist(at)  
+    v_mask = (vel.data.mask == True)
+    bgmap.scatter(xg_2d[v_mask[sweep]], yg_2d[v_mask[sweep]], c='k', s = 1., alpha=0.5, ax=ax2)
+
+    # Get other metadata....for labeling
+
+    instrument_name = ref.metadata['instrument_name']
+    time_start = ncdf.num2date(ref.time['data'][0], ref.time['units'])
+    time_text = time_start.isoformat().replace("T"," ")
+    title = '\nDate:  %s   Time:  %s Z   Elevation:  %2.2f deg' % (time_text[0:10], time_text[10:19], ref.elevations[sweep])
+    plt.suptitle(title, fontsize=24)
     
-# Now plot locations of nan data
-
-  v_mask = (vel.data.mask == True)
-  bgmap.scatter(xg_2d[v_mask[sweep]], yg_2d[v_mask[sweep]], c='k', s = 1., alpha=0.5, ax=ax2)
-
-# Get other metadata....for labeling
-
-  instrument_name = ref.metadata['instrument_name']
-  time_start = ncdf.num2date(ref.time['data'][0], ref.time['units'])
-  time_text = time_start.isoformat().replace("T"," ")
-  title = '\nDate:  %s   Time:  %s Z   Elevation:  %2.2f deg' % (time_text[0:10], time_text[10:19], ref.elevations[sweep])
-  plt.suptitle(title, fontsize=24)
-  
-  plt.savefig(filename)
-  
-  if interactive:  plt.show()
+    plt.savefig(filename)
+    
+    if interactive:  plt.show()
 
 #####################################################################################################
 def write_radar_file(ref, vel, filename=None):
-    
-  _time_units    = 'seconds since 1970-01-01 00:00:00'
-  _calendar      = 'standard'
-
-  if filename == None:
-      print("\n write_DART_ascii:  No output file name is given, writing to %s" % "obs_seq.txt")
-      filename = "obs_seq.nc"
-  else:
-      dirname = os.path.dirname(filename)
-      basename = "%s_%s.nc" % ("obs_seq", os.path.basename(filename))
-      filename =  os.path.join(dirname, basename)
-
-  _stringlen     = 8
-  _datelen       = 19
-     
-# Extract grid and ref data
         
-  dbz        = ref.data
-  lats       = ref.lats
-  lons       = ref.lons
-  hgts       = ref.zg + ref.radar_hgt
-  kind       = ObType_LookUp(ref.field.upper())  
-  R_xy       = np.sqrt(ref.xg[20]**2 + ref.yg[20]**2)
-  elevations = beam_elv(R_xy, ref.zg[:,20,20])
-  
-# if there is a zero dbz obs type, reform the data array 
-  try:
-      nx1, ny1       = ref.zero_dbz.shape
-      zero_data      = np.ma.zeros((2, ny1, nx1), dtype=np.float32)
-      zero_hgts      = np.ma.zeros((2, ny1, nx1), dtype=np.float32)
-      zero_data[0]   = ref.zero_dbz
-      zero_data[1]   = ref.zero_dbz
-      zero_hgts[0:2] = ref.zero_dbz_zg[0:2]
-      cref           = ref.cref
-      zero_flag = True
-      print("\n write_DART_ascii:  0-DBZ separate type added to netcdf output\n")
-  except AttributeError:
-      zero_flag = False
-      print("\n write_DART_ascii:  No 0-DBZ separate type found\n")
-      
-# Extract velocity data
-  
-  vr                  = vel.data
-  platform_lat        = vel.radar_lat
-  platform_lon        = vel.radar_lon
-  platform_hgt        = vel.radar_hgt
+    _time_units    = 'seconds since 1970-01-01 00:00:00'
+    _calendar      = 'standard'
 
-# Use the volume mean time for the time of the volume
-      
-  dtime   = ncdf.num2date(ref.time['data'].mean(), ref.time['units'])
-  days    = ncdf.date2num(dtime, units = "days since 1601-01-01 00:00:00")
-  seconds = np.int(86400.*(days - np.floor(days)))  
-  
-# create the fileput filename and create new netCDF4 file
+    if filename == None:
+        print("\n write_DART_ascii:  No output file name is given, writing to %s" % "obs_seq.txt")
+        filename = "obs_seq.nc"
+    else:
+        dirname = os.path.dirname(filename)
+        basename = "%s_%s.nc" % ("obs_seq", os.path.basename(filename))
+        filename =  os.path.join(dirname, basename)
 
-#filename = os.path.join(path, "%s_%s%s" % ("Inflation", DT.strftime("%Y-%m-%d_%H:%M:%S"), ".nc" ))
-
-  print("\n -->  Writing %s as the radar file..." % (filename))
+    _stringlen     = 8
+    _datelen       = 19
+        
+    # Extract grid and ref data
+            
+    dbz        = ref.data
+    lats       = ref.lats
+    lons       = ref.lons
+    hgts       = ref.zg + ref.radar_hgt
+    kind       = ObType_LookUp(ref.field.upper())  
+    R_xy       = np.sqrt(ref.xg[20]**2 + ref.yg[20]**2)
+    elevations = beam_elv(R_xy, ref.zg[:,20,20])
     
-  rootgroup = ncdf.Dataset(filename, 'w', format='NETCDF4')
-      
-# Create dimensions
+    # if there is a zero dbz obs type, reform the data array 
+    try:
+        nx1, ny1       = ref.zero_dbz.shape
+        zero_data      = np.ma.zeros((2, ny1, nx1), dtype=np.float32)
+        zero_hgts      = np.ma.zeros((2, ny1, nx1), dtype=np.float32)
+        zero_data[0]   = ref.zero_dbz
+        zero_data[1]   = ref.zero_dbz
+        zero_hgts[0:2] = ref.zero_dbz_zg[0:2]
+        cref           = ref.cref
+        zero_flag = True
+        print("\n write_DART_ascii:  0-DBZ separate type added to netcdf output\n")
+    except AttributeError:
+        zero_flag = False
+        print("\n write_DART_ascii:  No 0-DBZ separate type found\n")
+        
+    # Extract velocity data
+    
+    vr                  = vel.data
+    platform_lat        = vel.radar_lat
+    platform_lon        = vel.radar_lon
+    platform_hgt        = vel.radar_hgt
 
-  shape = dbz.shape
-  
-  rootgroup.createDimension('nz',   shape[0])
-  rootgroup.createDimension('ny',   shape[1])
-  rootgroup.createDimension('nx',   shape[2])
-  rootgroup.createDimension('stringlen', _stringlen)
-  rootgroup.createDimension('datelen', _datelen)
-  if zero_flag:
-      rootgroup.createDimension('nz2',   2)
-  
-# Write some attributes
+    # Use the volume mean time for the time of the volume
+        
+    dtime   = ncdf.num2date(ref.time['data'].mean(), ref.time['units'])
+    days    = ncdf.date2num(dtime, units = "days since 1601-01-01 00:00:00")
+    seconds = np.int(86400.*(days - np.floor(days)))  
+    
+    # create the fileput filename and create new netCDF4 file
 
-  rootgroup.time_units   = _time_units
-  rootgroup.calendar     = _calendar
-  rootgroup.stringlen    = "%d" % (_stringlen)
-  rootgroup.datelen      = "%d" % (_datelen)
-  rootgroup.platform_lat = platform_lat
-  rootgroup.platform_lon = platform_lon
-  rootgroup.platform_hgt = platform_hgt
+    #filename = os.path.join(path, "%s_%s%s" % ("Inflation", DT.strftime("%Y-%m-%d_%H:%M:%S"), ".nc" ))
 
-# Create variables
+    print("\n -->  Writing %s as the radar file..." % (filename))
+        
+    rootgroup = ncdf.Dataset(filename, 'w', format='NETCDF4')
+        
+    # Create dimensions
 
-  R_type  = rootgroup.createVariable('REF', 'f4', ('nz', 'ny', 'nx'), zlib=True, shuffle=True )    
-  V_type  = rootgroup.createVariable('VEL', 'f4', ('nz', 'ny', 'nx'), zlib=True, shuffle=True )
-  
-  if zero_flag:
-      R0_type   = rootgroup.createVariable('0REF',  'f4', ('nz2', 'ny', 'nx'), zlib=True, shuffle=True )    
-      Z0_type   = rootgroup.createVariable('0HGTS', 'f4', ('nz2', 'ny', 'nx'), zlib=True, shuffle=True )
-      CREF_type = rootgroup.createVariable('CREF', 'f4', ('ny', 'nx'), zlib=True, shuffle=True )
-      
-  V_dates = rootgroup.createVariable('date', 'S1', ('datelen'), zlib=True, shuffle=True)
-  V_xc    = rootgroup.createVariable('XC', 'f4', ('nx'), zlib=True, shuffle=True)
-  V_yc    = rootgroup.createVariable('YC', 'f4', ('ny'), zlib=True, shuffle=True)
-  V_el    = rootgroup.createVariable('EL', 'f4', ('nz'), zlib=True, shuffle=True)
+    shape = dbz.shape
+    
+    rootgroup.createDimension('nz',   shape[0])
+    rootgroup.createDimension('ny',   shape[1])
+    rootgroup.createDimension('nx',   shape[2])
+    rootgroup.createDimension('stringlen', _stringlen)
+    rootgroup.createDimension('datelen', _datelen)
+    if zero_flag:
+        rootgroup.createDimension('nz2',   2)
+    
+    # Write some attributes
 
-  V_lat   = rootgroup.createVariable('LATS', 'f4', ('ny'), zlib=True, shuffle=True)
-  V_lon   = rootgroup.createVariable('LONS', 'f4', ('nx'), zlib=True, shuffle=True)
-  V_hgt   = rootgroup.createVariable('HGTS', 'f4', ('nz', 'ny', 'nx'), zlib=True, shuffle=True)
+    rootgroup.time_units   = _time_units
+    rootgroup.calendar     = _calendar
+    rootgroup.stringlen    = "%d" % (_stringlen)
+    rootgroup.datelen      = "%d" % (_datelen)
+    rootgroup.platform_lat = platform_lat
+    rootgroup.platform_lon = platform_lon
+    rootgroup.platform_hgt = platform_hgt
 
-# Write variables
+    # Create variables
 
-  rootgroup.variables['date'][:] = ncdf.stringtoarr(dtime.strftime("%Y-%m-%d_%H:%M:%S"), _datelen)
-  
-  rootgroup.variables['REF'][:,:,:] = dbz[:]
-  rootgroup.variables['VEL'][:,:,:] = vr[:]
+    R_type  = rootgroup.createVariable('REF', 'f4', ('nz', 'ny', 'nx'), zlib=True, shuffle=True )    
+    V_type  = rootgroup.createVariable('VEL', 'f4', ('nz', 'ny', 'nx'), zlib=True, shuffle=True )
+    
+    if zero_flag:
+        R0_type   = rootgroup.createVariable('0REF',  'f4', ('nz2', 'ny', 'nx'), zlib=True, shuffle=True )    
+        Z0_type   = rootgroup.createVariable('0HGTS', 'f4', ('nz2', 'ny', 'nx'), zlib=True, shuffle=True )
+        CREF_type = rootgroup.createVariable('CREF', 'f4', ('ny', 'nx'), zlib=True, shuffle=True )
+        
+    V_dates = rootgroup.createVariable('date', 'S1', ('datelen'), zlib=True, shuffle=True)
+    V_xc    = rootgroup.createVariable('XC', 'f4', ('nx'), zlib=True, shuffle=True)
+    V_yc    = rootgroup.createVariable('YC', 'f4', ('ny'), zlib=True, shuffle=True)
+    V_el    = rootgroup.createVariable('EL', 'f4', ('nz'), zlib=True, shuffle=True)
 
-  rootgroup.variables['XC'][:]   = ref.xg[:]
-  rootgroup.variables['YC'][:]   = ref.yg[:]
-  rootgroup.variables['EL'][:]   = elevations[:]
-  rootgroup.variables['HGTS'][:] = ref.zg[:]
-  rootgroup.variables['LATS'][:] = lats[:]
-  rootgroup.variables['LONS'][:] = lons[:]
-  
-  if zero_flag:
-       rootgroup.variables['0REF'][:]   = zero_data
-       rootgroup.variables['0HGTS'][:]  = zero_hgts
-       rootgroup.variables['CREF'][:]   = cref
-  
-  rootgroup.sync()
-  rootgroup.close()
-  
-  return filename  
+    V_lat   = rootgroup.createVariable('LATS', 'f4', ('ny'), zlib=True, shuffle=True)
+    V_lon   = rootgroup.createVariable('LONS', 'f4', ('nx'), zlib=True, shuffle=True)
+    V_hgt   = rootgroup.createVariable('HGTS', 'f4', ('nz', 'ny', 'nx'), zlib=True, shuffle=True)
+
+    # Write variables
+
+    rootgroup.variables['date'][:] = ncdf.stringtoarr(dtime.strftime("%Y-%m-%d_%H:%M:%S"), _datelen)
+    
+    rootgroup.variables['REF'][:,:,:] = dbz[:]
+    rootgroup.variables['VEL'][:,:,:] = vr[:]
+
+    rootgroup.variables['XC'][:]   = ref.xg[:]
+    rootgroup.variables['YC'][:]   = ref.yg[:]
+    rootgroup.variables['EL'][:]   = elevations[:]
+    rootgroup.variables['HGTS'][:] = ref.zg[:]
+    rootgroup.variables['LATS'][:] = lats[:]
+    rootgroup.variables['LONS'][:] = lons[:]
+    
+    if zero_flag:
+        rootgroup.variables['0REF'][:]   = zero_data
+        rootgroup.variables['0HGTS'][:]  = zero_hgts
+        rootgroup.variables['CREF'][:]   = cref
+    
+    rootgroup.sync()
+    rootgroup.close()
+    
+    return filename  
+
 #=========================================================================================
 # Defines the data frame for each observation type
 #
@@ -936,39 +936,16 @@ def clock_string():
                                          local_time.tm_hour, \
                                          local_time.tm_min)
 
+########################################################################
+# Main function
 
-def processVolume(volume, options, cLatLon):
-    # Modern level-II files need to be mapped to figure out where the super-res velocity and reflectivity fields are located in file
-
-    tim0 = timeit.time()     
-
-    # ret = volume_mapping(volume)
-
-    # Now grid the reflectivity (embedded call) and then mask it off based on parameters set at top
-
-    ref, vel = (None, None)
-
-    if 'reflectivity' in volume.fields.keys():
-        ref = dbz_masking(grid_data(volume, "reflectivity", LatLon=cLatLon), thin_zeros=_grid_dict['thin_zeros'])
-
-    # Finally, regrid the radial velocity
-
-    if 'velocity' in volume.fields.keys():
-        vel = grid_data(volume, "velocity", LatLon=cLatLon)
-    
-    # Mask it off based on dictionary parameters set at top
-
-    if _grid_dict['mask_vr_with_dbz']:
-        vel = vel_masking(vel, ref, volume)
-
-    print("\n Time for gridding fields: {} seconds".format(timeit.time() - tim0))
-    
-    print('\n ================================================================================')
-
-    return vel
-
-
-def processVolumes(radar, run_time, options):
+def run(radar, run_time, options):
+    print(' ================================================================================')
+    print('')
+    print('                   BEGIN PROGRAM RASS                     ')
+    print('')
+    print('')
+    print(' ================================================================================')
     if options.newse:
         print(" \n now processing NEWSe radar file....\n ")
         cLatLon = parse_NEWSe_radar_file(options.newse, getLatLon=True)
@@ -1017,223 +994,10 @@ def processVolumes(radar, run_time, options):
 
     write_obs_seq_xarray(vel, filename=out_filename, obs_error= _obs_errors['velocity'])
 
-
     if len(sweep_num) > 0:
         fplotname = os.path.basename(out_filename)
         for pl in sweep_num:
             plottime = plot_gridded(ref, vel, pl, fsuffix=fplotname, dir=options.out_dir, shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
-
-    # TODO: move out of loop, compine tilts to single file
-    # if options.write == True:      
-    #     print('\n WRITING XARRAY: {}\n'.format(out_filename))
-    #     ret = write_obs_seq_xarray(vel, filename=out_filename, obs_error= _obs_errors['velocity'], volume_name=os.path.basename(fname))
-
-    #     print('\n WRITING DART: {}\n'.format(out_filename))
-    #     ret = opaws_write_DART_ascii(vel, filename=out_filename, grid_dict=_grid_dict, obs_error=[_obs_errors['velocity']] )
-
-    #     if options.onlyVR != True:
-    #         print('\n WRITING DART ONLY VR: {}\n'.format(out_filename))
-    #         ret = opaws_write_DART_ascii(ref, filename=out_filename+"_RF", grid_dict=_grid_dict, obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
-        
-    # if len(sweep_num) > 0:
-    #     fplotname = os.path.basename(out_filename)
-    #     for pl in sweep_num:
-    #         plottime = plot_gridded(ref, vel, pl, fsuffix=fplotname, dir=options.out_dir, shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
-
-
-
-
-
-########################################################################
-# Main function
-
-def run(options):
-    print(' ================================================================================')
-    print('')
-    print('                   BEGIN PROGRAM opaws2D                     ')
-    print('')
-    print('')
-    print(' ================================================================================')
-
-    # Create directory for output files
-
-    if not os.path.exists(options.out_dir):
-        os.mkdir(options.out_dir)
-
-    out_filenames = []
-    in_filenames  = []
-
-    if options.dname == None: 
-        if options.fname == None:
-            print("\n\n ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE! *****")
-            print("\n\n *****                     OR                               *****")
-            print("\n\n *****               CFRADIAL FILE!                         *****")
-            print("\n                         EXITING!\n\n")
-            parser.print_help()
-            print()
-            sys.exit(1)
-        else:
-            in_filenames.append(os.path.abspath(options.fname))
-            strng = os.path.basename(in_filenames[0]).split("_V06")[0]
-            strng = strng[0:4] + "_" + strng[4:]
-            strng = os.path.join(options.out_dir, strng)
-            out_filenames.append(strng) 
-    else:
-        if options.window:
-            ttime      = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
-            start_time = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[0])
-            stop_time  = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[1])
-
-            if _AWS_L2Files:
-                in_filenames = glob.glob(_AWS_L2Name_Style % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"))) \
-                            + glob.glob(_AWS_L2Name_Style % (os.path.abspath(options.dname),stop_time.strftime("%Y%m%d_%H")))
-            else:
-                in_filenames = glob.glob(_LDM_L2Name_Style % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"))) \
-                            + glob.glob(_LDM_L2Name_Style % (os.path.abspath(options.dname),stop_time.strftime("%Y%m%d_%H")))
-
-            if len(in_filenames) == 0:
-                print("\n COULD NOT find any files for radar %s between %s and %s, EXITING" \
-                        % (os.path.abspath(options.dname),start_time.strftime("%Y%m%d_%H"),stop_time.strftime("%Y%m%d_%H")))
-                sys.exit(0)
-            else:
-                print("\n WINDOW IS SUPPLIED, WILL LOOK FOR AN INDIVIDUAL FILE.... \n ")
-                print("\n WINDOW_START:  %s" % start_time.strftime("%Y,%m,%d,%H,%M") )
-                print(" WINDOW_END:    %s, will search %d files for closest time " \
-                        % (stop_time.strftime("%Y,%m,%d,%H,%M"), len(in_filenames)) )
-        else:
-            in_filenames = glob.glob("%s/*" % os.path.abspath(options.dname))
-            if len(in_filenames) == 0:
-                print("\n COULD NOT find any files for radar: %s, EXITING" % (os.path.abspath(options.dname)))
-                sys.exit(0)
-            else:
-                print("\n NO WINDOW SUPPLIED, PROCESSING WHOLE DIRECTORY.... \n ")
-                print("\n opaws2D:  Processing %d files in the directory:  %s\n" % (len(in_filenames), options.dname))
-                print("\n opaws2D:  First file is %s" % (in_filenames[0]))
-                print("\n opaws2D:  Last  file is %s" % (in_filenames[-1]))
-
-        if debug:  
-            print(in_filenames)
-
-        # if cfradial files....
-        if in_filenames[0][-3:] == ".nc":
-            for item in in_filenames:
-                strng = os.path.basename(item).split(".")[0:2]
-                strng = strng[0] + "_" + strng[1]
-                strng = os.path.join(options.out_dir, strng)
-                out_filenames.append(strng) 
-        # WSR88D files
-        else:
-            for item in in_filenames:
-                if options.window:   # for real time processing, we will timestamp the file with the analysis time
-                    strng = "%s_VR_%s" % (os.path.basename(item)[0:4], ttime.strftime("%Y%m%d_%H%M"))
-                    strng = os.path.join(options.out_dir, strng)
-                    out_filenames.append(strng)
-                else:
-                    strng = os.path.basename(item)[0:18]
-                    strng = os.path.join(options.out_dir, strng)
-                    out_filenames.append(strng)
-
-    if options.unfold == "phase":
-        print("\n opaws2D dealias_unwrap_phase unfolding will be used\n")
-        unfold_type = "phase"
-    elif options.unfold == "region":
-        print("\n opaws2D dealias_region_based unfolding will be used\n")
-        unfold_type = "region"
-    else:
-        print("\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****")
-        print("\n          NO VELOCITY UNFOLDING DONE...\n\n")
-        unfold_type = None
-
-    if options.newse:
-        print(" \n now processing NEWSe radar file....\n ")
-        cLatLon = parse_NEWSe_radar_file(options.newse, getLatLon=True)
-    else:
-        cLatLon = None
-
-    if options.method:
-        _grid_dict['anal_method'] = options.method
-
-    if options.dx:
-        _grid_dict['grid_spacing_xy'] = options.dx
-        _grid_dict['ROI'] = options.dx / 0.707
-        
-    if options.roi:
-        _grid_dict['ROI'] = options.roi
-
-    if options.plot == 0:
-        sweep_num = []
-    elif options.plot > 0:
-        sweep_num = [options.plot]
-        if not os.path.exists("images"):
-            os.mkdir("images")
-    else:
-        sweep_num = _plevels
-        if not os.path.exists("images"):
-            os.mkdir("images")
-
-    # Read input file and create radar object
-
-    t0 = timeit.time()
-
-    # Preprocessing to find closest file....
-
-    if options.window:
-        try:
-            analysisT     = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
-            xfiles        = [os.path.basename(f) for f in in_filenames]
-            if _AWS_L2Files:
-                xfiles_DT     = [DT.datetime.strptime("%s" % f[4:19], "%Y%m%d_%H%M%S") for f in xfiles]
-            else:
-                xfiles_DT     = [DT.datetime.strptime("%s" % f[5:20], "%Y%m%d_%H%M%S") for f in xfiles]
-            in_filenames  = [in_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
-            out_filenames = [out_filenames[xfiles_DT.index(min(xfiles_DT, key=lambda d:  abs(d - analysisT)))]]
-            print("\n FOUND CLOSEST FILE:   %s" % in_filenames[0] )
-        except:
-            print("\n COULD NOT FILE CLOSEST FILE, exiting: %s <----> %s" % (in_filenames[0], in_filenames[-1]) )
-            sys.exit(0)
-
-    for n, fname in enumerate(in_filenames):
-
-        # the check for file size is to make sure there is data in the LVL2 file
-        try:
-            if os.path.getsize(fname) < 2048000:
-                print('\n File {} is less than 2 mb, skipping...'.format(fname))
-                continue
-        except:
-            continue
-
-        tim0 = timeit.time() 
-
-        print('\n READING: {}\n'.format(fname))
-
-        if fname[-3:] == ".nc":
-            if _radar_parameters['field_label_trans'][0] == True:
-                REF_LABEL = _radar_parameters['field_label_trans'][1]
-                VEL_LABEL = _radar_parameters['field_label_trans'][2]
-                volume = pyart.io.read_cfradial(fname, field_names={REF_LABEL:"reflectivity", VEL_LABEL:"velocity"})
-            else:
-                volume = pyart.io.read_cfradial(fname)
-        else:
-            try:
-                volume = pyart.io.read_nexrad_archive(fname, field_names=None, 
-                                                        additional_metadata=None, file_field_names=False, 
-                                                        delay_field_loading=False, 
-                                                        station=None, scans=None, linear_interp=True)
-            except:
-                print('\n File {} cannot be read, skipping...\n'.format(fname))
-                continue
-
-        opaws2D_io_cpu = timeit.time() - tim0
-
-        print("\n Time for reading in LVL2: {} seconds".format(opaws2D_io_cpu))
-        
-        processVolume(volume, unfold_type, options, cLatLon, sweep_num, out_filenames[n])
-
-    opaws2D_cpu_time = timeit.time() - t0
-
-    print("\n Time for opaws2D operations: {} seconds".format(opaws2D_cpu_time))
-
-    print("\n PROGRAM opaws2D COMPLETED\n")
 
 if __name__ == "__main__":
    parser = OptionParser()
