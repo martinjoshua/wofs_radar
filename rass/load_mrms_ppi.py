@@ -201,9 +201,10 @@ def getProducts(radar, run_time, tilt):
     vel_path = __get_path_velocity_tilt__(radar, run_time, tilt)
 
     def getNearestFile(time, files):
+        win = int(settings.rass_window)
         files = map(lambda x: (abs((time - datetime.datetime.strptime(os.path.splitext(x)[0], "%Y%m%d-%H%M%S")).total_seconds()), x), files)
         s = sorted(files, key = lambda x: x[0])
-        s = list(filter(lambda x: x[0] <= 120, s))
+        s = list(filter(lambda x: x[0] <= win, s))
         return s[0] if len(s) > 0 else None
 
     v = getNearestFile(run_time, os.listdir(vel_path))
